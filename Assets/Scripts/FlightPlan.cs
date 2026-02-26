@@ -106,6 +106,42 @@ public class FlightPlan : MonoBehaviour
             Debug.Log($"[FlightPlan] Snapped aircraft to {waypoints[0].name}");
     }
 
+    /// <summary>
+    /// Rebuild the active waypoint list from a student-edited route (called by ActLegsView).
+    /// Runs synchronously — safe to call at runtime once the tile grid is initialised.
+    /// </summary>
+    public void RebuildRoute(List<ScenarioDefinition.WaypointDef> newWpts,
+                              double centerLat, double centerLon, int zoom)
+    {
+        StopAllCoroutines();
+        ClearSpawned();
+
+        float tileSizeM = tileGrid ? tileGrid.tileSizeM
+                                   : (float)WebMercator.MetersPerTile(centerLat, zoom);
+        var center = LatLonToTileXYFrac(centerLat, centerLon, zoom);
+
+        foreach (var wpDef in newWpts)
+        {
+            if (wpDef == null || string.IsNullOrWhiteSpace(wpDef.ident)) continue;
+
+            var tile    = LatLonToTileXYFrac(wpDef.latDeg, wpDef.lonDeg, zoom);
+            float dxTiles = (float)(tile.x - center.x);
+            float dyTiles = (float)(tile.y - center.y);
+
+            Vector3 localPos = new(dxTiles * tileSizeM, 0f, -dyTiles * tileSizeM);
+
+            var go = new GameObject($"WP_{wpDef.ident}");
+            go.transform.SetParent(waypointParent ? waypointParent : transform, false);
+            go.transform.localPosition = localPos;
+            spawned.Add(go.transform);
+        }
+
+        waypoints = spawned.ToArray();
+
+        if (logBuild)
+            Debug.Log($"[FlightPlan] RebuildRoute: {waypoints.Length} waypoints @ z={zoom}");
+    }
+
     private void ClearSpawned()
     {
         waypoints = Array.Empty<Transform>();

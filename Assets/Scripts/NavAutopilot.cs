@@ -5,6 +5,7 @@ public class NavAutopilot : MonoBehaviour
 
     [HideInInspector] public float activeDistance;
     [HideInInspector] public float activeBearing;
+    [HideInInspector] public float xtkM;           // cross-track error in meters (+ = right of track)
 
     public FlightPlan plan;
     public SimTargets targets;
@@ -69,6 +70,8 @@ public class NavAutopilot : MonoBehaviour
         if (!targets || !aircraft) return;
 
 
+        xtkM = 0f;
+
         if (advanceCooldownT > 0f)
             advanceCooldownT -= Time.fixedDeltaTime;
         activeIndex = Mathf.Clamp(activeIndex, 0, plan.waypoints.Length - 1);
@@ -107,6 +110,7 @@ public class NavAutopilot : MonoBehaviour
                 Vector3 ABn = AB.normalized;
                 Vector3 AP = P - A;
                 float xtk = Vector3.Cross(ABn, AP).y;
+                xtkM = xtk;
 
                 float courseHdg = Mathf.Atan2(ABn.x, ABn.z) * Mathf.Rad2Deg;
                 courseHdg = (courseHdg + 360f) % 360f;
@@ -120,7 +124,7 @@ public class NavAutopilot : MonoBehaviour
 
         // ND-friendly outputs: distance + bearing to active waypoint
         activeDistance = dist;
-        activeBearing = bearingToWp;
+        activeBearing  = bearingToWp;
 
         // Smart capture (use direction to waypoint, not desiredHeading)
         Vector3 forward = Flat(aircraft.forward).normalized;

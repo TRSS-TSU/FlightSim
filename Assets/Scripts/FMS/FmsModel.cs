@@ -1,0 +1,106 @@
+using System;
+using System.Collections.Generic;
+
+/// <summary>
+/// Central data store for all CDU/FMS state.
+/// Pure C# class — no MonoBehaviour lifecycle. Held and updated by FmsPageRouter.
+/// </summary>
+public class FmsModel
+{
+    // ── Flight Plan ────────────────────────────────────────────────────────────
+    public List<ScenarioDefinition.WaypointDef> ActiveRoute = new();
+    public int ActiveLegIndex;           // mirrors NavAutopilot.activeIndex
+    public string OriginIdent = "";
+    public string DestIdent   = "";
+
+    // ── POS INIT ───────────────────────────────────────────────────────────────
+    public double FmsPosLat;
+    public double FmsPosLon;
+    public string AirportIdent  = "";
+    public string RefWptIdent   = "";
+
+    // ── Frequency (pre-populated from Scenario.txt / Scenario 01 values) ───────
+    public string FreqAtis = "125.75";
+    public string FreqGnd  = "121.9";
+    public string FreqTwr  = "120.65";
+    public string FreqDep  = "270.8";
+    public string FreqClnc = "\u2014";   // em-dash
+    public string FreqRdr  = "119.1";
+
+    // ── Status ─────────────────────────────────────────────────────────────────
+    public string NavDataIdent  = "HH ABCD 1234";
+    public string ActiveDbRange = "25JAN26/22FEB26";
+    public string ProgramId     = "\u2014";
+
+    // ── Live telemetry (pumped by FmsPageRouter.Update every frame) ────────────
+    public float IasKt;
+    public float AltFtMsl;
+    public float HdgDeg;
+    public float VsiFpm;
+    public float BrgDeg;     // bearing to active waypoint (degrees)
+    public float DistM;      // distance to active waypoint (meters)
+    public float XtkM;       // cross-track error in meters (+ve = right of track)
+
+    // ── Scenario reference ─────────────────────────────────────────────────────
+    public ScenarioDefinition Scenario { get; private set; }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Initialisation
+    // ─────────────────────────────────────────────────────────────────────────
+
+    public void LoadFromScenario(ScenarioDefinition sd)
+    {
+        if (sd == null) return;
+        Scenario = sd;
+
+        ActiveRoute = new List<ScenarioDefinition.WaypointDef>();
+        foreach (var ident in sd.prefillRouteIdents)
+        {
+            var wpDef = sd.waypoints.Find(w =>
+                string.Equals(w.ident, ident, StringComparison.OrdinalIgnoreCase));
+            if (wpDef != null)
+                ActiveRoute.Add(wpDef);
+        }
+
+        OriginIdent  = ActiveRoute.Count > 0 ? ActiveRoute[0].ident : "";
+        DestIdent    = ActiveRoute.Count > 1 ? ActiveRoute[ActiveRoute.Count - 1].ident : "";
+        AirportIdent = OriginIdent;
+
+        if (sd.waypoints.Count > 0)
+        {
+            FmsPosLat = sd.waypoints[0].latDeg;
+            FmsPosLon = sd.waypoints[0].lonDeg;
+        }
+
+        ActiveLegIndex = 0;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Formatting helpers
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /// <summary>Returns a CDU-style lat/lon string: N30°21.00 W087°19.20</summary>
+    public string FormatLatLon(double lat, double lon)
+    {
+        char ns = lat >= 0 ? 'N' : 'S';
+        char ew = lon >= 0 ? 'E' : 'W';
+        double aLat = Math.Abs(lat);
+        double aLon = Math.Abs(lon);
+        int    dLat = (int)aLat;  double mLat = (aLat - dLat) * 60.0;
+        int    dLon = (int)aLon;  double mLon = (aLon - dLon) * 60.0;
+        return $"{ns}{dLat:D2}\u00B0{mLat:00.00} {ew}{dLon:D3}\u00B0{mLon:00.00}";
+    }
+
+    /// <summary>Distance to active waypoint in nautical miles.</summary>
+    public float DistNm => DistM / 1852f;
+
+    /// <summary>Format ETE as mm:ss from a distance (nm) and speed (kt).</summary>
+    public string FormatEte(float distNm, float speedKt)
+    {
+        if (speedKt < 1f) return "--:--";
+        float totalMin = distNm / speedKt * 60f;
+        int min = (int)totalMin;
+        int sec = (int)((totalMin - min) * 60f);
+        return $"{min:D2}:{sec:D2}";
+    }
+}
