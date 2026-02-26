@@ -18,7 +18,7 @@ MonoBehaviour:
     are RNAVs, ILS, etc. \n\nWould you like to load this Scenario?\r\n"
   centerLatDeg: 30.3
   centerLonDeg: -87.3
-  baseZoom: 16
+  baseZoom: 14
   waypoints:
   - ident: KNPA
     latDeg: 30.35
