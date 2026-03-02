@@ -60,17 +60,18 @@ public abstract class FmsPageView : MonoBehaviour
         if (!line) return (null, null, null, null);
 
         return (
-            line.Find("Label_Left")?.GetComponent<TMP_Text>(),
+            line.Find("Label_Left")?.GetComponent<TMP_Text>(), 
             line.Find("Value_Left")?.GetComponent<TMP_Text>(),
-            line.Find("Label_Right")?.GetComponent<TMP_Text>(),
+            line.Find("Label_Right")?.GetComponent<TMP_Text>(), 
             line.Find("Value_Right")?.GetComponent<TMP_Text>()
-        );
+            );
     }
 
     /// <summary>Set all four fields of a body line in one call. Pass null to leave unchanged.</summary>
     protected void SetLine(int lineNumber,
         string labelL = "", string valueL = "",
-        string labelR = "", string valueR = "")
+        string labelR = "", string valueR = ""
+        )
     {
         var (ll, vl, lr, vr) = GetLine(lineNumber);
         if (ll != null) ll.text = labelL ?? "";

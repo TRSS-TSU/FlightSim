@@ -27,10 +27,16 @@ public class FmsModel
     public string FreqClnc = "\u2014";   // em-dash
     public string FreqRdr  = "119.1";
 
+    // ── Performance (PERF INIT) ────────────────────────────────────────────────
+    public float ZfwLbs;
+    public float FuelWeightLbs;
+    public float GrossWeightLbs => ZfwLbs + FuelWeightLbs;
+
     // ── Status ─────────────────────────────────────────────────────────────────
-    public string NavDataIdent  = "HH ABCD 1234";
-    public string ActiveDbRange = "25JAN26/22FEB26";
-    public string ProgramId     = "\u2014";
+    public string NavDataIdent  = "JB-AMER";
+    public string ActiveDbRange = "19JAN26 18MAR26";
+    public string SecDbRange = "22JAN26 18FEB26";
+    public string ProgramId     = "SCID 832-4117-142";
 
     // ── Live telemetry (pumped by FmsPageRouter.Update every frame) ────────────
     public float IasKt;
@@ -73,6 +79,9 @@ public class FmsModel
         }
 
         ActiveLegIndex = 0;
+
+        ZfwLbs        = sd.zfwLbs;
+        FuelWeightLbs = sd.fuelWeightLbs;
     }
 
     // ─────────────────────────────────────────────────────────────────────────

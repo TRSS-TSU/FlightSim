@@ -19,15 +19,15 @@ public class StatusView : FmsPageView
         GetTitle()?.SetText("STATUS");
         GetPageNumber()?.SetText("1/1");
 
-        string utc  = System.DateTime.UtcNow.ToString("HH:mm:ss");
-        string date = System.DateTime.UtcNow.ToString("dd-MMM-yy").ToUpper();
+        string utc  = System.DateTime.UtcNow.ToString("HH:mm");
+        string date = System.DateTime.UtcNow.ToString("ddMMMyy").ToUpper();
 
-        SetLine(1, "NAV DATA",        Model.NavDataIdent,  "",      "");
-        SetLine(2, "ACTIVE DATA BASE", Model.ActiveDbRange, "",      "");
-        SetLine(3, "",                 "",                  "UTC",   utc);
-        SetLine(4, "",                 "",                  "DATE",  date);
-        SetLine(5, "PROGRAM",          Model.ProgramId,     "",      "");
-        SetLine(6, "<IDX",             "",                  "",      "");
+        SetLine(1, "NAV DATA", Model.NavDataIdent, "", "");
+        SetLine(2, "ACTIVE DATA BASE", Model.ActiveDbRange, "", "");
+        SetLine(3, "SEC DATA BASE", Model.SecDbRange, "", "");
+        SetLine(4, "UTC", utc, "DATE", date);
+        SetLine(5, "PROGRAM", Model.ProgramId, "", "");
+        SetLine(6, "<INDEX", "", "POS INIT>", "");
     }
 
     public override void HandleLsk(int side, int row)

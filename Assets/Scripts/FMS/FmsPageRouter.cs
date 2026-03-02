@@ -27,6 +27,7 @@ public class FmsPageRouter : MonoBehaviour
     public FlightDataBus flightDataBus;
     public FlightPlan flightPlan;
     public FmsScratchpad scratchpad;
+    public SimTargets simTargets;
 
     // ── Page GameObjects ────────────────────────────────────────────────────────
     [Header("CDU Pages (assign GameObjects in Inspector)")]
@@ -46,6 +47,7 @@ public class FmsPageRouter : MonoBehaviour
     public GameObject pageSecFpln;
     public GameObject pageDepArr;
     public GameObject pageExec;
+    public GameObject pagePerf;
 
     // ── Internal ────────────────────────────────────────────────────────────────
     private readonly FmsModel _model = new();
@@ -53,6 +55,12 @@ public class FmsPageRouter : MonoBehaviour
     private readonly Dictionary<string, FmsPageView> _pages = new();
 
     public FmsPageView CurrentPage => _current;
+
+    /// <summary>
+    /// Set by PerfInitView when the student stages weight data.
+    /// Cleared (and confirmed) by the EXEC function key handler.
+    /// </summary>
+    public bool HasPendingPerf { get; set; }
 
     // ─────────────────────────────────────────────────────────────────────────
     // Unity lifecycle
@@ -119,7 +127,17 @@ public class FmsPageRouter : MonoBehaviour
             case FmsKey.DepArr: ShowPage("DepArr");    break;
             case FmsKey.Prog:   ShowPage("Prog");      break;
             case FmsKey.Dir:    ShowPage("ActFpln");   break;
-            case FmsKey.Exec:   ShowPage("Exec");      break;
+            case FmsKey.Exec:
+                if (HasPendingPerf)
+                {
+                    HasPendingPerf = false;
+                    scratchpad?.ShowMessage("PERF ACCEPTED", 1.5f);
+                }
+                else
+                {
+                    scratchpad?.ShowMessage("EXEC COMPLETE", 1.5f);
+                }
+                break;
             case FmsKey.Next:   (_current as IMultiPage)?.NextPage(); break;
             case FmsKey.Prev:   (_current as IMultiPage)?.PrevPage(); break;
         }
@@ -132,6 +150,7 @@ public class FmsPageRouter : MonoBehaviour
     public FmsModel      GetModel()        => _model;
     public FlightPlan    GetFlightPlan()   => flightPlan;
     public NavAutopilot  GetNavAutopilot() => navAutopilot;
+    public SimTargets    GetSimTargets()   => simTargets;
 
     // ─────────────────────────────────────────────────────────────────────────
     // Private helpers
@@ -155,6 +174,7 @@ public class FmsPageRouter : MonoBehaviour
         Register("SecFpln",   pageSecFpln);
         Register("DepArr",    pageDepArr);
         Register("Exec",      pageExec);
+        Register("PerfInit",  pagePerf);
 
         // Hide all pages at startup
         foreach (var kv in _pages)

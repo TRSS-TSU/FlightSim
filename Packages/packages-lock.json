@@ -1,13 +1,14 @@
 {
   "dependencies": {
     "com.coplaydev.unity-mcp": {
-      "version": "https://github.com/CoplayDev/unity-mcp.git?path=/MCPForUnity#v9.0.3",
+      "version": "https://github.com/CoplayDev/unity-mcp.git?path=/MCPForUnity#main",
       "depth": 0,
       "source": "git",
       "dependencies": {
-        "com.unity.nuget.newtonsoft-json": "3.0.2"
+        "com.unity.nuget.newtonsoft-json": "3.0.2",
+        "com.unity.test-framework": "1.1.31"
       },
-      "hash": "85198a07ea6cc0bb07fb6c5453d10a3b2cb0db19"
+      "hash": "d76a8df311c48263872be0cd3e6a8ef1a0fa8e59"
     },
     "com.unity.2d.common": {
       "version": "12.0.1",
@@ -38,19 +39,17 @@
     },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
-      "depth": 1,
+      "depth": 2,
       "source": "builtin",
       "dependencies": {}
     },
     "com.unity.ai.generators": {
-      "version": "1.5.0-pre.2",
-      "depth": 0,
+      "version": "1.0.0-pre.12",
+      "depth": 1,
       "source": "registry",
       "dependencies": {
-        "com.unity.2d.sprite": "1.0.0",
-        "com.unity.ai.toolkit": "1.5.0-pre.2",
+        "com.unity.ai.toolkit": "1.0.0-pre.12",
         "com.unity.mathematics": "1.3.2",
-        "com.unity.cloud.gltfast": "6.14.1",
         "com.unity.nuget.newtonsoft-json": "3.2.1"
       },
       "url": "https://packages.unity.com"
@@ -69,8 +68,8 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.ai.toolkit": {
-      "version": "1.5.0-pre.2",
-      "depth": 1,
+      "version": "1.0.0-pre.12",
+      "depth": 2,
       "source": "registry",
       "dependencies": {
         "com.unity.nuget.newtonsoft-json": "3.2.1"
@@ -93,19 +92,6 @@
       "dependencies": {
         "com.unity.mathematics": "1.2.1",
         "com.unity.modules.jsonserialize": "1.0.0"
-      },
-      "url": "https://packages.unity.com"
-    },
-    "com.unity.cloud.gltfast": {
-      "version": "6.14.1",
-      "depth": 1,
-      "source": "registry",
-      "dependencies": {
-        "com.unity.burst": "1.8.24",
-        "com.unity.collections": "1.2.4",
-        "com.unity.mathematics": "1.2.6",
-        "com.unity.modules.jsonserialize": "1.0.0",
-        "com.unity.modules.unitywebrequest": "1.0.0"
       },
       "url": "https://packages.unity.com"
     },
@@ -148,7 +134,7 @@
       "dependencies": {}
     },
     "com.unity.ide.rider": {
-      "version": "3.0.38",
+      "version": "3.0.39",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -157,17 +143,17 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.ide.visualstudio": {
-      "version": "2.0.25",
+      "version": "2.0.27",
       "depth": 0,
       "source": "registry",
       "dependencies": {
-        "com.unity.test-framework": "1.1.31"
+        "com.unity.test-framework": "1.1.33"
       },
       "url": "https://packages.unity.com"
     },
     "com.unity.mathematics": {
       "version": "1.3.3",
-      "depth": 1,
+      "depth": 2,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
@@ -195,7 +181,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.recorder": {
-      "version": "5.1.4",
+      "version": "5.1.5",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -281,7 +267,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.timeline": {
-      "version": "1.8.10",
+      "version": "1.8.11",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -302,7 +288,7 @@
       }
     },
     "com.unity.visualscripting": {
-      "version": "1.9.9",
+      "version": "1.9.10",
       "depth": 0,
       "source": "registry",
       "dependencies": {
