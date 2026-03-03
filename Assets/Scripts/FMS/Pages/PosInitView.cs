@@ -17,11 +17,10 @@ using UnityEngine;
 ///   L4 DME USAGE  YES
 ///   L6 <IDX
 ///
-/// Scratchpad interactions (page 1/2):
-///   LSK L1 (empty SP) → copy FMS POS to scratchpad
-///   LSK R1 (empty SP) → copy AIRPORT ident to scratchpad
-///   LSK L3 (SP with text) → SET POS (currently shows message — live SET POS requires GPS input parsing)
-/// </summary>
+/// LSK interactions (page 1/2):
+///   LSK R4 → SET POS TO GNSS (captures scenario waypoints[0], starts 3-sec load timer)
+///   LSK L6/R6 → INDEX
+///</summary>
 public class PosInitView : FmsPageView, IMultiPage
 {
     private int _page = 1;
@@ -70,32 +69,15 @@ public class PosInitView : FmsPageView, IMultiPage
 
     public override void HandleLsk(int side, int row)
     {
-        string posStr = Model.FormatLatLon(Model.FmsPosLat, Model.FmsPosLon);
         if (_page == 1)
         {
             if (side == 0)
             {
-                switch (row)
-                {
-                    case 1:
-                        if (Scratchpad.CurrentText.Length == 0)
-                            Scratchpad.Append(Model.FormatLatLon(Model.FmsPosLat, Model.FmsPosLon));
-                        break;
-                    case 3:
-                        string entry = Scratchpad.ReadAndClear();
-                        if (!string.IsNullOrEmpty(entry))
-                            Scratchpad.ShowMessage("SET POS NOT SUPPORTED");
-                        break;
-                    case 6:
-                        Router.ShowPage("Index");
-                        break;
-                }
+                if (row == 6) Router.ShowPage("Index");
             }
             else // Right
             {
-                if (row == 1 && Scratchpad.CurrentText.Length == 0)
-                    Scratchpad.Append(Model.AirportIdent);
-                else if (row == 4)
+                if (row == 4)
                 {
                     _gnssPosSet = true;
                     var wp = (Model.Scenario?.waypoints?.Count > 0) ? Model.Scenario.waypoints[0] : null;
@@ -104,7 +86,7 @@ public class PosInitView : FmsPageView, IMultiPage
                         : Model.FormatLatLon(Model.FmsPosLat, Model.FmsPosLon);
                     StartCoroutine(LoadPosAfterDelay());
                 }
-                else if (row == 6) Router.ShowPage("Index");
+                else if (row == 6) Router.ShowPage("ActFpln");
             }
         }
         else // page 2
