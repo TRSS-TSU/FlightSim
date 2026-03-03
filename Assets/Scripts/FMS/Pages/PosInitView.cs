@@ -25,6 +25,7 @@ using UnityEngine;
 public class PosInitView : FmsPageView, IMultiPage
 {
     private int _page = 1;
+    private bool _gnssPosSet = false;
 
     public override void Populate()
     {
@@ -45,7 +46,7 @@ public class PosInitView : FmsPageView, IMultiPage
         SetLine(1, "FMS POS", posStr, "", "");
         SetLine(2, "Airport", Model.AirportIdent, "", "");
         SetLine(3, "PILOT/REF WPT", refWpt, "", "");
-        SetLine(4, "", "", "COMPLETED", posStr+">");
+        SetLine(4, "", "", _gnssPosSet ? "COMPLETED" : "SET POS TO GNSS", posStr+">");
         SetLine(5, "", "", "SET POS", posStr);
         SetLine(6, "<INDEX", "", "FPLN>", "");
     }
@@ -63,6 +64,7 @@ public class PosInitView : FmsPageView, IMultiPage
 
     public override void HandleLsk(int side, int row)
     {
+        string posStr = Model.FormatLatLon(Model.FmsPosLat, Model.FmsPosLon);
         if (_page == 1)
         {
             if (side == 0)
@@ -87,8 +89,8 @@ public class PosInitView : FmsPageView, IMultiPage
             {
                 if (row == 1 && Scratchpad.CurrentText.Length == 0)
                     Scratchpad.Append(Model.AirportIdent);
-                else if (row == 6)
-                    Router.ShowPage("Index");
+                else if (row == 4) _gnssPosSet = true;
+                else if (row == 6) Router.ShowPage("Index");
             }
         }
         else // page 2
