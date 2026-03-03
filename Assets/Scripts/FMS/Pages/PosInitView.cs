@@ -42,21 +42,23 @@ public class PosInitView : FmsPageView, IMultiPage
         string posStr = Model.FormatLatLon(Model.FmsPosLat, Model.FmsPosLon);
         string refWpt = string.IsNullOrEmpty(Model.RefWptIdent) ? "\u2014" : Model.RefWptIdent;
 
-        SetLine(1, "FMS POS",       posStr,  "AIRPORT",  Model.AirportIdent);
-        SetLine(2, "PILOT/REF WPT", refWpt,  "",         "");
-        SetLine(3, "SET POS <",     "",      "",         "");
-        SetLine(6, "<IDX",          "",      "",         "");
+        SetLine(1, "FMS POS", posStr, "", "");
+        SetLine(2, "Airport", Model.AirportIdent, "", "");
+        SetLine(3, "PILOT/REF WPT", refWpt, "", "");
+        SetLine(4, "", "", "COMPLETED", posStr+">");
+        SetLine(5, "", "", "SET POS", posStr);
+        SetLine(6, "<INDEX", "", "FPLN>", "");
     }
 
     private void PopulatePage2()
     {
         string posStr = Model.FormatLatLon(Model.FmsPosLat, Model.FmsPosLon);
 
-        SetLine(1, "FMS POS",   posStr,      "",  "");
-        SetLine(2, "NAVAID",    "INHIBIT: NO","",  "");
-        SetLine(3, "VOR USAGE", "YES",        "",  "");
-        SetLine(4, "DME USAGE", "YES",        "",  "");
-        SetLine(6, "<IDX",      "",           "",  "");
+        SetLine(1, "FMS POS", posStr, "", "");
+        SetLine(2, "NAVAID", "INHIBIT: NO","", "");
+        SetLine(3, "VOR USAGE", "YES", "",  "");
+        SetLine(4, "DME USAGE", "YES", "", "");
+        SetLine(6, "<INDEX", "", "FPLN", "");
     }
 
     public override void HandleLsk(int side, int row)

@@ -32,6 +32,21 @@ public class StatusView : FmsPageView
 
     public override void HandleLsk(int side, int row)
     {
-        if (row == 6) Router.ShowPage("Index");
+         if (side == 0) // Left
+        {
+            switch (row)
+            {
+                case 6: Router.ShowPage("Index");
+                break;
+            }
+        }
+        else // Right
+        {
+            switch (row)
+            {
+                case 6: Router.ShowPage("PosInit");
+                break;
+            }
+        }
     }
 }
