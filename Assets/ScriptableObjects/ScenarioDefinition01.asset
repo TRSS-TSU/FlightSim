@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: ScenarioDefinition01
   m_EditorClassIdentifier: Assembly-CSharp::ScenarioDefinition
   scenarioTitle: Flight Scenario 01
+  route: T3002
   scenarioDescription: "Scenario 01 consists of departure from KNPA to Visual route
     1020 and lands at KVPS. \n\nOptional points are CEW, GPT, etc. \n\nOptional Dep/Apr
     are RNAVs, ILS, etc. \n\nWould you like to load this Scenario?\r\n"
@@ -23,48 +24,63 @@ MonoBehaviour:
   - ident: KNPA
     latDeg: 30.35
     lonDeg: -87.32
+    distance: 0
   - ident: TEEZY
     latDeg: 30.18
     lonDeg: -87.69
+    distance: 0
   - ident: TRADR
     latDeg: 30.3
     lonDeg: -88.06
+    distance: 0
   - ident: BFM
     latDeg: 30.61
     lonDeg: -88.06
+    distance: 0
   - ident: VR1020_A
     latDeg: 31
     lonDeg: -88
+    distance: 0
   - ident: VR1020_B
     latDeg: 31.55
     lonDeg: -87.52
+    distance: 0
   - ident: VR1020_C
     latDeg: 32.08
     lonDeg: -87.4
+    distance: 0
   - ident: VR1020_D
     latDeg: 31.4
     lonDeg: -86.73
+    distance: 0
   - ident: VR1020_E
     latDeg: 31.1
     lonDeg: -86.57
+    distance: 0
   - ident: CEW
     latDeg: 30.83
     lonDeg: -86.68
+    distance: 0
   - ident: PENSI
     latDeg: 30.79
     lonDeg: -87.27
+    distance: 0
   - ident: CUPER
     latDeg: 30.17
     lonDeg: -87.15
+    distance: 0
   - ident: POOVE
     latDeg: 30.32
     lonDeg: -87.07
+    distance: 0
   - ident: APUCE
     latDeg: 30.42
     lonDeg: -87.13
+    distance: 0
   - ident: ALCOME
     latDeg: 30.38
     lonDeg: -87.22
+    distance: 0
   prefillRouteIdents:
   - KNPA
   - TEEZY

@@ -26,6 +26,8 @@ public class PosInitView : FmsPageView, IMultiPage
     private int _page = 1;
     private bool   _gnssPosSet = false;
     private string _confirmedPos = null;
+
+    private string _initPos = "---°--.-- ----°--.--";
     private bool   _posLoadComplete = false;
 
     public override void Populate()
@@ -52,7 +54,7 @@ public class PosInitView : FmsPageView, IMultiPage
         SetLine(2, "Airport", Model.AirportIdent, "", "");
         SetLine(3, "PILOT/REF WPT", refWpt, "", "");
         SetLine(4, "", "", _gnssPosSet ? "COMPLETED" : "SET POS TO GNSS", gnssStr + ">");
-        SetLine(5, "", "", "SET POS", _confirmedPos ?? posStr);
+        SetLine(5, "", "", "SET POS", _confirmedPos ?? _initPos);
         SetLine(6, "<INDEX", "", "FPLN>", "");
     }
 

@@ -7,6 +7,7 @@ public class ScenarioDefinition : ScriptableObject
 {
     [Header("Scenario Info")]
     public string scenarioTitle;
+    public string route;
     [TextArea(3, 6)] public string scenarioDescription;
 
     [Header("Map Anchor (center tile)")]
@@ -22,6 +23,7 @@ public class ScenarioDefinition : ScriptableObject
         public string ident;      // e.g., KNPA, TEEZY, VR1020_A
         public double latDeg;
         public double lonDeg;     // West = negative
+        public int distance;     // Distance
     }
 
     [Header("Waypoint Database (known points)")]
