@@ -25,7 +25,9 @@ using UnityEngine;
 public class PosInitView : FmsPageView, IMultiPage
 {
     private int _page = 1;
-    private bool _gnssPosSet = false;
+    private bool   _gnssPosSet = false;
+    private string _confirmedPos = null;
+    private bool   _posLoadComplete = false;
 
     public override void Populate()
     {
@@ -43,11 +45,12 @@ public class PosInitView : FmsPageView, IMultiPage
         string posStr = Model.FormatLatLon(Model.FmsPosLat, Model.FmsPosLon);
         string refWpt = string.IsNullOrEmpty(Model.RefWptIdent) ? "\u2014" : Model.RefWptIdent;
 
-        SetLine(1, "FMS POS", posStr, "", "");
+        string fmsDisplay = (_posLoadComplete && _confirmedPos != null) ? _confirmedPos : posStr;
+        SetLine(1, "FMS POS", fmsDisplay, "", "");
         SetLine(2, "Airport", Model.AirportIdent, "", "");
         SetLine(3, "PILOT/REF WPT", refWpt, "", "");
         SetLine(4, "", "", _gnssPosSet ? "COMPLETED" : "SET POS TO GNSS", posStr+">");
-        SetLine(5, "", "", "SET POS", posStr);
+        SetLine(5, "", "", "SET POS", _confirmedPos ?? posStr);
         SetLine(6, "<INDEX", "", "FPLN>", "");
     }
 
@@ -89,7 +92,12 @@ public class PosInitView : FmsPageView, IMultiPage
             {
                 if (row == 1 && Scratchpad.CurrentText.Length == 0)
                     Scratchpad.Append(Model.AirportIdent);
-                else if (row == 4) _gnssPosSet = true;
+                else if (row == 4)
+                {
+                    _gnssPosSet = true;
+                    _confirmedPos = Model.FormatLatLon(Model.FmsPosLat, Model.FmsPosLon);
+                    StartCoroutine(LoadPosAfterDelay());
+                }
                 else if (row == 6) Router.ShowPage("Index");
             }
         }
@@ -97,6 +105,12 @@ public class PosInitView : FmsPageView, IMultiPage
         {
             if (row == 6) Router.ShowPage("Index");
         }
+    }
+
+    private System.Collections.IEnumerator LoadPosAfterDelay()
+    {
+        yield return new WaitForSeconds(3f);
+        _posLoadComplete = true;
     }
 
     public void NextPage() => _page = _page == 1 ? 2 : 1;
