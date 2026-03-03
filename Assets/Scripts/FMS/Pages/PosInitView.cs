@@ -45,11 +45,14 @@ public class PosInitView : FmsPageView, IMultiPage
         string posStr = Model.FormatLatLon(Model.FmsPosLat, Model.FmsPosLon);
         string refWpt = string.IsNullOrEmpty(Model.RefWptIdent) ? "\u2014" : Model.RefWptIdent;
 
+        var wp0 = (Model.Scenario?.waypoints?.Count > 0) ? Model.Scenario.waypoints[0] : null;
+        string gnssStr = wp0 != null ? Model.FormatLatLon(wp0.latDeg, wp0.lonDeg) : posStr;
+
         string fmsDisplay = (_posLoadComplete && _confirmedPos != null) ? _confirmedPos : posStr;
         SetLine(1, "FMS POS", fmsDisplay, "", "");
         SetLine(2, "Airport", Model.AirportIdent, "", "");
         SetLine(3, "PILOT/REF WPT", refWpt, "", "");
-        SetLine(4, "", "", _gnssPosSet ? "COMPLETED" : "SET POS TO GNSS", posStr+">");
+        SetLine(4, "", "", _gnssPosSet ? "COMPLETED" : "SET POS TO GNSS", gnssStr + ">");
         SetLine(5, "", "", "SET POS", _confirmedPos ?? posStr);
         SetLine(6, "<INDEX", "", "FPLN>", "");
     }
@@ -95,7 +98,10 @@ public class PosInitView : FmsPageView, IMultiPage
                 else if (row == 4)
                 {
                     _gnssPosSet = true;
-                    _confirmedPos = Model.FormatLatLon(Model.FmsPosLat, Model.FmsPosLon);
+                    var wp = (Model.Scenario?.waypoints?.Count > 0) ? Model.Scenario.waypoints[0] : null;
+                    _confirmedPos = wp != null
+                        ? Model.FormatLatLon(wp.latDeg, wp.lonDeg)
+                        : Model.FormatLatLon(Model.FmsPosLat, Model.FmsPosLon);
                     StartCoroutine(LoadPosAfterDelay());
                 }
                 else if (row == 6) Router.ShowPage("Index");
