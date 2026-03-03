@@ -103,6 +103,31 @@ public class FmsModel
     /// <summary>Distance to active waypoint in nautical miles.</summary>
     public float DistNm => DistM / 1852f;
 
+    /// <summary>Sum of great-circle distances across all active route legs, in nautical miles.</summary>
+    public float TotalRouteDistNm
+    {
+        get
+        {
+            float total = 0f;
+            for (int i = 0; i < ActiveRoute.Count - 1; i++)
+                total += HaversineNm(ActiveRoute[i].latDeg, ActiveRoute[i].lonDeg,
+                                     ActiveRoute[i + 1].latDeg, ActiveRoute[i + 1].lonDeg);
+            return total;
+        }
+    }
+
+    private static float HaversineNm(double lat1, double lon1, double lat2, double lon2)
+    {
+        const double R = 3440.065; // Earth radius in nautical miles
+        double dLat = (lat2 - lat1) * Math.PI / 180.0;
+        double dLon = (lon2 - lon1) * Math.PI / 180.0;
+        double a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2)
+                 + Math.Cos(lat1 * Math.PI / 180.0) * Math.Cos(lat2 * Math.PI / 180.0)
+                 * Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+        double c = 2.0 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1.0 - a));
+        return (float)(R * c);
+    }
+
     /// <summary>Format ETE as mm:ss from a distance (nm) and speed (kt).</summary>
     public string FormatEte(float distNm, float speedKt)
     {

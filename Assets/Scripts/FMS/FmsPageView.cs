@@ -49,6 +49,13 @@ public abstract class FmsPageView : MonoBehaviour
     protected TMP_Text GetTitle()      => transform.Find("Title_Line/Title")?.GetComponent<TMP_Text>();
     protected TMP_Text GetPageNumber() => transform.Find("Title_Line/Page_Number")?.GetComponent<TMP_Text>();
 
+    /// <summary>
+    /// Returns the shared Message_Line TMP field under Shared_IO/Message_Line.
+    /// Navigates from the FmsPageRouter's transform (CDU root).
+    /// </summary>
+    protected TMP_Text GetMessageLine() =>
+        Router?.transform.Find("Shared_IO/Message_Line")?.GetComponent<TMP_Text>();
+
     /// <summary>Returns the four TMP fields for a given body line (1–6).</summary>
     protected (TMP_Text labelL, TMP_Text valueL, TMP_Text labelR, TMP_Text valueR)
         GetLine(int lineNumber)
