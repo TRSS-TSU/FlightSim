@@ -16,8 +16,11 @@ public class StubPageView : FmsPageView
         GetPageNumber()?.SetText("1/1");
 
         ClearAllLines();
-        SetLine(3, "", "NOT IMPLEMENTED", "", "");
-        SetLine(6, "<IDX", "", "", "");
+        SetLineLabels(3, "", "");
+        SetLineValues(3, "NOT IMPLEMENTED", "");
+
+        SetLineLabels(6, "<IDX", "");
+        SetLineValues(6, "", "");
     }
 
     public override void HandleLsk(int side, int row)

@@ -74,23 +74,39 @@ public abstract class FmsPageView : MonoBehaviour
             );
     }
 
-    /// <summary>Set all four fields of a body line in one call. Pass null to leave unchanged.</summary>
-    protected void SetLine(int lineNumber,
-        string labelL = "", string valueL = "",
-        string labelR = "", string valueR = ""
-        )
+    /// <summary>Set only the label fields of a body line (does not touch values).</summary>
+    protected void SetLineLabels(int lineNumber, string labelL = "", string labelR = "")
     {
-        var (ll, vl, lr, vr) = GetLine(lineNumber);
+        var (ll, _, lr, _) = GetLine(lineNumber);
         if (ll != null) ll.text = labelL ?? "";
-        if (vl != null) vl.text = valueL ?? "";
         if (lr != null) lr.text = labelR ?? "";
+    }
+
+    /// <summary>Set only the value fields of a body line (does not touch labels).</summary>
+    protected void SetLineValues(int lineNumber, string valueL = "", string valueR = "")
+    {
+        var (_, vl, _, vr) = GetLine(lineNumber);
+        if (vl != null) vl.text = valueL ?? "";
         if (vr != null) vr.text = valueR ?? "";
     }
 
-    protected void ClearLine(int lineNumber) => SetLine(lineNumber, "", "", "", "");
+    protected void ClearLine(int lineNumber)
+    {
+        SetLineLabels(lineNumber, "", "");
+        SetLineValues(lineNumber, "", "");
+    }
+
+    /// <summary>Clear only the value fields of a body line (does not touch labels).</summary>
+    protected void ClearLineValues(int lineNumber) => SetLineValues(lineNumber, "", "");
 
     protected void ClearAllLines()
     {
         for (int i = 1; i <= 6; i++) ClearLine(i);
+    }
+
+    /// <summary>Clear only the value fields on all lines (does not touch labels).</summary>
+    protected void ClearAllValues()
+    {
+        for (int i = 1; i <= 6; i++) ClearLineValues(i);
     }
 }

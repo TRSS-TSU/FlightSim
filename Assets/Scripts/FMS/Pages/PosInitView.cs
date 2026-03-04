@@ -50,23 +50,43 @@ public class PosInitView : FmsPageView, IMultiPage
         string gnssStr = wp0 != null ? Model.FormatLatLon(wp0.latDeg, wp0.lonDeg) : posStr;
 
         string fmsDisplay = (_posLoadComplete && _confirmedPos != null) ? _confirmedPos : posStr;
-        SetLine(1, "FMS POS", fmsDisplay, "", "");
-        SetLine(2, "Airport", Model.AirportIdent, "", "");
-        SetLine(3, "PILOT/REF WPT", refWpt, "", "");
-        SetLine(4, "", "", _gnssPosSet ? "COMPLETED" : "SET POS TO GNSS", gnssStr + ">");
-        SetLine(5, "", "", "SET POS", _confirmedPos ?? _initPos);
-        SetLine(6, "<INDEX", "", "FPLN>", "");
+        SetLineLabels(1, "FMS POS", "");
+        SetLineValues(1, fmsDisplay, "");
+
+        SetLineLabels(2, "Airport", "");
+        SetLineValues(2, Model.AirportIdent, "");
+
+        SetLineLabels(3, "PILOT/REF WPT", "");
+        SetLineValues(3, refWpt, "");
+
+        SetLineLabels(4, "", _gnssPosSet ? "COMPLETED" : "SET POS TO GNSS");
+        SetLineValues(4, "", gnssStr + ">");
+
+        SetLineLabels(5, "", "SET POS");
+        SetLineValues(5, "", _confirmedPos ?? _initPos);
+
+        SetLineLabels(6, "<INDEX", "FPLN>");
+        SetLineValues(6, "", "");
     }
 
     private void PopulatePage2()
     {
         string posStr = Model.FormatLatLon(Model.FmsPosLat, Model.FmsPosLon);
 
-        SetLine(1, "FMS POS", posStr, "", "");
-        SetLine(2, "NAVAID", "INHIBIT: NO","", "");
-        SetLine(3, "VOR USAGE", "YES", "",  "");
-        SetLine(4, "DME USAGE", "YES", "", "");
-        SetLine(6, "<INDEX", "", "FPLN", "");
+        SetLineLabels(1, "FMS POS", "");
+        SetLineValues(1, posStr, "");
+
+        SetLineLabels(2, "NAVAID", "");
+        SetLineValues(2, "INHIBIT: NO", "");
+
+        SetLineLabels(3, "VOR USAGE", "");
+        SetLineValues(3, "YES", "");
+
+        SetLineLabels(4, "DME USAGE", "");
+        SetLineValues(4, "YES", "");
+
+        SetLineLabels(6, "<INDEX", "FPLN");
+        SetLineValues(6, "", "");
     }
 
     public override void HandleLsk(int side, int row)

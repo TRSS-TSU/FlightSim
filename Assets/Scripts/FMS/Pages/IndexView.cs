@@ -19,12 +19,23 @@ public class IndexView : FmsPageView
         GetTitle()?.SetText("INDEX");
         GetPageNumber()?.SetText("1/1");
 
-        SetLine(1, "MCDU MENU",    "", "GNSS POS>",  "");
-        SetLine(2, "<STATUS",  "", "FREQUENCY>", "");
-        SetLine(3, "<POS INIT", "", "FIX>",       "");
-        SetLine(4, "<PERF INIT",  "", "HOLD>",      "");
-        SetLine(5, "<GNSS CTL",   "", "PROG>",      "");
-        SetLine(6, "<FMS CTL",           "", "SEC FPLN>",  "");
+        SetLineLabels(1, "MCDU MENU", "GNSS POS>");
+        SetLineValues(1, "", "");
+
+        SetLineLabels(2, "<STATUS", "FREQUENCY>");
+        SetLineValues(2, "", "");
+
+        SetLineLabels(3, "<POS INIT", "FIX>");
+        SetLineValues(3, "", "");
+
+        SetLineLabels(4, "<PERF INIT", "HOLD>");
+        SetLineValues(4, "", "");
+
+        SetLineLabels(5, "<GNSS CTL", "PROG>");
+        SetLineValues(5, "", "");
+
+        SetLineLabels(6, "<FMS CTL", "SEC FPLN>");
+        SetLineValues(6, "", "");
     }
 
     public override void HandleLsk(int side, int row)

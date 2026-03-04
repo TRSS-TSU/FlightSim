@@ -4,7 +4,7 @@ using UnityEngine;
 /// <summary>
 /// Hard function key identifiers for FmsFunctionButton.
 /// </summary>
-public enum FmsKey { Idx, Fpln, Legs, DepArr, Prog, Dir, Prev, Next, Exec }
+public enum FmsKey { Index, Fpln, Legs, DepArr, Prog, Dir, Prev, Next, Exec }
 
 /// <summary>
 /// Implemented by any FmsPageView that supports PREV/NEXT paging within itself.
@@ -46,7 +46,7 @@ public class FmsPageRouter : MonoBehaviour
     public GameObject pageHold;
     public GameObject pageSecFpln;
     public GameObject pageDepArr;
-    public GameObject pageExec;
+    public GameObject pageDir;
     public GameObject pagePerf;
 
     // ── Internal ────────────────────────────────────────────────────────────────
@@ -121,13 +121,18 @@ public class FmsPageRouter : MonoBehaviour
     {
         switch (key)
         {
-            case FmsKey.Idx:    ShowPage("Index");     break;
+            case FmsKey.Index:  ShowPage("Index");     break;
             case FmsKey.Fpln:   ShowPage("ActFpln");   break;
             case FmsKey.Legs:   ShowPage("ActLegs");   break;
             case FmsKey.DepArr: ShowPage("DepArr");    break;
             case FmsKey.Prog:   ShowPage("Prog");      break;
-            case FmsKey.Dir:    ShowPage("ActFpln");   break;
+            case FmsKey.Dir:    ShowPage("Dir");       break;
             case FmsKey.Exec:
+                if (_current is ActFplnView actFpln)
+                {
+                    actFpln.HandleExec();
+                    break;
+                }
                 if (HasPendingPerf)
                 {
                     HasPendingPerf = false;
@@ -173,7 +178,7 @@ public class FmsPageRouter : MonoBehaviour
         Register("Hold",      pageHold);
         Register("SecFpln",   pageSecFpln);
         Register("DepArr",    pageDepArr);
-        Register("Exec",      pageExec);
+        Register("Dir",       pageDir);
         Register("PerfInit",  pagePerf);
 
         // Hide all pages at startup

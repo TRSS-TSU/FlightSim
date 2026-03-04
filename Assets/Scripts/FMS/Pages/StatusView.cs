@@ -22,12 +22,23 @@ public class StatusView : FmsPageView
         string utc  = System.DateTime.UtcNow.ToString("HH:mm");
         string date = System.DateTime.UtcNow.ToString("ddMMMyy").ToUpper();
 
-        SetLine(1, "NAV DATA", Model.NavDataIdent, "", "");
-        SetLine(2, "ACTIVE DATA BASE", Model.ActiveDbRange, "", "");
-        SetLine(3, "SEC DATA BASE", Model.SecDbRange, "", "");
-        SetLine(4, "UTC", utc, "DATE", date);
-        SetLine(5, "PROGRAM", Model.ProgramId, "", "");
-        SetLine(6, "<INDEX", "", "POS INIT>", "");
+        SetLineLabels(1, "NAV DATA", "");
+        SetLineValues(1, Model.NavDataIdent, "");
+
+        SetLineLabels(2, "ACTIVE DATA BASE", "");
+        SetLineValues(2, Model.ActiveDbRange, "");
+
+        SetLineLabels(3, "SEC DATA BASE", "");
+        SetLineValues(3, Model.SecDbRange, "");
+
+        SetLineLabels(4, "UTC", "DATE");
+        SetLineValues(4, utc, date);
+
+        SetLineLabels(5, "PROGRAM", "");
+        SetLineValues(5, Model.ProgramId, "");
+
+        SetLineLabels(6, "<INDEX", "POS INIT>");
+        SetLineValues(6, "", "");
     }
 
     public override void HandleLsk(int side, int row)

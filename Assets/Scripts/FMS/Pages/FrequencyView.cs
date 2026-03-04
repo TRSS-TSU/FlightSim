@@ -21,12 +21,23 @@ public class FrequencyView : FmsPageView
         GetTitle()?.SetText("FREQUENCY");
         GetPageNumber()?.SetText("1/1");
 
-        SetLine(1, "ATIS",     Model.FreqAtis, "",    "");
-        SetLine(2, "GND",      Model.FreqGnd,  "",    "");
-        SetLine(3, "TWR",      Model.FreqTwr,  "",    "");
-        SetLine(4, "DEP",      Model.FreqDep,  "RDR", Model.FreqRdr);
-        SetLine(5, "CLNC DEL", Model.FreqClnc, "",    "");
-        SetLine(6, "<IDX",     "",             "",    "");
+        SetLineLabels(1, "ATIS", "");
+        SetLineValues(1, Model.FreqAtis, "");
+
+        SetLineLabels(2, "GND", "");
+        SetLineValues(2, Model.FreqGnd, "");
+
+        SetLineLabels(3, "TWR", "");
+        SetLineValues(3, Model.FreqTwr, "");
+
+        SetLineLabels(4, "DEP", "RDR");
+        SetLineValues(4, Model.FreqDep, Model.FreqRdr);
+
+        SetLineLabels(5, "CLNC DEL", "");
+        SetLineValues(5, Model.FreqClnc, "");
+
+        SetLineLabels(6, "<IDX", "");
+        SetLineValues(6, "", "");
     }
 
     public override void HandleLsk(int side, int row)

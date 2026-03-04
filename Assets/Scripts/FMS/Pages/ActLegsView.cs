@@ -51,8 +51,9 @@ public class ActLegsView : FmsPageView, IMultiPage
 
             if (routeIdx >= Model.ActiveRoute.Count)
             {
-                SetLine(lineA, "\u2014", "", "", "");
-                if (lineB < 6) SetLine(lineB, "", "", "", "");
+                SetLineLabels(lineA, "\u2014", "");
+                SetLineValues(lineA, "", "");
+                if (lineB < 6) ClearLine(lineB);
                 continue;
             }
 
@@ -79,18 +80,19 @@ public class ActLegsView : FmsPageView, IMultiPage
                 eteStr  = Model.FormatEte(distNm, Model.IasKt);
             }
 
-            SetLine(lineA,
-                labelL: $"{col}{wp.ident}{colEnd}",
-                valueL: brgStr,
-                labelR: "ETE",
-                valueR: eteStr);
+            SetLineLabels(lineA, labelL: $"{col}{wp.ident}{colEnd}", labelR: "ETE");
+            SetLineValues(lineA, valueL: brgStr, valueR: eteStr);
 
             if (lineB <= 6)
-                SetLine(lineB, "", distStr, "", "");
+            {
+                SetLineLabels(lineB, "", "");
+                SetLineValues(lineB, distStr, "");
+            }
         }
 
         // Line 6 always shows IDX shortcut
-        SetLine(6, "<IDX", "", "", "");
+        SetLineLabels(6, "<IDX", "");
+        SetLineValues(6, "", "");
     }
 
     public override void HandleLsk(int side, int row)

@@ -3,31 +3,33 @@ using UnityEngine;
 /// <summary>
 /// CDU ACT FPLN page — route loading workflow.
 ///
-/// Layout (ACT state):
-///   L1 ""  [OriginIdent]    [TotalDistNm]   ""   [DestIdent]
-///   L2 (empty — route name appears here after selection)
-///   L3–L5 (empty)
-///   L6 "&lt;IDX"
+/// Four display states driven by _modActive, _execArmed, and ActiveRoute.Count:
+///   ACT no route   — !_modActive, Count == 0
+///   ACT route loaded — !_modActive, Count > 0
+///   MOD confirm    — _modActive, !_execArmed
+///   MOD armed      — _modActive, _execArmed
 ///
-/// Layout (MOD state):
-///   L1 same as ACT
-///   L2 ""  ""  ""  [selectedRouteName]
-///   L6 "---- Load New Route ----"  "&lt;CANCEL MOD"  ""  "No&gt;"
-///   Title: "MOD FPLN"
-///   Message_Line: "Exec"
+/// Line layout (all states):
+///   L1  [OriginIdent + TotalDist]          [DestIdent]
+///   L2  [route name]          ALTN  [----]
+///   L3                        ORIG RWY
+///   L4  VIA  [DIRECT]         TO  [dest ident]
+///   L5  (empty)
+///   L6  (state-dependent — see Populate)
 ///
 /// LSK interactions:
 ///   L2 (empty scratchpad)  → copy scenario route name to scratchpad
-///   L2 (non-empty SP)      → commit SP to line 2 VR, enter MOD state
-///   L6 (any, MOD active)   → cancel MOD, revert to ACT
-///   L6 (any, ACT)          → navigate to Index
-///   R6 (MOD active)        → apply route → rebuild FlightPlan → revert to ACT
+///   L2 (non-empty SP)      → commit SP → enter MOD state
+///   L6 ACT                 → navigate to SecFpln
+///   L6 MOD not-armed       → <YES arms EXEC; NO> cancels MOD
+///   L6 MOD armed           → <CANCEL MOD cancels; R6 OFFSET = inactive
 /// </summary>
 public class ActFplnView : FmsPageView
 {
     // ── MOD state ───────────────────────────────────────────────────────────────
     private bool   _modActive        = false;
     private string _pendingRouteName = null;
+    private bool   _execArmed        = false;
 
     // ─────────────────────────────────────────────────────────────────────────
     // FmsPageView contract
@@ -36,63 +38,133 @@ public class ActFplnView : FmsPageView
     public override void Populate()
     {
         ClearAllLines();
-
-        GetTitle()?.SetText(_modActive ? "MOD FPLN" : "ACT FPLN");
         GetPageNumber()?.SetText("1/1");
 
-        // ── Line 1: origin / dest / total distance ───────────────────────────
-        string origin = Model.ActiveRoute.Count > 0
-            ? Model.ActiveRoute[0].ident
-            : "----";
-        string dest = Model.ActiveRoute.Count > 1
-            ? Model.ActiveRoute[Model.ActiveRoute.Count - 1].ident
-            : "----";
-        int distNm = Mathf.RoundToInt(Model.TotalRouteDistNm);
-        string valLeft = $"{origin,-14}{distNm,5}";
+        // Seed pending route name when in ACT state and not yet set
+        if (!_modActive && string.IsNullOrEmpty(_pendingRouteName))
+            _pendingRouteName = Model?.Scenario?.route ?? "";
 
-        SetLine(1, "", valLeft, "", dest);
-
-        // ── Line 2: selected route name (visible in MOD state) ───────────────
-        SetLine(2, "", "", "", _pendingRouteName ?? "");
-
-        // ── Lines 3–5: reserved / empty ──────────────────────────────────────
-        // (left for future use)
-
-        // ── Line 6: context-sensitive ────────────────────────────────────────
-        if (_modActive)
+        if (_modActive && _execArmed)
         {
-            SetLine(6, "---- Load New Route ----", "<CANCEL MOD", "", "No>");
+            // ── STATE: MOD ARMED ─────────────────────────────────────────────────
+            // EXEC is primed; user can CANCEL or navigate away.
+            string origin  = Model.ActiveRoute.Count > 0 ? Model.ActiveRoute[0].ident : "----";
+            string dest    = Model.ActiveRoute.Count > 0 ? Model.ActiveRoute[Model.ActiveRoute.Count - 1].ident : "----";
+            string toIdent = Model.ActiveRoute.Count > 1 ? Model.ActiveRoute[1].ident : "----";
+            int    distNm  = Mathf.RoundToInt(Model.TotalRouteDistNm);
+
+            GetTitle()?.SetText("MOD FPLN");
+            SetLineLabels(1, "ORIGIN     DIST", "DEST");
+            SetLineValues(1, $"{origin,-14}{distNm,5}", dest);
+            SetLineLabels(2, "ROUTE", "ALTN");
+            SetLineValues(2, _pendingRouteName ?? "", "----");
+            SetLineLabels(3, "", "ORIG RWY");
+            SetLineLabels(4, "VIA", "TO");
+            SetLineValues(4, "DIRECT", toIdent);
+            // L5 empty
+            SetLineLabels(6, "", "");
+            SetLineValues(6, "<CANCEL MOD", "OFFSET   ----");
+            GetMessageLine()?.SetText("EXEC");
+        }
+        else if (_modActive)
+        {
+            // ── STATE: MOD CONFIRM ───────────────────────────────────────────────
+            // Prompting YES / NO to load new route.
+            string origin  = Model.ActiveRoute.Count > 0 ? Model.ActiveRoute[0].ident : "----";
+            string dest    = Model.ActiveRoute.Count > 0 ? Model.ActiveRoute[Model.ActiveRoute.Count - 1].ident : "----";
+            string toIdent = Model.ActiveRoute.Count > 1 ? Model.ActiveRoute[1].ident : "----";
+            int    distNm  = Mathf.RoundToInt(Model.TotalRouteDistNm);
+
+            GetTitle()?.SetText("MOD FPLN");
+            SetLineLabels(1, "ORIGIN     DIST", "DEST");
+            SetLineValues(1, $"{origin,-14}{distNm,5}", dest);
+            SetLineLabels(2, "ROUTE", "ALTN");
+            SetLineValues(2, _pendingRouteName ?? "", "----");
+            SetLineLabels(3, "", "ORIG RWY");
+            SetLineLabels(4, "VIA", "TO");
+            SetLineValues(4, "DIRECT", toIdent);
+            // L5 empty
+            SetLineLabels(6, "---- LOAD NEW ROUTE ----", "");
+            SetLineValues(6, "<YES", "NO>");
+            GetMessageLine()?.SetText("EXEC");
+        }
+        else if (Model.ActiveRoute.Count > 0)
+        {
+            // ── STATE: ACT — ROUTE LOADED ────────────────────────────────────────
+            // Normal ACT display with live route data.
+            string origin  = Model.ActiveRoute[0].ident;
+            string dest    = Model.ActiveRoute[Model.ActiveRoute.Count - 1].ident;
+            string toIdent = Model.ActiveRoute.Count > 1 ? Model.ActiveRoute[1].ident : dest;
+            int    distNm  = Mathf.RoundToInt(Model.TotalRouteDistNm);
+
+            GetTitle()?.SetText("ACT FPLN");
+            SetLineLabels(1, "ORIGIN     DIST", "DEST");
+            SetLineValues(1, $"{origin,-14}{distNm,5}", dest);
+            SetLineLabels(2, "ROUTE", "ALTN");
+            SetLineValues(2, _pendingRouteName ?? "", "----");
+            SetLineLabels(3, "", "ORIG RWY");
+            SetLineLabels(4, "VIA", "TO");
+            SetLineValues(4, "DIRECT", toIdent);
+            // L5 empty
+            SetLineLabels(6, "", "");
+            SetLineValues(6, "<SEC FPLN", "OFFSET   ----");
+            GetMessageLine()?.SetText("");
         }
         else
         {
-            SetLine(6, "<IDX", "", "", "");
+            // ── STATE: ACT — NO ROUTE ────────────────────────────────────────────
+            // Empty flight plan; awaiting route selection via L2.
+            GetTitle()?.SetText("ACT FPLN");
+            SetLineLabels(1, "ORIGIN     DIST", "DEST");
+            SetLineValues(1, "----", "----");
+            SetLineLabels(2, "ROUTE", "ALTN");
+            SetLineValues(2, "", "----");
+            SetLineLabels(3, "", "ORIG RWY");
+            SetLineLabels(4, "VIA", "TO");
+            SetLineValues(4, "DIRECT", "----");
+            // L5 empty
+            SetLineLabels(6, "", "");
+            SetLineValues(6, "<SEC FPLN", "");
+            GetMessageLine()?.SetText("");
         }
-
-        // ── Message_Line: "Exec" during MOD, cleared otherwise ───────────────
-        GetMessageLine()?.SetText(_modActive ? "Exec" : "");
     }
 
     public override void HandleLsk(int side, int row)
     {
-        switch (row)
+        if (_modActive && _execArmed)
         {
-            case 2 when side == 0:
-                HandleL2();
-                break;
-
-            case 6:
-                if (_modActive)
-                {
-                    if (side == 0) CancelMod();     // <CANCEL MOD
-                    else           ApplyRoute();     // No>
-                }
-                else
-                {
-                    Router.ShowPage("Index");
-                }
-                break;
+            // ── STATE: MOD ARMED ─────────────────────────────────────────────────
+            // Only L6 left is active; all other keys ignored.
+            if (row == 6 && side == 0) CancelMod();   // <CANCEL MOD
+            // L6 right: OFFSET — inactive
         }
+        else if (_modActive)
+        {
+            // ── STATE: MOD CONFIRM ───────────────────────────────────────────────
+            // L6 left arms EXEC; L6 right cancels MOD. All other keys ignored.
+            if (row == 6 && side == 0) _execArmed = true;  // <YES — arm EXEC
+            if (row == 6 && side == 1) CancelMod();         // NO>  — cancel MOD
+        }
+        else if (Model.ActiveRoute.Count > 0)
+        {
+            // ── STATE: ACT — ROUTE LOADED ────────────────────────────────────────
+            // L2 left: scratchpad seed / commit to enter MOD.
+            // L6 left: navigate to SecFpln. L6 right: OFFSET — inactive.
+            if (row == 2 && side == 0) HandleL2();
+            if (row == 6 && side == 0) Router.ShowPage("SecFpln");
+        }
+        else
+        {
+            // ── STATE: ACT — NO ROUTE ────────────────────────────────────────────
+            // L2 left: scratchpad seed / commit to enter MOD.
+            // L6 left: navigate to SecFpln. L6 right: inactive (no OFFSET).
+            if (row == 2 && side == 0) HandleL2();
+            if (row == 6 && side == 0) Router.ShowPage("SecFpln");
+        }
+
+        Populate();
     }
+
 
     // ─────────────────────────────────────────────────────────────────────────
     // Unity lifecycle
@@ -125,6 +197,7 @@ public class ActFplnView : FmsPageView
             // Step B: commit scratchpad content → enter MOD
             _pendingRouteName = Scratchpad.ReadAndClear();
             _modActive = true;
+            _execArmed = false;
         }
     }
 
@@ -133,6 +206,18 @@ public class ActFplnView : FmsPageView
     {
         _modActive        = false;
         _pendingRouteName = null;
+        _execArmed        = false;
+    }
+
+    /// <summary>Called by the EXEC function key.</summary>
+    public void HandleExec()
+    {
+        if (!_modActive || !_execArmed)
+        {
+            Scratchpad.ShowMessage("NO MOD", 1.5f);
+            return;
+        }
+        ApplyRoute();
     }
 
     /// <summary>

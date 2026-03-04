@@ -20,12 +20,23 @@ public class DepArrView : FmsPageView
         string dep  = Model.OriginIdent.Length > 0 ? Model.OriginIdent : "----";
         string arr  = Model.DestIdent.Length   > 0 ? Model.DestIdent   : "----";
 
-        SetLine(1, "DEP",  dep,          "ARR",  arr);
-        SetLine(2, "PROC", "RWYS 25L/R", "",     "");
-        SetLine(3, "HDG",  "220\u00B0",  "",     "");
-        SetLine(4, "ALT",  "3,000 FT",  "",     "");
-        SetLine(5, "",     "",           "",     "");
-        SetLine(6, "<IDX", "",           "",     "");
+        SetLineLabels(1, "DEP", "ARR");
+        SetLineValues(1, dep, arr);
+
+        SetLineLabels(2, "PROC", "");
+        SetLineValues(2, "RWYS 25L/R", "");
+
+        SetLineLabels(3, "HDG", "");
+        SetLineValues(3, "220\u00B0", "");
+
+        SetLineLabels(4, "ALT", "");
+        SetLineValues(4, "3,000 FT", "");
+
+        SetLineLabels(5, "", "");
+        SetLineValues(5, "", "");
+
+        SetLineLabels(6, "<IDX", "");
+        SetLineValues(6, "", "");
     }
 
     public override void HandleLsk(int side, int row)

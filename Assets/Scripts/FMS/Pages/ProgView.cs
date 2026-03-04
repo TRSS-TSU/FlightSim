@@ -49,25 +49,46 @@ public class ProgView : FmsPageView, IMultiPage
         string eteStr  = Model.FormatEte(distNm, Model.IasKt);
         string distStr = $"{distNm:0.0}NM";
 
-        SetLine(1, "FROM", fromIdent, "DIST", distStr);
-        SetLine(2, "TO",   toIdent,   "ETE",  eteStr);
-        SetLine(3, "DEST", destIdent, "DIST", "\u2014");
-        SetLine(4, "",     "",        "",     "");
+        SetLineLabels(1, "FROM", "DIST");
+        SetLineValues(1, fromIdent, distStr);
+
+        SetLineLabels(2, "TO", "ETE");
+        SetLineValues(2, toIdent, eteStr);
+
+        SetLineLabels(3, "DEST", "DIST");
+        SetLineValues(3, destIdent, "\u2014");
+
+        SetLineLabels(4, "", "");
+        SetLineValues(4, "", "");
 
         float  xtkNm  = Mathf.Abs(Model.XtkM) / 1852f;
         string xtkDir = Model.XtkM >= 0f ? "R" : "L";
-        SetLine(5, "XTK", $"{xtkNm:0.00}NM {xtkDir}", "", "");
-        SetLine(6, "<IDX","",                           "", "");
+        SetLineLabels(5, "XTK", "");
+        SetLineValues(5, $"{xtkNm:0.00}NM {xtkDir}", "");
+
+        SetLineLabels(6, "<IDX", "");
+        SetLineValues(6, "", "");
     }
 
     private void PopulatePage2()
     {
-        SetLine(1, "IAS",   $"{Model.IasKt:0}KT",           "HDG",  $"{Model.HdgDeg:000}\u00B0");
-        SetLine(2, "ALT",   $"{Model.AltFtMsl:0}FT",        "VSI",  $"{Model.VsiFpm:+0;-0}FPM");
-        SetLine(3, "",      "",                              "",     "");
-        SetLine(4, "",      "",                              "",     "");
-        SetLine(5, "",      "",                              "",     "");
-        SetLine(6, "<IDX",  "",                              "",     "");
+        SetLineLabels(1, "IAS", "HDG");
+        SetLineValues(1, $"{Model.IasKt:0}KT", $"{Model.HdgDeg:000}\u00B0");
+
+        SetLineLabels(2, "ALT", "VSI");
+        SetLineValues(2, $"{Model.AltFtMsl:0}FT", $"{Model.VsiFpm:+0;-0}FPM");
+
+        SetLineLabels(3, "", "");
+        SetLineValues(3, "", "");
+
+        SetLineLabels(4, "", "");
+        SetLineValues(4, "", "");
+
+        SetLineLabels(5, "", "");
+        SetLineValues(5, "", "");
+
+        SetLineLabels(6, "<IDX", "");
+        SetLineValues(6, "", "");
     }
 
     public override void HandleLsk(int side, int row)

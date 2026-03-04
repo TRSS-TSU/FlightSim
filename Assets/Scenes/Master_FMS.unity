@@ -22464,8 +22464,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 295, y: -100}
-  m_SizeDelta: {x: 600, y: 100}
+  m_AnchoredPosition: {x: 463, y: -100}
+  m_SizeDelta: {x: 270.5, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &638982809
 MonoBehaviour:
@@ -22487,7 +22487,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: perf init
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 09ca4792173bc144bb01881a26b0c03a, type: 2}
   m_sharedMaterial: {fileID: -4223161061878018300, guid: 09ca4792173bc144bb01881a26b0c03a, type: 2}
@@ -48593,7 +48593,7 @@ MonoBehaviour:
   pageHold: {fileID: 1920718175}
   pageSecFpln: {fileID: 717951977}
   pageDepArr: {fileID: 1229893180}
-  pageExec: {fileID: 1146824905}
+  pageDir: {fileID: 1146824905}
   pagePerf: {fileID: 779738462}
 --- !u!1 &1252015184
 GameObject:
@@ -65868,7 +65868,7 @@ GameObject:
   - component: {fileID: 1705076353}
   - component: {fileID: 1705076356}
   m_Layer: 5
-  m_Name: IDX Button (03)
+  m_Name: INDEX Button (03)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -68281,8 +68281,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -136.5, y: -20}
-  m_SizeDelta: {x: 1000, y: 100}
+  m_AnchoredPosition: {x: -387.4, y: -20}
+  m_SizeDelta: {x: 500, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1767121757
 MonoBehaviour:
@@ -73771,7 +73771,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: ---- Load New Route ----
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c93ce450f5c39cc4f8fbcc85f38a120e, type: 2}
   m_sharedMaterial: {fileID: 3193201477835477899, guid: c93ce450f5c39cc4f8fbcc85f38a120e, type: 2}

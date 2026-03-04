@@ -40,22 +40,44 @@ public class PerfInitView : FmsPageView, IMultiPage
         string fuel  = Model.FuelWeightLbs  > 0f ? $"{Model.FuelWeightLbs:0} LBS" : "------";
         string gross = Model.GrossWeightLbs > 0f ? $"{Model.GrossWeightLbs:0} LBS" : "------";
 
-        SetLine(1, "ZFW",     zfw,  "GROSS WT", gross);
-        SetLine(2, "FUEL WT", fuel, "",         "");
-        SetLine(3, "",        "",   "",         "");
-        SetLine(4, "",        "",   "",         "");
-        SetLine(5, "",        "",   "",         "");
-        SetLine(6, "<IDX",    "",   "",         "");
+        SetLineLabels(1, "ZFW", "GROSS WT");
+        SetLineValues(1, zfw, gross);
+
+        SetLineLabels(2, "FUEL WT", "");
+        SetLineValues(2, fuel, "");
+
+        SetLineLabels(3, "", "");
+        SetLineValues(3, "", "");
+
+        SetLineLabels(4, "", "");
+        SetLineValues(4, "", "");
+
+        SetLineLabels(5, "", "");
+        SetLineValues(5, "", "");
+
+        SetLineLabels(6, "<IDX", "");
+        SetLineValues(6, "", "");
     }
 
     private void PopulatePage2()
     {
-        SetLine(1, "",            "",                  "", "");
-        SetLine(2, "",            "",                  "", "");
-        SetLine(3, "V-SPEEDS", "NOT IMPL",             "", "");
-        SetLine(4, "",            "",                  "", "");
-        SetLine(5, "",            "",                  "", "");
-        SetLine(6, "<IDX",        "",                  "", "");
+        SetLineLabels(1, "", "");
+        SetLineValues(1, "", "");
+
+        SetLineLabels(2, "", "");
+        SetLineValues(2, "", "");
+
+        SetLineLabels(3, "V-SPEEDS", "");
+        SetLineValues(3, "NOT IMPL", "");
+
+        SetLineLabels(4, "", "");
+        SetLineValues(4, "", "");
+
+        SetLineLabels(5, "", "");
+        SetLineValues(5, "", "");
+
+        SetLineLabels(6, "<IDX", "");
+        SetLineValues(6, "", "");
     }
 
     public override void HandleLsk(int side, int row)
