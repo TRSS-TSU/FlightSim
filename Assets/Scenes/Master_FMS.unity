@@ -11904,7 +11904,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c5f555e59a1c0c4ca9b628d0c4d71b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FMS_Button_Selection
-  scratchpad: {fileID: 0}
+  scratchpad: {fileID: 348894425}
 --- !u!114 &348894425
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -44573,7 +44573,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1146824907}
-  - component: {fileID: 1146824906}
+  - component: {fileID: 1146824908}
   m_Layer: 5
   m_Name: Dir
   m_TagString: Untagged
@@ -44581,19 +44581,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 0
---- !u!114 &1146824906
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1146824905}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7817082f7a915634eaf98d76adb4ae8d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::StubPageView
-  pageTitle: ACT DIRECT-TO
 --- !u!224 &1146824907
 RectTransform:
   m_ObjectHideFlags: 0
@@ -44615,6 +44602,18 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: -350}
   m_SizeDelta: {x: 0, y: 700}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1146824908
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1146824905}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ef4fe51e8c51bd46b37e746b5d8a839, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DirView
 --- !u!1 &1150818091
 GameObject:
   m_ObjectHideFlags: 0

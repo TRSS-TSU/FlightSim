@@ -146,8 +146,6 @@ public class ActFplnView : FmsPageView
 
     public override void HandleLsk(int side, int row)
     {
-        Debug.Log($"[ActFpln] LSK {(side == 0 ? "L" : "R")}{row} pressed | modActive={_modActive}  execArmed={_execArmed}  routeCount={Model.ActiveRoute.Count}");
-
         if (_modActive && _execArmed)
         {
             // ── STATE: MOD ARMED ─────────────────────────────────────────────────
@@ -180,7 +178,6 @@ public class ActFplnView : FmsPageView
             if (side == 0 && row == 6) Router.ShowPage("SecFpln");
         }
 
-        Debug.Log($"[ActFpln] LSK handled  | modActive={_modActive}  execArmed={_execArmed}");
         // NOTE: Populate() is NOT called here — FmsPageRouter.Update() pumps it every frame.
     }
 

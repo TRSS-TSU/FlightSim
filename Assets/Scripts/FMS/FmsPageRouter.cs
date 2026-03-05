@@ -53,6 +53,8 @@ public class FmsPageRouter : MonoBehaviour
     private readonly FmsModel _model = new();
     private FmsPageView _current;
     private readonly Dictionary<string, FmsPageView> _pages = new();
+    private float _refreshTimer;
+    private const float RefreshInterval = 0.1f; // 10 Hz
 
     public FmsPageView CurrentPage => _current;
 
@@ -98,7 +100,10 @@ public class FmsPageRouter : MonoBehaviour
             _model.XtkM           = navAutopilot.xtkM;
         }
 
-        // Re-render the active page
+        // Re-render the active page at 10 Hz
+        _refreshTimer += Time.deltaTime;
+        if (_refreshTimer < RefreshInterval) return;
+        _refreshTimer = 0f;
         _current?.Populate();
     }
 
