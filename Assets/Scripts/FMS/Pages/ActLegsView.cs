@@ -9,31 +9,47 @@ using UnityEngine;
 ///   Line N  : Label_Left=[ident]  Value_Left=[BRG]°  Label_Right=ETE  Value_Right=[mm:ss]
 ///   Line N+1: Label_Left=""       Value_Left=[dist]NM Label_Right=""   Value_Right=""
 ///
-/// Colour convention (TMP rich text):
+/// Leg colour convention (TMP rich text applied directly to ident string):
 ///   Past legs   → cyan  (#00FFFF)
 ///   Active leg  → green (#00FF00)
-///   Future legs → white (default)
+///   Future legs → default (no tag; white by TMP default)
+///
+/// Note: FmtLabel/FmtValue are NOT applied to ident strings — per-leg color tags
+/// take precedence and must not be wrapped in a global FmtLabel cyan tag.
+/// FmtLabel/FmtValue are applied only to structural labels (ETE, IDX) and data values.
 ///
 /// Scratchpad interactions:
-///   LSK L1/L3/L5 (empty SP)  → copy waypoint ident to scratchpad
-///   LSK L1/L3/L5 (SP=ident)  → insert waypoint before that row
-///   LSK L1/L3/L5 (SP=DELETE) → remove waypoint at that row
-///   LSK L6                    → return to Index
+///   L1/L3/L5 (empty SP)  → copy waypoint ident to scratchpad
+///   L1/L3/L5 (SP=ident)  → insert waypoint before that row
+///   L1/L3/L5 (SP=DELETE) → remove waypoint at that row
+///   L6                    → return to Index
+///
+/// Formatting: structural labels cyan (#00FFFF), values white (#FFFFFF) via FmtLabel/FmtValue.
 /// </summary>
 public class ActLegsView : FmsPageView, IMultiPage
 {
+    // ── Formatting helpers ───────────────────────────────────────────────────────
+    private string FmtTitle()             => "ACT LEGS";
+    private string FmtLabel(string label) => string.IsNullOrEmpty(label) ? label : $"<color=#00FFFF>{label}</color>";
+    private string FmtValue(string value) => string.IsNullOrEmpty(value) ? value : $"<color=#FFFFFF>{value}</color>";
+
+    // ── State ────────────────────────────────────────────────────────────────────
     private const int LEGS_PER_PAGE = 3;
     private int _pageIndex;
 
     private int TotalPages =>
         Mathf.Max(1, Mathf.CeilToInt(Model.ActiveRoute.Count / (float)LEGS_PER_PAGE));
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // FmsPageView contract
+    // ─────────────────────────────────────────────────────────────────────────
+
     public override void Populate()
     {
-        GetTitle()?.SetText("ACT LEGS");
-        GetPageNumber()?.SetText($"{_pageIndex + 1}/{TotalPages}");
-
         ClearAllLines();
+        GetTitle()?.SetText(FmtTitle());
+        GetPageNumber()?.SetText($"{_pageIndex + 1}/{TotalPages}");
+        GetMessageLine()?.SetText("");
 
         int start = _pageIndex * LEGS_PER_PAGE;
 
@@ -43,12 +59,6 @@ public class ActLegsView : FmsPageView, IMultiPage
             int lineA    = slot * 2 + 1;  // lines 1, 3, 5
             int lineB    = lineA + 1;      // lines 2, 4, 6
 
-            // Line 6 on the last slot is reserved for IDX — skip if we're on the last page's last slot
-            if (lineA == 5 && lineB == 6 && slot == LEGS_PER_PAGE - 1)
-            {
-                // Still show waypoint on line 5, but line 6 goes to IDX
-            }
-
             if (routeIdx >= Model.ActiveRoute.Count)
             {
                 SetLineLabels(lineA, "\u2014", "");
@@ -57,17 +67,17 @@ public class ActLegsView : FmsPageView, IMultiPage
                 continue;
             }
 
-            var wp     = Model.ActiveRoute[routeIdx];
+            var  wp     = Model.ActiveRoute[routeIdx];
             bool past   = routeIdx < Model.ActiveLegIndex;
             bool active = routeIdx == Model.ActiveLegIndex;
 
-            // Colour tag
-            string col = past   ? "<color=#00FFFF>"
-                       : active ? "<color=#00FF00>"
-                       :          "";
+            // Per-leg colour applied directly to ident string — NOT via FmtLabel
+            string col    = past   ? "<color=#00FFFF>"
+                          : active ? "<color=#00FF00>"
+                          :          "";
             string colEnd = (past || active) ? "</color>" : "";
 
-            // Live data for the active leg; static for others
+            // Live data for the active leg; dashes for others
             string brgStr  = "\u2014";
             string distStr = "\u2014";
             string eteStr  = "--:--";
@@ -80,37 +90,76 @@ public class ActLegsView : FmsPageView, IMultiPage
                 eteStr  = Model.FormatEte(distNm, Model.IasKt);
             }
 
-            SetLineLabels(lineA, labelL: $"{col}{wp.ident}{colEnd}", labelR: "ETE");
-            SetLineValues(lineA, valueL: brgStr, valueR: eteStr);
+            // Ident uses inline color tag directly; structural "ETE" label uses FmtLabel
+            SetLineLabels(lineA, labelL: $"{col}{wp.ident}{colEnd}", labelR: FmtLabel("ETE"));
+            SetLineValues(lineA, valueL: FmtValue(brgStr), valueR: FmtValue(eteStr));
 
             if (lineB <= 6)
             {
                 SetLineLabels(lineB, "", "");
-                SetLineValues(lineB, distStr, "");
+                SetLineValues(lineB, FmtValue(distStr), "");
             }
         }
 
         // Line 6 always shows IDX shortcut
-        SetLineLabels(6, "<IDX", "");
+        SetLineLabels(6, FmtLabel("<IDX"), "");
         SetLineValues(6, "", "");
     }
 
     public override void HandleLsk(int side, int row)
     {
-        // Only Left LSKs 1, 3, 5 map to waypoints; L6 is IDX
-        if (side == 0 && row == 6) { Router.ShowPage("Index"); return; }
-        if (side != 0)             return;
+        if (side == 0)  // Left
+        {
+            switch (row)
+            {
+                case 1: HandleWaypointLsk(0); break;  // slot 0
+                case 2: // inactive (even rows are data lines, not selectable)
+                    break;
+                case 3: HandleWaypointLsk(1); break;  // slot 1
+                case 4: // inactive
+                    break;
+                case 5: HandleWaypointLsk(2); break;  // slot 2
+                case 6: Router.ShowPage("Index"); break;
+            }
+        }
+        else  // Right
+        {
+            switch (row)
+            {
+                case 1: // inactive
+                    break;
+                case 2: // inactive
+                    break;
+                case 3: // inactive
+                    break;
+                case 4: // inactive
+                    break;
+                case 5: // inactive
+                    break;
+                case 6: // inactive
+                    break;
+            }
+        }
+        // NOTE: Populate() is NOT called here — FmsPageRouter.Update() pumps it every frame.
+    }
 
-        int slotFromRow = row == 1 ? 0 : row == 3 ? 1 : row == 5 ? 2 : -1;
-        if (slotFromRow < 0) return;
+    // ─────────────────────────────────────────────────────────────────────────
+    // Private handlers
+    // ─────────────────────────────────────────────────────────────────────────
 
-        int routeIdx = _pageIndex * LEGS_PER_PAGE + slotFromRow;
-
-        string sp = Scratchpad.CurrentText;
+    /// <summary>
+    /// Handles L1/L3/L5 scratchpad interactions for a waypoint slot.
+    ///   Empty SP  → copy ident to scratchpad.
+    ///   SP=DELETE → remove waypoint at slot.
+    ///   SP=ident  → insert waypoint before slot.
+    /// </summary>
+    private void HandleWaypointLsk(int slot)
+    {
+        int routeIdx = _pageIndex * LEGS_PER_PAGE + slot;
+        string sp    = Scratchpad.CurrentText;
 
         if (sp.Length == 0)
         {
-            // Copy ident to scratchpad
             if (routeIdx < Model.ActiveRoute.Count)
                 Scratchpad.Append(Model.ActiveRoute[routeIdx].ident);
             return;
@@ -125,7 +174,10 @@ public class ActLegsView : FmsPageView, IMultiPage
                 CommitRoute();
                 _pageIndex = Mathf.Clamp(_pageIndex, 0, TotalPages - 1);
             }
-            else Scratchpad.ShowMessage("NOT ALLOWED");
+            else
+            {
+                Scratchpad.ShowMessage("NOT ALLOWED");
+            }
             return;
         }
 
