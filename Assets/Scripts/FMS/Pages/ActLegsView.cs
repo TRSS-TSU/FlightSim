@@ -29,9 +29,13 @@ using UnityEngine;
 public class ActLegsView : FmsPageView, IMultiPage
 {
     // ── Formatting helpers ───────────────────────────────────────────────────────
-    private string FmtTitle()             => "ACT LEGS";
-    private string FmtLabel(string label) => string.IsNullOrEmpty(label) ? label : $"<color=#00FFFF>{label}</color>";
-    private string FmtValue(string value) => string.IsNullOrEmpty(value) ? value : $"<color=#FFFFFF>{value}</color>";
+    private string FmtTitle() => "ACT LEGS";
+
+    private string FmtLabel(string label) =>
+        string.IsNullOrEmpty(label) ? label : $"<color=#00FFFF>{label}</color>";
+
+    private string FmtValue(string value) =>
+        string.IsNullOrEmpty(value) ? value : $"<color=#FFFFFF>{value}</color>";
 
     // ── State ────────────────────────────────────────────────────────────────────
     private const int LEGS_PER_PAGE = 3;
@@ -56,38 +60,40 @@ public class ActLegsView : FmsPageView, IMultiPage
         for (int slot = 0; slot < LEGS_PER_PAGE; slot++)
         {
             int routeIdx = start + slot;
-            int lineA    = slot * 2 + 1;  // lines 1, 3, 5
-            int lineB    = lineA + 1;      // lines 2, 4, 6
+            int lineA = slot * 2 + 1; // lines 1, 3, 5
+            int lineB = lineA + 1; // lines 2, 4, 6
 
             if (routeIdx >= Model.ActiveRoute.Count)
             {
                 SetLineLabels(lineA, "\u2014", "");
                 SetLineValues(lineA, "", "");
-                if (lineB < 6) ClearLine(lineB);
+                if (lineB < 6)
+                    ClearLine(lineB);
                 continue;
             }
 
-            var  wp     = Model.ActiveRoute[routeIdx];
-            bool past   = routeIdx < Model.ActiveLegIndex;
+            var wp = Model.ActiveRoute[routeIdx];
+            bool past = routeIdx < Model.ActiveLegIndex;
             bool active = routeIdx == Model.ActiveLegIndex;
 
             // Per-leg colour applied directly to ident string — NOT via FmtLabel
-            string col    = past   ? "<color=#00FFFF>"
-                          : active ? "<color=#00FF00>"
-                          :          "";
+            string col =
+                past ? "<color=#00FFFF>"
+                : active ? "<color=#00FF00>"
+                : "";
             string colEnd = (past || active) ? "</color>" : "";
 
             // Live data for the active leg; dashes for others
-            string brgStr  = "\u2014";
+            string brgStr = "\u2014";
             string distStr = "\u2014";
-            string eteStr  = "--:--";
+            string eteStr = "--:--";
 
             if (active)
             {
                 float distNm = Model.DistM / 1852f;
-                brgStr  = $"{Model.BrgDeg:000}\u00B0";
+                brgStr = $"{Model.BrgDeg:000}\u00B0";
                 distStr = $"{distNm:0.0}NM";
-                eteStr  = Model.FormatEte(distNm, Model.IasKt);
+                eteStr = Model.FormatEte(distNm, Model.IasKt);
             }
 
             // Ident uses inline color tag directly; structural "ETE" label uses FmtLabel
@@ -102,27 +108,35 @@ public class ActLegsView : FmsPageView, IMultiPage
         }
 
         // Line 6 always shows IDX shortcut
-        SetLineLabels(6, FmtLabel("<IDX"), "");
+        SetLineLabels(6, FmtLabel("<INDEX"), "");
         SetLineValues(6, "", "");
     }
 
     public override void HandleLsk(int side, int row)
     {
-        if (side == 0)  // Left
+        if (side == 0) // Left
         {
             switch (row)
             {
-                case 1: HandleWaypointLsk(0); break;  // slot 0
+                case 1:
+                    HandleWaypointLsk(0);
+                    break; // slot 0
                 case 2: // inactive (even rows are data lines, not selectable)
                     break;
-                case 3: HandleWaypointLsk(1); break;  // slot 1
+                case 3:
+                    HandleWaypointLsk(1);
+                    break; // slot 1
                 case 4: // inactive
                     break;
-                case 5: HandleWaypointLsk(2); break;  // slot 2
-                case 6: Router.ShowPage("Index"); break;
+                case 5:
+                    HandleWaypointLsk(2);
+                    break; // slot 2
+                case 6:
+                    Router.ShowPage("Index");
+                    break;
             }
         }
-        else  // Right
+        else // Right
         {
             switch (row)
             {
@@ -156,7 +170,7 @@ public class ActLegsView : FmsPageView, IMultiPage
     private void HandleWaypointLsk(int slot)
     {
         int routeIdx = _pageIndex * LEGS_PER_PAGE + slot;
-        string sp    = Scratchpad.CurrentText;
+        string sp = Scratchpad.CurrentText;
 
         if (sp.Length == 0)
         {
@@ -183,12 +197,21 @@ public class ActLegsView : FmsPageView, IMultiPage
 
         // Attempt to insert the typed waypoint ident before routeIdx
         var scenario = Model.Scenario;
-        if (scenario == null) { Scratchpad.ShowMessage("NO SCENARIO"); return; }
+        if (scenario == null)
+        {
+            Scratchpad.ShowMessage("NO SCENARIO");
+            return;
+        }
 
         var wpDef = scenario.waypoints.Find(w =>
-            string.Equals(w.ident, sp, StringComparison.OrdinalIgnoreCase));
+            string.Equals(w.ident, sp, StringComparison.OrdinalIgnoreCase)
+        );
 
-        if (wpDef == null) { Scratchpad.ShowMessage("NOT IN DATABASE"); return; }
+        if (wpDef == null)
+        {
+            Scratchpad.ShowMessage("NOT IN DATABASE");
+            return;
+        }
 
         int insertAt = Mathf.Clamp(routeIdx, 0, Model.ActiveRoute.Count);
         Model.ActiveRoute.Insert(insertAt, wpDef);
@@ -217,5 +240,6 @@ public class ActLegsView : FmsPageView, IMultiPage
     // ─────────────────────────────────────────────────────────────────────────
 
     public void NextPage() => _pageIndex = (_pageIndex + 1) % TotalPages;
+
     public void PrevPage() => _pageIndex = (_pageIndex - 1 + TotalPages) % TotalPages;
 }
