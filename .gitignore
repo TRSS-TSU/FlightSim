@@ -63,7 +63,6 @@ node_modules/
 *.orig
 *.pdf
 
-
 # Claude local settings
 .claude/settings.local.json
 
