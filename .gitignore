@@ -80,3 +80,5 @@ node_modules/
 .claude
 /docs/
 CLAUDE.md
+bash.exe.stackdump
+*.slnx
