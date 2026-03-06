@@ -7,8 +7,11 @@ using UnityEngine.EventSystems;
 /// </summary>
 public class FmsFunctionButton : MonoBehaviour, IPointerClickHandler
 {
-    [SerializeField] private FmsKey key;
-    [SerializeField] private FmsPageRouter router;
+    [SerializeField]
+    private FmsKey key;
+
+    [SerializeField]
+    private FmsPageRouter router;
 
     public void OnPointerClick(PointerEventData eventData)
     {

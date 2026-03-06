@@ -289,6 +289,7 @@ public class ActFplnView : FmsPageView
             nav.activeIndex = 0;
 
         CancelMod();
+        Model.ArrivalLoaded = false;
         Scratchpad.ShowMessage("ROUTE LOADED", 1.5f);
     }
 }

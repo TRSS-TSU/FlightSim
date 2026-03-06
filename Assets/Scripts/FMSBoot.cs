@@ -2,15 +2,19 @@ using UnityEngine;
 
 public class FMSBoot : MonoBehaviour
 {
+    [SerializeField]
+    Animator anim;
 
-    [SerializeField] Animator anim;
-    [SerializeField] string closedStateName = "Close_FMS";
+    [SerializeField]
+    string closedStateName = "Close_FMS";
     static readonly int IsOpen = Animator.StringToHash("IsOpen");
 
     void Awake()
     {
-        if (!anim) anim = GetComponent<Animator>();
-        if (!anim) return;
+        if (!anim)
+            anim = GetComponent<Animator>();
+        if (!anim)
+            return;
 
         anim.enabled = true;
 
@@ -29,5 +33,4 @@ public class FMSBoot : MonoBehaviour
             anim.Update(0f);
         }
     }
-
 }

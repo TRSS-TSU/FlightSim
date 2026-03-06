@@ -5,15 +5,20 @@ using UnityEngine;
 public class FollowAircraftCamera : MonoBehaviour
 {
     [Header("Target")]
-    [SerializeField] private Transform aircraft;
+    [SerializeField]
+    private Transform aircraft;
 
     [Header("ND Orientation")]
     [Tooltip("If true: map rotates with aircraft heading (yaw only). If false: North-Up.")]
-    [SerializeField] private bool headingUp = false;
+    [SerializeField]
+    private bool headingUp = false;
 
     [Header("Camera Offsets (meters)")]
-    [Tooltip("X/Z are planar offsets. Y is computed from ND range; this value is used until the first range event.")]
-    [SerializeField] private Vector3 offset = new Vector3(0f, 32078f, 0f);
+    [Tooltip(
+        "X/Z are planar offsets. Y is computed from ND range; this value is used until the first range event."
+    )]
+    [SerializeField]
+    private Vector3 offset = new Vector3(0f, 32078f, 0f);
 
     [Header("ND Range Source")]
     public NDRangeState rangeState;
@@ -35,7 +40,8 @@ public class FollowAircraftCamera : MonoBehaviour
 
     void OnEnable()
     {
-        if (rangeState != null) rangeState.OnRangeChanged += HandleRangeChanged;
+        if (rangeState != null)
+            rangeState.OnRangeChanged += HandleRangeChanged;
 
         // Ensure we apply once on enable even if no event fired yet.
         int nm = (rangeState != null) ? rangeState.CurrentRangeNm : 20;
@@ -44,14 +50,17 @@ public class FollowAircraftCamera : MonoBehaviour
 
     void OnDisable()
     {
-        if (rangeState != null) rangeState.OnRangeChanged -= HandleRangeChanged;
-        if (pending != null) StopCoroutine(pending);
+        if (rangeState != null)
+            rangeState.OnRangeChanged -= HandleRangeChanged;
+        if (pending != null)
+            StopCoroutine(pending);
         pending = null;
     }
 
     void LateUpdate()
     {
-        if (!aircraft) return;
+        if (!aircraft)
+            return;
 
         Vector3 p = aircraft.position;
 
@@ -65,7 +74,8 @@ public class FollowAircraftCamera : MonoBehaviour
 
     private void HandleRangeChanged(int nm)
     {
-        if (pending != null) StopCoroutine(pending);
+        if (pending != null)
+            StopCoroutine(pending);
         pending = StartCoroutine(ApplyAfterDelay(nm));
     }
 

@@ -1,15 +1,21 @@
-using UnityEngine;
 using TMPro;
+using UnityEngine;
 
 public class ND_Status_Panel : MonoBehaviour
 {
     [Header("ND Status Text Fields")]
-    [SerializeField] private TMP_Text statusLine1;
-    [SerializeField] private TMP_Text statusLine2;
+    [SerializeField]
+    private TMP_Text statusLine1;
+
+    [SerializeField]
+    private TMP_Text statusLine2;
 
     [Header("Default Text (Startup)")]
-    [SerializeField] private string defaultLine1 = "ROLL AP ALT";
-    [SerializeField] private string defaultLine2 = "\u2190"; // LEFTWARDS ARROW
+    [SerializeField]
+    private string defaultLine1 = "ROLL AP ALT";
+
+    [SerializeField]
+    private string defaultLine2 = "\u2190"; // LEFTWARDS ARROW
 
     private void Awake()
     {

@@ -9,19 +9,23 @@ public class NDRangeLock : MonoBehaviour
 
     void OnEnable()
     {
-        if (!ndCam) ndCam = GetComponent<Camera>();
-        if (rangeState != null) rangeState.OnRangeChanged += OnRangeChanged;
+        if (!ndCam)
+            ndCam = GetComponent<Camera>();
+        if (rangeState != null)
+            rangeState.OnRangeChanged += OnRangeChanged;
         Apply(rangeState ? rangeState.CurrentRangeNm : Mathf.RoundToInt(fallbackWidthNm));
     }
 
     void OnDisable()
     {
-        if (rangeState != null) rangeState.OnRangeChanged -= OnRangeChanged;
+        if (rangeState != null)
+            rangeState.OnRangeChanged -= OnRangeChanged;
     }
 
     void OnValidate()
     {
-        if (!ndCam) ndCam = GetComponent<Camera>();
+        if (!ndCam)
+            ndCam = GetComponent<Camera>();
         Apply(rangeState ? rangeState.CurrentRangeNm : Mathf.RoundToInt(fallbackWidthNm));
     }
 
@@ -29,7 +33,8 @@ public class NDRangeLock : MonoBehaviour
 
     void Apply(int widthNm)
     {
-        if (!ndCam) return;
+        if (!ndCam)
+            return;
         ndCam.orthographic = true;
         float widthM = widthNm * 1852f;
         float aspect = 1f; // 785x785 RT

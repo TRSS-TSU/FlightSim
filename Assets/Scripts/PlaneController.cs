@@ -12,16 +12,20 @@ public class PlaneController : MonoBehaviour
     [Header("Speed Hold")]
     [Tooltip("Proportional gain that turns speed error into commanded acceleration.")]
     public float speedResponse = 1.5f; // 1/s
+
     [Tooltip("Maximum forward acceleration/deceleration (m/s^2).")]
     public float maxAccel = 5f; // m/s^2
 
     [Header("Altitude Hold")]
     [Tooltip("Proportional gain that turns altitude error into commanded vertical speed.")]
     public float altitudeResponse = 1.5f; // 1/s
+
     [Tooltip("Maximum climb/descent rate (m/s).")]
     public float maxClimbRate = 15f; // m/s
+
     [Tooltip("Altitude capture band in meters (~3m ≈ 10ft). Inside this band, Vy command is 0.")]
     public float altitudeCaptureBandM = 3f;
+
     [Tooltip("Maximum change rate of commanded vertical speed (m/s^2).")]
     public float maxVyAccel = 3f; // m/s^2
     float vyCmdSmoothed = 0f;
@@ -31,7 +35,11 @@ public class PlaneController : MonoBehaviour
     public float initialHoldAltFtMsl = 3000f;
     const float M_TO_FT = 3.2808399f; // 1 / 0.3048
 
-    public enum AltMode { Hold, Capture }
+    public enum AltMode
+    {
+        Hold,
+        Capture,
+    }
 
     [Header("Altitude Mode")]
     [Tooltip("When within this error (ft), declare altitude captured and hold.")]
@@ -42,24 +50,25 @@ public class PlaneController : MonoBehaviour
     [Tooltip("When within this error (m), declare altitude captured and hold.")]
     public float altHoldToleranceM = 5.0f; // 0.1 m ≈ 0.33 ft
 
-
-    public float captureVyEpsilon = 0.3f;     // m/s ~ 60 fpm
+    public float captureVyEpsilon = 0.3f; // m/s ~ 60 fpm
     float lastTargetAltM;
+
     [Header("VNAV Lite")]
     public bool vnavLiteEnabled = true;
     public float vnavMinDistanceM = 300f;
     public float vnavBlendStartM = 2000f;
     public float vnavBlendEndM = 500f;
 
-
-
     [Header("Turn Dynamics")]
     [Tooltip("Maximum bank angle used by the turn model (deg).")]
     public float maxBankDeg = 25f;
+
     [Tooltip("Maximum roll rate (deg/sec).")]
     public float maxRollRateDegPerSec = 15f;
+
     [Tooltip("Heading error (deg) -> bank command (deg).")]
     public float headingToBankGain = 0.5f;
+
     [Tooltip("If heading error is within this value, command wings level.")]
     public float wingsLevelErrorDeg = 2f;
 
@@ -88,21 +97,19 @@ public class PlaneController : MonoBehaviour
     float prevYawDeg;
     bool yawInit;
 
-
-
-
-
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
-        if (!targets) targets = GetComponent<SimTargets>();
+        if (!targets)
+            targets = GetComponent<SimTargets>();
 
         rb.useGravity = false;
 
         // Keep the sim deterministic and planar:
         rb.linearDamping = 0f;
         rb.angularDamping = 0f;
-        rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+        rb.constraints =
+            RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
 
         rb.interpolation = RigidbodyInterpolation.None;
         rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
@@ -111,9 +118,8 @@ public class PlaneController : MonoBehaviour
             targets.targetAltFtMsl = initialHoldAltFtMsl;
 
         lastTargetAltM = targets ? targets.TargetAltM : 0f;
-        if (!nav) nav = GetComponentInParent<NavAutopilot>();
-
-
+        if (!nav)
+            nav = GetComponentInParent<NavAutopilot>();
     }
 
     void FixedUpdate()
@@ -132,7 +138,8 @@ public class PlaneController : MonoBehaviour
         // Forward direction on the ground plane
         Vector3 fwd = transform.forward;
         fwd.y = 0f;
-        if (fwd.sqrMagnitude < 1e-6f) fwd = Vector3.forward;
+        if (fwd.sqrMagnitude < 1e-6f)
+            fwd = Vector3.forward;
         fwd.Normalize();
 
         // Current forward ground speed (m/s)
@@ -153,18 +160,23 @@ public class PlaneController : MonoBehaviour
     // Bank-based coordinated turn: heading error -> bank -> turn rate depends on ground speed.
     void UpdateHeading()
     {
-        if (!targets) return;
+        if (!targets)
+            return;
 
         float dt = Time.fixedDeltaTime;
         float currentYaw = rb.rotation.eulerAngles.y;
         float targetYaw = targets.targetHdgDeg;
 
-        if (!yawInit) { prevYawDeg = currentYaw; yawInit = true; }
+        if (!yawInit)
+        {
+            prevYawDeg = currentYaw;
+            yawInit = true;
+        }
 
         float yawRateMeas = Mathf.DeltaAngle(prevYawDeg, currentYaw) / dt; // deg/s
         prevYawDeg = currentYaw;
 
-        float headingError = Mathf.DeltaAngle(currentYaw, targetYaw);      // deg
+        float headingError = Mathf.DeltaAngle(currentYaw, targetYaw); // deg
 
         float yawRateCmd = yawRateP * headingError - yawRateD * yawRateMeas;
         yawRateCmd = Mathf.Clamp(yawRateCmd, -maxYawRateDegPerSec, +maxYawRateDegPerSec);
@@ -186,14 +198,15 @@ public class PlaneController : MonoBehaviour
         float turnRateRad = 9.81f * Mathf.Tan(currentBankDeg * Mathf.Deg2Rad) / groundSpeed;
         float newYaw = currentYaw + turnRateRad * Mathf.Rad2Deg * dt;
 
-        if (enableHeadingDebug) LogHeadingDebug(currentYaw, targetYaw, currentBankDeg, groundSpeed);
+        if (enableHeadingDebug)
+            LogHeadingDebug(currentYaw, targetYaw, currentBankDeg, groundSpeed);
         rb.MoveRotation(Quaternion.Euler(0f, newYaw, -currentBankDeg));
     }
 
-
     void UpdateAltitude()
     {
-        if (!targets) return;
+        if (!targets)
+            return;
 
         float dt = Time.fixedDeltaTime;
         float h = rb.position.y;
@@ -223,7 +236,6 @@ public class PlaneController : MonoBehaviour
             return;
         }
 
-
         float vyDes = 0f;
 
         float vyCap = 0f;
@@ -244,7 +256,6 @@ public class PlaneController : MonoBehaviour
 
             vyDes = Mathf.Lerp(vyCap, vyVnav, blend);
         }
-
         else // Hold
         {
             vyDes = 0f;
@@ -257,11 +268,11 @@ public class PlaneController : MonoBehaviour
         rb.linearVelocity = v;
     }
 
-
     void LogHeadingDebug(float currentYaw, float targetYaw, float bankDeg, float groundSpeed)
     {
         _hdgLogT += Time.fixedDeltaTime;
-        if (_hdgLogT < 0.5f) return;
+        if (_hdgLogT < 0.5f)
+            return;
         _hdgLogT = 0f;
 
         float err = Mathf.DeltaAngle(currentYaw, targetYaw);

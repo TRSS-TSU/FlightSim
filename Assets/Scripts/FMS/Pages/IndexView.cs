@@ -17,9 +17,13 @@ using UnityEngine;
 public class IndexView : FmsPageView
 {
     // ── Formatting helpers ───────────────────────────────────────────────────────
-    private string FmtTitle()             => "INDEX";
-    private string FmtLabel(string label) => string.IsNullOrEmpty(label) ? label : $"<color=#00FFFF>{label}</color>";
-    private string FmtValue(string value) => string.IsNullOrEmpty(value) ? value : $"<color=#FFFFFF>{value}</color>";
+    private string FmtTitle() => "INDEX";
+
+    private string FmtLabel(string label) =>
+        string.IsNullOrEmpty(label) ? label : $"<color=#00FFFF>{label}</color>";
+
+    private string FmtValue(string value) =>
+        string.IsNullOrEmpty(value) ? value : $"<color=#FFFFFF>{value}</color>";
 
     // ─────────────────────────────────────────────────────────────────────────
     // FmsPageView contract
@@ -35,7 +39,7 @@ public class IndexView : FmsPageView
         SetLineLabels(1, FmtLabel("MCDU MENU"), FmtLabel("GNSS POS>"));
         SetLineValues(1, "", "");
 
-        SetLineLabels(2, FmtLabel("<STATUS"), FmtLabel("FREQUENCY>"));
+        SetLineLabels(2, FmtLabel("<STATUS"), FmtLabel("TUNE>"));
         SetLineValues(2, "", "");
 
         SetLineLabels(3, FmtLabel("<POS INIT"), FmtLabel("FIX>"));
@@ -53,28 +57,52 @@ public class IndexView : FmsPageView
 
     public override void HandleLsk(int side, int row)
     {
-        if (side == 0)  // Left
+        if (side == 0) // Left
         {
             switch (row)
             {
-                case 1: Router.ShowPage("McduMenu");  break;
-                case 2: Router.ShowPage("Status");    break;
-                case 3: Router.ShowPage("PosInit");   break;
-                case 4: Router.ShowPage("PerfInit");  break;
-                case 5: Router.ShowPage("GnssCtl");   break;
-                case 6: Router.ShowPage("FmsCtl");    break;
+                case 1:
+                    Router.ShowPage("McduMenu");
+                    break;
+                case 2:
+                    Router.ShowPage("Status");
+                    break;
+                case 3:
+                    Router.ShowPage("PosInit");
+                    break;
+                case 4:
+                    Router.ShowPage("PerfInit");
+                    break;
+                case 5:
+                    Router.ShowPage("GnssCtl");
+                    break;
+                case 6:
+                    Router.ShowPage("FmsCtl");
+                    break;
             }
         }
-        else  // Right
+        else // Right
         {
             switch (row)
             {
-                case 1: Scratchpad.ShowMessage("NOT AVAILABLE"); break;
-                case 2: Router.ShowPage("Frequency");            break;
-                case 3: Router.ShowPage("Fix");                  break;
-                case 4: Router.ShowPage("Hold");                 break;
-                case 5: Router.ShowPage("Prog");                 break;
-                case 6: Router.ShowPage("SecFpln");              break;
+                case 1:
+                    Scratchpad.ShowMessage("NOT AVAILABLE");
+                    break;
+                case 2:
+                    Router.ShowPage("Tune");
+                    break;
+                case 3:
+                    Router.ShowPage("Fix");
+                    break;
+                case 4:
+                    Router.ShowPage("Hold");
+                    break;
+                case 5:
+                    Router.ShowPage("Prog");
+                    break;
+                case 6:
+                    Router.ShowPage("SecFpln");
+                    break;
             }
         }
         // NOTE: Populate() is NOT called here — FmsPageRouter.Update() pumps it every frame.

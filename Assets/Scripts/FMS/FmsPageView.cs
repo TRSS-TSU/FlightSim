@@ -22,16 +22,16 @@ using UnityEngine;
 public abstract class FmsPageView : MonoBehaviour
 {
     // Set by FmsPageRouter.Register()
-    protected FmsModel      Model;
+    protected FmsModel Model;
     protected FmsScratchpad Scratchpad;
     protected FmsPageRouter Router;
 
     /// <summary>Called once by FmsPageRouter after instantiation.</summary>
     public void Init(FmsModel model, FmsScratchpad scratchpad, FmsPageRouter router)
     {
-        Model      = model;
+        Model = model;
         Scratchpad = scratchpad;
-        Router     = router;
+        Router = router;
     }
 
     /// <summary>Called every frame while this page is the active page. Fill TMP fields here.</summary>
@@ -46,8 +46,10 @@ public abstract class FmsPageView : MonoBehaviour
     // Protected helpers
     // ─────────────────────────────────────────────────────────────────────────
 
-    protected TMP_Text GetTitle()      => transform.Find("Title_Line/Title")?.GetComponent<TMP_Text>();
-    protected TMP_Text GetPageNumber() => transform.Find("Title_Line/Page_Number")?.GetComponent<TMP_Text>();
+    protected TMP_Text GetTitle() => transform.Find("Title_Line/Title")?.GetComponent<TMP_Text>();
+
+    protected TMP_Text GetPageNumber() =>
+        transform.Find("Title_Line/Page_Number")?.GetComponent<TMP_Text>();
 
     /// <summary>
     /// Returns the shared Message_Line TMP field under Shared_IO/Message_Line.
@@ -57,37 +59,44 @@ public abstract class FmsPageView : MonoBehaviour
         Router?.transform.Find("Shared_IO/Message_Line")?.GetComponent<TMP_Text>();
 
     /// <summary>Returns the four TMP fields for a given body line (1–6).</summary>
-    protected (TMP_Text labelL, TMP_Text valueL, TMP_Text labelR, TMP_Text valueR)
-        GetLine(int lineNumber)
+    protected (TMP_Text labelL, TMP_Text valueL, TMP_Text labelR, TMP_Text valueR) GetLine(
+        int lineNumber
+    )
     {
         Transform body = transform.Find("Body");
-        if (!body) return (null, null, null, null);
+        if (!body)
+            return (null, null, null, null);
 
         Transform line = body.Find($"Body_Line_{lineNumber}");
-        if (!line) return (null, null, null, null);
+        if (!line)
+            return (null, null, null, null);
 
         return (
-            line.Find("Label_Left")?.GetComponent<TMP_Text>(), 
+            line.Find("Label_Left")?.GetComponent<TMP_Text>(),
             line.Find("Value_Left")?.GetComponent<TMP_Text>(),
-            line.Find("Label_Right")?.GetComponent<TMP_Text>(), 
+            line.Find("Label_Right")?.GetComponent<TMP_Text>(),
             line.Find("Value_Right")?.GetComponent<TMP_Text>()
-            );
+        );
     }
 
     /// <summary>Set only the label fields of a body line (does not touch values).</summary>
     protected void SetLineLabels(int lineNumber, string labelL = "", string labelR = "")
     {
         var (ll, _, lr, _) = GetLine(lineNumber);
-        if (ll != null) ll.text = labelL ?? "";
-        if (lr != null) lr.text = labelR ?? "";
+        if (ll != null)
+            ll.text = labelL ?? "";
+        if (lr != null)
+            lr.text = labelR ?? "";
     }
 
     /// <summary>Set only the value fields of a body line (does not touch labels).</summary>
     protected void SetLineValues(int lineNumber, string valueL = "", string valueR = "")
     {
         var (_, vl, _, vr) = GetLine(lineNumber);
-        if (vl != null) vl.text = valueL ?? "";
-        if (vr != null) vr.text = valueR ?? "";
+        if (vl != null)
+            vl.text = valueL ?? "";
+        if (vr != null)
+            vr.text = valueR ?? "";
     }
 
     protected void ClearLine(int lineNumber)
@@ -101,12 +110,14 @@ public abstract class FmsPageView : MonoBehaviour
 
     protected void ClearAllLines()
     {
-        for (int i = 1; i <= 6; i++) ClearLine(i);
+        for (int i = 1; i <= 6; i++)
+            ClearLine(i);
     }
 
     /// <summary>Clear only the value fields on all lines (does not touch labels).</summary>
     protected void ClearAllValues()
     {
-        for (int i = 1; i <= 6; i++) ClearLineValues(i);
+        for (int i = 1; i <= 6; i++)
+            ClearLineValues(i);
     }
 }

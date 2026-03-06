@@ -68,10 +68,15 @@ node_modules/
 .claude/settings.local.json
 
 # Project-specific ignored folders
-/Assets/StreamingAssets/
+/Assets/StreamingAssets/tiles_nd_dark_v1
 /Assets/_Recovery/
 /notes/
 /Recordings/
 /Temp/
 /Exports/
 /context/
+
+#other files
+.claude
+/docs/
+CLAUDE.md

@@ -18,17 +18,20 @@ public static class ScenarioDefinitionValidator
             foreach (var id in list)
             {
                 var key = (id ?? "").Trim();
-                if (key.Length == 0) continue;
-                if (!known.Contains(key)) missing.Add($"{label}: {key}");
+                if (key.Length == 0)
+                    continue;
+                if (!known.Contains(key))
+                    missing.Add($"{label}: {key}");
             }
         }
 
         CheckList("Prefill", s.prefillRouteIdents);
         CheckList("RNAV25L", s.rnav25LFixes);
 
-        report = missing.Count == 0
-            ? $"[ScenarioValidator] OK: '{s.scenarioTitle}' ({known.Count} waypoints)"
-            : "[ScenarioValidator] MISSING:\n - " + string.Join("\n - ", missing);
+        report =
+            missing.Count == 0
+                ? $"[ScenarioValidator] OK: '{s.scenarioTitle}' ({known.Count} waypoints)"
+                : "[ScenarioValidator] MISSING:\n - " + string.Join("\n - ", missing);
 
         return missing.Count == 0;
     }

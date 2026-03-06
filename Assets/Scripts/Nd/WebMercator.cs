@@ -8,8 +8,7 @@ public static class WebMercator
     public static float MetersPerTile(double latDeg, int zoom)
     {
         double latRad = latDeg * Math.PI / 180.0;
-        double metersPerPixel =
-            (2.0 * Math.PI * R * Math.Cos(latRad)) / (256.0 * (1 << zoom));
+        double metersPerPixel = (2.0 * Math.PI * R * Math.Cos(latRad)) / (256.0 * (1 << zoom));
         return (float)(metersPerPixel * 256.0);
     }
 }

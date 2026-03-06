@@ -8,7 +8,8 @@ public class NDRangeState : MonoBehaviour
 
     public void SetRangeNm(int nm)
     {
-        if (nm == CurrentRangeNm) return;
+        if (nm == CurrentRangeNm)
+            return;
         CurrentRangeNm = nm;
         OnRangeChanged?.Invoke(nm);
     }

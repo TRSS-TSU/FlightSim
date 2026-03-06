@@ -2,7 +2,8 @@ using UnityEngine;
 
 public class TileContent : MonoBehaviour
 {
-    [SerializeField] private MeshRenderer meshRenderer;
+    [SerializeField]
+    private MeshRenderer meshRenderer;
 
     public void SetTexture(Texture2D tex)
     {

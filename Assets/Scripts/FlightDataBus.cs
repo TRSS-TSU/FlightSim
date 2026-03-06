@@ -3,7 +3,7 @@ using UnityEngine;
 /// <summary>
 /// Central read-only telemetry hub for instruments (PFD/ND/FMS UI).
 /// Pulls physics truth from the aircraft Rigidbody and exposes values in training-friendly units.
-/// 
+///
 /// Provides explicit unit-suffixed fields (preferred) AND legacy aliases (ias/alt/hdg/vsi/dist/brg)
 /// to avoid breaking existing UI scripts.
 /// </summary>
@@ -80,8 +80,10 @@ public class FlightDataBus : MonoBehaviour
 
     void ResolveRefs()
     {
-        if (!plane) plane = GetComponentInParent<PlaneController>();
-        if (plane && !_rb) _rb = plane.GetComponent<Rigidbody>();
+        if (!plane)
+            plane = GetComponentInParent<PlaneController>();
+        if (plane && !_rb)
+            _rb = plane.GetComponent<Rigidbody>();
 
         if (!targets && plane)
             targets = plane.targets ? plane.targets : plane.GetComponent<SimTargets>();
@@ -92,9 +94,12 @@ public class FlightDataBus : MonoBehaviour
 
     void Update()
     {
-        if (!plane) return;
-        if (!_rb) _rb = plane.GetComponent<Rigidbody>();
-        if (!_rb) return;
+        if (!plane)
+            return;
+        if (!_rb)
+            _rb = plane.GetComponent<Rigidbody>();
+        if (!_rb)
+            return;
 
         Vector3 v = _rb.linearVelocity;
 
@@ -116,7 +121,8 @@ public class FlightDataBus : MonoBehaviour
             float trk = Mathf.Atan2(vXZ.x, vXZ.y) * Mathf.Rad2Deg;
             trkDeg = Mathf.Repeat(trk, 360f);
         }
-        else trkDeg = hdgDeg;
+        else
+            trkDeg = hdgDeg;
 
         float dt = Time.deltaTime;
         if (dt > 1e-6f)

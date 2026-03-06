@@ -1,6 +1,6 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 public class McpStubUI : MonoBehaviour
 {
@@ -16,7 +16,8 @@ public class McpStubUI : MonoBehaviour
 
     void Start()
     {
-        if (!targets) return;
+        if (!targets)
+            return;
 
         // Initialize sliders from SimTargets (aviation units)
         speed.value = targets.targetIasKt;
@@ -47,10 +48,14 @@ public class McpStubUI : MonoBehaviour
 
     void Refresh()
     {
-        if (!targets) return;
+        if (!targets)
+            return;
 
-        if (speedLabel) speedLabel.text = $"SPD {targets.targetIasKt:0}";
-        if (altitudeLabel) altitudeLabel.text = $"ALT {targets.targetAltFtMsl:0}";
-        if (headingLabel) headingLabel.text = $"HDG {targets.targetHdgDeg:0}";
+        if (speedLabel)
+            speedLabel.text = $"SPD {targets.targetIasKt:0}";
+        if (altitudeLabel)
+            altitudeLabel.text = $"ALT {targets.targetAltFtMsl:0}";
+        if (headingLabel)
+            headingLabel.text = $"HDG {targets.targetHdgDeg:0}";
     }
 }

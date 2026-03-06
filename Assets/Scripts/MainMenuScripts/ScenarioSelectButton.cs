@@ -2,8 +2,11 @@ using UnityEngine;
 
 public class ScenarioSelectButton : MonoBehaviour
 {
-    [SerializeField] private ScenarioDefinition scenario;
-    [SerializeField] private ScenarioConfirmPanel confirmPanel;
+    [SerializeField]
+    private ScenarioDefinition scenario;
+
+    [SerializeField]
+    private ScenarioConfirmPanel confirmPanel;
 
     public void Select()
     {

@@ -3,15 +3,16 @@ using UnityEngine;
 public class NDAircraftIconDriver : MonoBehaviour
 {
     [Header("Sources")]
-    public Transform aircraftRoot;   // _AircraftRoot
+    public Transform aircraftRoot; // _AircraftRoot
 
     [Header("Options")]
-    public bool northUp = true;       // ND is north-up for now
+    public bool northUp = true; // ND is north-up for now
     public float rotationOffsetDeg = 0f; // use if sprite points up/right/etc
 
     void LateUpdate()
     {
-        if (aircraftRoot == null) return;
+        if (aircraftRoot == null)
+            return;
 
         // Unity yaw: 0 = +Z (north), increases clockwise → matches ND nicely
         float headingDeg = aircraftRoot.eulerAngles.y;

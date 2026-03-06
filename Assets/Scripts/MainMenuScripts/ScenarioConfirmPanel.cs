@@ -1,11 +1,14 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using TMPro;
 
 public class ScenarioConfirmPanel : MonoBehaviour
 {
-    [SerializeField] private TMP_Text descriptionText;
-    [SerializeField] private string masterSceneName = "Master_FMS";
+    [SerializeField]
+    private TMP_Text descriptionText;
+
+    [SerializeField]
+    private string masterSceneName = "Master_FMS";
 
     void Awake() => gameObject.SetActive(false);
 
@@ -17,14 +20,12 @@ public class ScenarioConfirmPanel : MonoBehaviour
             return;
         }
 
-        descriptionText.text =
-            string.IsNullOrEmpty(scenario.scenarioDescription)
+        descriptionText.text = string.IsNullOrEmpty(scenario.scenarioDescription)
             ? scenario.name
             : scenario.scenarioDescription;
 
         gameObject.SetActive(true);
     }
-
 
     public void OnYes()
     {

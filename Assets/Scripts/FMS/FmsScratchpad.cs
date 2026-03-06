@@ -10,16 +10,18 @@ using UnityEngine;
 public class FmsScratchpad : MonoBehaviour
 {
     [Header("TMP References")]
-    [SerializeField] private TMP_Text scratchpadTMP;
+    [SerializeField]
+    private TMP_Text scratchpadTMP;
 
     [Header("Rules")]
-    [SerializeField] private int maxChars = 24;
+    [SerializeField]
+    private int maxChars = 24;
 
     // ── Public state ────────────────────────────────────────────────────────────
     public string CurrentText { get; private set; } = "";
 
     // ── Internal ────────────────────────────────────────────────────────────────
-    private string    _savedText  = "";
+    private string _savedText = "";
     private Coroutine _msgRoutine;
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -29,9 +31,12 @@ public class FmsScratchpad : MonoBehaviour
     /// <summary>Append a character string, forcing uppercase. Ignores input during message display.</summary>
     public void Append(string s)
     {
-        if (_msgRoutine != null) return;
-        if (string.IsNullOrEmpty(s)) return;
-        if (CurrentText.Length >= maxChars) return;
+        if (_msgRoutine != null)
+            return;
+        if (string.IsNullOrEmpty(s))
+            return;
+        if (CurrentText.Length >= maxChars)
+            return;
 
         CurrentText += s.ToUpperInvariant();
         Refresh();
@@ -40,9 +45,12 @@ public class FmsScratchpad : MonoBehaviour
     /// <summary>Append without uppercase conversion (for degree symbol, +/-).</summary>
     public void AppendRaw(string s)
     {
-        if (_msgRoutine != null) return;
-        if (string.IsNullOrEmpty(s)) return;
-        if (CurrentText.Length >= maxChars) return;
+        if (_msgRoutine != null)
+            return;
+        if (string.IsNullOrEmpty(s))
+            return;
+        if (CurrentText.Length >= maxChars)
+            return;
 
         CurrentText += s;
         Refresh();
@@ -51,14 +59,22 @@ public class FmsScratchpad : MonoBehaviour
     /// <summary>Toggle the trailing +/- sign, or append + if none present.</summary>
     public void TogglePlusMinus()
     {
-        if (_msgRoutine != null) return;
+        if (_msgRoutine != null)
+            return;
 
-        if (CurrentText.Length == 0) { AppendRaw("+"); return; }
+        if (CurrentText.Length == 0)
+        {
+            AppendRaw("+");
+            return;
+        }
 
         char last = CurrentText[CurrentText.Length - 1];
-        if      (last == '+') CurrentText = CurrentText.Substring(0, CurrentText.Length - 1) + "-";
-        else if (last == '-') CurrentText = CurrentText.Substring(0, CurrentText.Length - 1) + "+";
-        else                  AppendRaw("+");
+        if (last == '+')
+            CurrentText = CurrentText.Substring(0, CurrentText.Length - 1) + "-";
+        else if (last == '-')
+            CurrentText = CurrentText.Substring(0, CurrentText.Length - 1) + "+";
+        else
+            AppendRaw("+");
         Refresh();
     }
 
@@ -69,8 +85,10 @@ public class FmsScratchpad : MonoBehaviour
     /// <summary>Backspace one character (CLR tap).</summary>
     public void Delete()
     {
-        if (_msgRoutine != null) return;
-        if (CurrentText.Length == 0) return;
+        if (_msgRoutine != null)
+            return;
+        if (CurrentText.Length == 0)
+            return;
 
         CurrentText = CurrentText.Substring(0, CurrentText.Length - 1);
         Refresh();
@@ -107,8 +125,9 @@ public class FmsScratchpad : MonoBehaviour
     /// </summary>
     public void ShowMessage(string msg, float duration = 1.5f)
     {
-        if (_msgRoutine != null) StopCoroutine(_msgRoutine);
-        _savedText  = CurrentText;
+        if (_msgRoutine != null)
+            StopCoroutine(_msgRoutine);
+        _savedText = CurrentText;
         _msgRoutine = StartCoroutine(MessageRoutine(msg, duration));
     }
 
@@ -118,7 +137,8 @@ public class FmsScratchpad : MonoBehaviour
 
     private IEnumerator MessageRoutine(string msg, float duration)
     {
-        if (scratchpadTMP) scratchpadTMP.text = msg;
+        if (scratchpadTMP)
+            scratchpadTMP.text = msg;
         yield return new WaitForSecondsRealtime(duration);
         _msgRoutine = null;
         CurrentText = _savedText;
@@ -127,6 +147,7 @@ public class FmsScratchpad : MonoBehaviour
 
     private void Refresh()
     {
-        if (scratchpadTMP) scratchpadTMP.text = CurrentText;
+        if (scratchpadTMP)
+            scratchpadTMP.text = CurrentText;
     }
 }

@@ -11,12 +11,17 @@ using UnityEngine;
 public class StubPageView : FmsPageView
 {
     // ── Formatting helpers ───────────────────────────────────────────────────────
-    private string FmtTitle()             => pageTitle;
-    private string FmtLabel(string label) => string.IsNullOrEmpty(label) ? label : $"<color=#00FFFF>{label}</color>";
-    private string FmtValue(string value) => string.IsNullOrEmpty(value) ? value : $"<color=#FFFFFF>{value}</color>";
+    private string FmtTitle() => pageTitle;
+
+    private string FmtLabel(string label) =>
+        string.IsNullOrEmpty(label) ? label : $"<color=#00FFFF>{label}</color>";
+
+    private string FmtValue(string value) =>
+        string.IsNullOrEmpty(value) ? value : $"<color=#FFFFFF>{value}</color>";
 
     // ── Inspector ────────────────────────────────────────────────────────────────
-    [SerializeField] private string pageTitle = "PAGE";
+    [SerializeField]
+    private string pageTitle = "PAGE";
 
     // ─────────────────────────────────────────────────────────────────────────
     // FmsPageView contract
@@ -37,7 +42,7 @@ public class StubPageView : FmsPageView
 
     public override void HandleLsk(int side, int row)
     {
-        if (side == 0)  // Left
+        if (side == 0) // Left
         {
             switch (row)
             {
@@ -51,10 +56,12 @@ public class StubPageView : FmsPageView
                     break;
                 case 5: // inactive
                     break;
-                case 6: Router.ShowPage("Index"); break;
+                case 6:
+                    Router.ShowPage("Index");
+                    break;
             }
         }
-        else  // Right
+        else // Right
         {
             switch (row)
             {

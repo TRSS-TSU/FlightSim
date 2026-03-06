@@ -11,24 +11,25 @@ using UnityEngine;
 /// LSK interactions:
 ///   L1 (empty SP)    → seed scratchpad with current TO waypoint ident
 ///   L1 (SP=ident)    → validate ident against scenario waypoints, then
-///                       execute Direct-To via the selected strategy (see TODO below)
+///                       execute Direct-To (STRICT: truncate route to target WP and after)
 ///   L6               → return to Index
 ///
-/// TODO: Choose Direct-To strategy before implementing route modification:
-///   SIMPLE — navigate directly to typed WP; keep remaining route unchanged
-///   STRICT — truncate ActiveRoute to [typed WP and all subsequent waypoints]
-///   FULL   — insert typed WP at index 0; keep full existing route after it
-/// Awaiting user decision. Current implementation validates the ident and
-/// shows NOT IMPLEMENTED — no route modification is performed yet.
+/// STRICT strategy: if target WP is in the active route, all legs before it are removed.
+/// If not in the route, the WP is inserted at index 0. Nav resets to leg 0.
+/// ArrivalLoaded is cleared (approach fixes may have been truncated).
 ///
 /// Formatting: labels cyan (#00FFFF), values white (#FFFFFF) via FmtLabel/FmtValue.
 /// </summary>
 public class DirView : FmsPageView
 {
     // ── Formatting helpers ───────────────────────────────────────────────────────
-    private string FmtTitle()             => "DIR";
-    private string FmtLabel(string label) => string.IsNullOrEmpty(label) ? label : $"<color=#00FFFF>{label}</color>";
-    private string FmtValue(string value) => string.IsNullOrEmpty(value) ? value : $"<color=#FFFFFF>{value}</color>";
+    private string FmtTitle() => "DIR";
+
+    private string FmtLabel(string label) =>
+        string.IsNullOrEmpty(label) ? label : $"<color=#00FFFF>{label}</color>";
+
+    private string FmtValue(string value) =>
+        string.IsNullOrEmpty(value) ? value : $"<color=#FFFFFF>{value}</color>";
 
     // ─────────────────────────────────────────────────────────────────────────
     // FmsPageView contract
@@ -64,11 +65,13 @@ public class DirView : FmsPageView
 
     public override void HandleLsk(int side, int row)
     {
-        if (side == 0)  // Left
+        if (side == 0) // Left
         {
             switch (row)
             {
-                case 1: HandleDirectTo(); break;
+                case 1:
+                    HandleDirectTo();
+                    break;
                 case 2: // inactive
                     break;
                 case 3: // inactive
@@ -77,10 +80,12 @@ public class DirView : FmsPageView
                     break;
                 case 5: // inactive
                     break;
-                case 6: Router.ShowPage("Index"); break;
+                case 6:
+                    Router.ShowPage("Index");
+                    break;
             }
         }
-        else  // Right
+        else // Right
         {
             switch (row)
             {
@@ -112,10 +117,9 @@ public class DirView : FmsPageView
         if (sp.Length == 0)
         {
             // Seed scratchpad with the current TO waypoint ident (if route is active)
-            int    active = Model.ActiveLegIndex;
-            string toIdent = (active < Model.ActiveRoute.Count)
-                           ? Model.ActiveRoute[active].ident
-                           : "";
+            int active = Model.ActiveLegIndex;
+            string toIdent =
+                (active < Model.ActiveRoute.Count) ? Model.ActiveRoute[active].ident : "";
             if (!string.IsNullOrEmpty(toIdent))
                 Scratchpad.Append(toIdent);
             return;
@@ -123,18 +127,54 @@ public class DirView : FmsPageView
 
         // Validate ident against scenario waypoint database
         var scenario = Model.Scenario;
-        if (scenario == null) { Scratchpad.ShowMessage("NO SCENARIO"); return; }
+        if (scenario == null)
+        {
+            Scratchpad.ShowMessage("NO SCENARIO");
+            return;
+        }
 
         var wpDef = scenario.waypoints.Find(w =>
-            string.Equals(w.ident, sp, System.StringComparison.OrdinalIgnoreCase));
+            string.Equals(w.ident, sp, System.StringComparison.OrdinalIgnoreCase)
+        );
 
-        if (wpDef == null) { Scratchpad.ShowMessage("NOT IN DATABASE"); return; }
+        if (wpDef == null)
+        {
+            Scratchpad.ShowMessage("NOT IN DATABASE");
+            return;
+        }
 
-        // TODO: Implement Direct-To route modification using chosen strategy:
-        //   SIMPLE — Router.GetNavAutopilot().activeIndex = index of wpDef in ActiveRoute
-        //   STRICT — ActiveRoute.RemoveRange(0, index); CommitRoute(); nav.activeIndex = 0
-        //   FULL   — ActiveRoute.Insert(0, wpDef); CommitRoute(); nav.activeIndex = 0
-        // Awaiting user decision before modifying the active route.
-        Scratchpad.ShowMessage("NOT IMPLEMENTED");
+        // STRICT strategy: truncate all legs before the target waypoint.
+        int idx = Model.ActiveRoute.FindIndex(w =>
+            string.Equals(w.ident, wpDef.ident, System.StringComparison.OrdinalIgnoreCase)
+        );
+
+        if (idx < 0)
+        {
+            // Valid DB ident but not in current route — insert at front
+            Model.ActiveRoute.Insert(0, wpDef);
+        }
+        else if (idx > 0)
+        {
+            // Truncate all legs before the target (STRICT)
+            Model.ActiveRoute.RemoveRange(0, idx);
+        }
+
+        Model.ActiveLegIndex = 0;
+
+        var fp = Router.GetFlightPlan();
+        var sd = Model.Scenario;
+        if (fp && sd != null)
+            fp.RebuildRoute(Model.ActiveRoute, sd.centerLatDeg, sd.centerLonDeg, sd.baseZoom);
+
+        var nav = Router.GetNavAutopilot();
+        if (nav)
+            nav.activeIndex = 0;
+
+        // Approach fixes are at the end of route; they may have been truncated.
+        Model.ArrivalLoaded = false;
+
+        Scratchpad.ReadAndClear();
+        Scratchpad.ShowMessage("DIRECT TO " + wpDef.ident, 2.0f);
+        Router.ShowPage("ActLegs");
     }
 }

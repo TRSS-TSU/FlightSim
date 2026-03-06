@@ -24,9 +24,13 @@ using UnityEngine;
 public class ProgView : FmsPageView, IMultiPage
 {
     // ── Formatting helpers ───────────────────────────────────────────────────────
-    private string FmtTitle()             => "PROGRESS";
-    private string FmtLabel(string label) => string.IsNullOrEmpty(label) ? label : $"<color=#00FFFF>{label}</color>";
-    private string FmtValue(string value) => string.IsNullOrEmpty(value) ? value : $"<color=#FFFFFF>{value}</color>";
+    private string FmtTitle() => "PROGRESS";
+
+    private string FmtLabel(string label) =>
+        string.IsNullOrEmpty(label) ? label : $"<color=#00FFFF>{label}</color>";
+
+    private string FmtValue(string value) =>
+        string.IsNullOrEmpty(value) ? value : $"<color=#FFFFFF>{value}</color>";
 
     // ── State ────────────────────────────────────────────────────────────────────
     private int _page = 1;
@@ -42,24 +46,24 @@ public class ProgView : FmsPageView, IMultiPage
         GetPageNumber()?.SetText($"{_page}/2");
         GetMessageLine()?.SetText("");
 
-        if (_page == 1) PopulatePage1();
-        else            PopulatePage2();
+        if (_page == 1)
+            PopulatePage1();
+        else
+            PopulatePage2();
     }
 
     private void PopulatePage1()
     {
-        var    route    = Model.ActiveRoute;
-        int    active   = Model.ActiveLegIndex;
+        var route = Model.ActiveRoute;
+        int active = Model.ActiveLegIndex;
 
-        string fromIdent = (active > 0 && active - 1 < route.Count)
-                         ? route[active - 1].ident : "\u2014";
-        string toIdent   = active < route.Count
-                         ? route[active].ident     : "\u2014";
-        string destIdent = route.Count > 0
-                         ? route[route.Count - 1].ident : "\u2014";
+        string fromIdent =
+            (active > 0 && active - 1 < route.Count) ? route[active - 1].ident : "\u2014";
+        string toIdent = active < route.Count ? route[active].ident : "\u2014";
+        string destIdent = route.Count > 0 ? route[route.Count - 1].ident : "\u2014";
 
-        float  distNm  = Model.DistNm;
-        string eteStr  = Model.FormatEte(distNm, Model.IasKt);
+        float distNm = Model.DistNm;
+        string eteStr = Model.FormatEte(distNm, Model.IasKt);
         string distStr = $"{distNm:0.0}NM";
 
         SetLineLabels(1, FmtLabel("FROM"), FmtLabel("DIST"));
@@ -74,7 +78,7 @@ public class ProgView : FmsPageView, IMultiPage
         SetLineLabels(4, "", "");
         SetLineValues(4, "", "");
 
-        float  xtkNm  = Mathf.Abs(Model.XtkM) / 1852f;
+        float xtkNm = Mathf.Abs(Model.XtkM) / 1852f;
         string xtkDir = Model.XtkM >= 0f ? "R" : "L";
         SetLineLabels(5, FmtLabel("XTK"), "");
         SetLineValues(5, FmtValue($"{xtkNm:0.00}NM {xtkDir}"), "");
@@ -106,7 +110,7 @@ public class ProgView : FmsPageView, IMultiPage
 
     public override void HandleLsk(int side, int row)
     {
-        if (side == 0)  // Left
+        if (side == 0) // Left
         {
             switch (row)
             {
@@ -120,10 +124,12 @@ public class ProgView : FmsPageView, IMultiPage
                     break;
                 case 5: // inactive
                     break;
-                case 6: Router.ShowPage("Index"); break;
+                case 6:
+                    Router.ShowPage("Index");
+                    break;
             }
         }
-        else  // Right
+        else // Right
         {
             switch (row)
             {
@@ -149,5 +155,6 @@ public class ProgView : FmsPageView, IMultiPage
     // ─────────────────────────────────────────────────────────────────────────
 
     public void NextPage() => _page = _page == 1 ? 2 : 1;
+
     public void PrevPage() => _page = _page == 2 ? 1 : 2;
 }

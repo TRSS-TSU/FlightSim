@@ -26,9 +26,13 @@
 public class PerfInitView : FmsPageView, IMultiPage
 {
     // ── Formatting helpers ───────────────────────────────────────────────────────
-    private string FmtTitle()             => "PERF MENU";
-    private string FmtLabel(string label) => string.IsNullOrEmpty(label) ? label : $"<color=#00FFFF>{label}</color>";
-    private string FmtValue(string value) => string.IsNullOrEmpty(value) ? value : $"<color=#FFFFFF>{value}</color>";
+    private string FmtTitle() => "PERF MENU";
+
+    private string FmtLabel(string label) =>
+        string.IsNullOrEmpty(label) ? label : $"<color=#00FFFF>{label}</color>";
+
+    private string FmtValue(string value) =>
+        string.IsNullOrEmpty(value) ? value : $"<color=#FFFFFF>{value}</color>";
 
     // ── State ────────────────────────────────────────────────────────────────────
     private int _page = 1;
@@ -44,14 +48,16 @@ public class PerfInitView : FmsPageView, IMultiPage
         GetPageNumber()?.SetText($"{_page}/2");
         GetMessageLine()?.SetText("");
 
-        if (_page == 1) PopulatePage1();
-        else            PopulatePage2();
+        if (_page == 1)
+            PopulatePage1();
+        else
+            PopulatePage2();
     }
 
     private void PopulatePage1()
     {
-        string zfw   = Model.ZfwLbs        > 0f ? $"{Model.ZfwLbs:0} LBS"        : "------";
-        string fuel  = Model.FuelWeightLbs  > 0f ? $"{Model.FuelWeightLbs:0} LBS"  : "------";
+        string zfw = Model.ZfwLbs > 0f ? $"{Model.ZfwLbs:0} LBS" : "------";
+        string fuel = Model.FuelWeightLbs > 0f ? $"{Model.FuelWeightLbs:0} LBS" : "------";
         string gross = Model.GrossWeightLbs > 0f ? $"{Model.GrossWeightLbs:0} LBS" : "------";
 
         SetLineLabels(1, FmtLabel("ZFW"), FmtLabel("GROSS WT"));
@@ -96,15 +102,17 @@ public class PerfInitView : FmsPageView, IMultiPage
 
     public override void HandleLsk(int side, int row)
     {
-        if (side == 0)  // Left
+        if (side == 0) // Left
         {
             switch (row)
             {
                 case 1:
-                    if (_page == 1) HandleZfw();
+                    if (_page == 1)
+                        HandleZfw();
                     break;
                 case 2:
-                    if (_page == 1) HandleFuel();
+                    if (_page == 1)
+                        HandleFuel();
                     break;
                 case 3: // inactive
                     break;
@@ -112,10 +120,12 @@ public class PerfInitView : FmsPageView, IMultiPage
                     break;
                 case 5: // inactive
                     break;
-                case 6: Router.ShowPage("Index"); break;
+                case 6:
+                    Router.ShowPage("Index");
+                    break;
             }
         }
-        else  // Right
+        else // Right
         {
             switch (row)
             {
@@ -129,7 +139,9 @@ public class PerfInitView : FmsPageView, IMultiPage
                     break;
                 case 5: // inactive
                     break;
-                case 6: Router.ShowPage("Index"); break;
+                case 6:
+                    Router.ShowPage("Index");
+                    break;
             }
         }
         // NOTE: Populate() is NOT called here — FmsPageRouter.Update() pumps it every frame.
@@ -144,12 +156,13 @@ public class PerfInitView : FmsPageView, IMultiPage
         string sp = Scratchpad.CurrentText;
         if (sp.Length == 0)
         {
-            if (Model.ZfwLbs > 0f) Scratchpad.Append($"{Model.ZfwLbs:0}");
+            if (Model.ZfwLbs > 0f)
+                Scratchpad.Append($"{Model.ZfwLbs:0}");
             return;
         }
         if (float.TryParse(sp, out float val) && val >= 0f)
         {
-            Model.ZfwLbs          = val;
+            Model.ZfwLbs = val;
             Router.HasPendingPerf = true;
             Scratchpad.ReadAndClear();
         }
@@ -164,12 +177,13 @@ public class PerfInitView : FmsPageView, IMultiPage
         string sp = Scratchpad.CurrentText;
         if (sp.Length == 0)
         {
-            if (Model.FuelWeightLbs > 0f) Scratchpad.Append($"{Model.FuelWeightLbs:0}");
+            if (Model.FuelWeightLbs > 0f)
+                Scratchpad.Append($"{Model.FuelWeightLbs:0}");
             return;
         }
         if (float.TryParse(sp, out float val) && val >= 0f)
         {
-            Model.FuelWeightLbs   = val;
+            Model.FuelWeightLbs = val;
             Router.HasPendingPerf = true;
             Scratchpad.ReadAndClear();
         }
@@ -184,5 +198,6 @@ public class PerfInitView : FmsPageView, IMultiPage
     // ─────────────────────────────────────────────────────────────────────────
 
     public void NextPage() => _page = _page == 1 ? 2 : 1;
+
     public void PrevPage() => _page = _page == 2 ? 1 : 2;
 }

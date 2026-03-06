@@ -1,15 +1,21 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 
 public class HowToPanel_Toggle : MonoBehaviour
 {
-    [SerializeField] private Animator animator;
-    [SerializeField] private string isOpenParam = "isOpen";
+    [SerializeField]
+    private Animator animator;
+
+    [SerializeField]
+    private string isOpenParam = "isOpen";
 
     [Header("Scroll Reset")]
-    [SerializeField] private ScrollRect scrollRect;
-    [SerializeField] private float closeAnimDelay = 0.3f; // match your close anim
+    [SerializeField]
+    private ScrollRect scrollRect;
+
+    [SerializeField]
+    private float closeAnimDelay = 0.3f; // match your close anim
 
     private void Awake()
     {
@@ -32,7 +38,8 @@ public class HowToPanel_Toggle : MonoBehaviour
     {
         yield return new WaitForSeconds(closeAnimDelay);
 
-        if (scrollRect == null) yield break;
+        if (scrollRect == null)
+            yield break;
 
         scrollRect.StopMovement();
         Canvas.ForceUpdateCanvases();

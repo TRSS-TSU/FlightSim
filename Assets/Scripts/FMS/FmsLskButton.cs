@@ -10,13 +10,16 @@ public class FmsLskButton : MonoBehaviour, IPointerClickHandler
 {
     [Header("LSK Identity")]
     [Tooltip("0 = Left column, 1 = Right column.")]
-    [SerializeField] private int side;
+    [SerializeField]
+    private int side;
 
     [Tooltip("Row 1 (top) through 6 (bottom).")]
-    [SerializeField] private int row;
+    [SerializeField]
+    private int row;
 
     [Header("Router")]
-    [SerializeField] private FmsPageRouter router;
+    [SerializeField]
+    private FmsPageRouter router;
 
     public void OnPointerClick(PointerEventData eventData)
     {

@@ -8,12 +8,17 @@ public class ScenarioSelection : MonoBehaviour
 
     void Awake()
     {
-        if (Instance != null) { Destroy(gameObject); return; }
+        if (Instance != null)
+        {
+            Destroy(gameObject);
+            return;
+        }
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
 
     public void SetPending(ScenarioDefinition def) => PendingScenario = def;
+
     public void ConfirmPending()
     {
         SelectedScenario = PendingScenario;

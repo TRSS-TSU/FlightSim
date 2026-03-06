@@ -10,8 +10,10 @@ public class NDRangeStepper : MonoBehaviour
     public Button minusButton;
     public Image plusImage;
     public Image minusImage;
-    public Sprite plusEnabled, plusDisabled;
-    public Sprite minusEnabled, minusDisabled;
+    public Sprite plusEnabled,
+        plusDisabled;
+    public Sprite minusEnabled,
+        minusDisabled;
 
     [Header("Ranges (NM)")]
     public int[] rangesNm = new[] { 5, 10, 20 };
@@ -25,8 +27,23 @@ public class NDRangeStepper : MonoBehaviour
         Apply();
     }
 
-    public void OnPlus() { if (idx < rangesNm.Length - 1) { idx++; Apply(); } }
-    public void OnMinus() { if (idx > 0) { idx--; Apply(); } }
+    public void OnPlus()
+    {
+        if (idx < rangesNm.Length - 1)
+        {
+            idx++;
+            Apply();
+        }
+    }
+
+    public void OnMinus()
+    {
+        if (idx > 0)
+        {
+            idx--;
+            Apply();
+        }
+    }
 
     public NDRangeState rangeState;
 
@@ -38,10 +55,14 @@ public class NDRangeStepper : MonoBehaviour
         bool canPlus = idx < rangesNm.Length - 1;
         bool canMinus = idx > 0;
 
-        if (plusButton) plusButton.interactable = canPlus;
-        if (minusButton) minusButton.interactable = canMinus;
+        if (plusButton)
+            plusButton.interactable = canPlus;
+        if (minusButton)
+            minusButton.interactable = canMinus;
 
-        if (plusImage && plusEnabled && plusDisabled) plusImage.sprite = canPlus ? plusEnabled : plusDisabled;
-        if (minusImage && minusEnabled && minusDisabled) minusImage.sprite = canMinus ? minusEnabled : minusDisabled;
+        if (plusImage && plusEnabled && plusDisabled)
+            plusImage.sprite = canPlus ? plusEnabled : plusDisabled;
+        if (minusImage && minusEnabled && minusDisabled)
+            minusImage.sprite = canMinus ? minusEnabled : minusDisabled;
     }
 }

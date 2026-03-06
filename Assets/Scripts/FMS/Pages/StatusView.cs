@@ -17,9 +17,13 @@ using UnityEngine;
 public class StatusView : FmsPageView
 {
     // ── Formatting helpers ───────────────────────────────────────────────────────
-    private string FmtTitle()             => "STATUS";
-    private string FmtLabel(string label) => string.IsNullOrEmpty(label) ? label : $"<color=#00FFFF>{label}</color>";
-    private string FmtValue(string value) => string.IsNullOrEmpty(value) ? value : $"<color=#FFFFFF>{value}</color>";
+    private string FmtTitle() => "STATUS";
+
+    private string FmtLabel(string label) =>
+        string.IsNullOrEmpty(label) ? label : $"<color=#00FFFF>{label}</color>";
+
+    private string FmtValue(string value) =>
+        string.IsNullOrEmpty(value) ? value : $"<color=#FFFFFF>{value}</color>";
 
     // ─────────────────────────────────────────────────────────────────────────
     // FmsPageView contract
@@ -32,7 +36,7 @@ public class StatusView : FmsPageView
         GetPageNumber()?.SetText("1/1");
         GetMessageLine()?.SetText("");
 
-        string utc  = System.DateTime.UtcNow.ToString("HH:mm");
+        string utc = System.DateTime.UtcNow.ToString("HH:mm");
         string date = System.DateTime.UtcNow.ToString("ddMMMyy").ToUpper();
 
         SetLineLabels(1, FmtLabel("NAV DATA"), "");
@@ -56,7 +60,7 @@ public class StatusView : FmsPageView
 
     public override void HandleLsk(int side, int row)
     {
-        if (side == 0)  // Left
+        if (side == 0) // Left
         {
             switch (row)
             {
@@ -70,10 +74,12 @@ public class StatusView : FmsPageView
                     break;
                 case 5: // inactive
                     break;
-                case 6: Router.ShowPage("Index"); break;
+                case 6:
+                    Router.ShowPage("Index");
+                    break;
             }
         }
-        else  // Right
+        else // Right
         {
             switch (row)
             {
@@ -87,7 +93,9 @@ public class StatusView : FmsPageView
                     break;
                 case 5: // inactive
                     break;
-                case 6: Router.ShowPage("PosInit"); break;
+                case 6:
+                    Router.ShowPage("PosInit");
+                    break;
             }
         }
         // NOTE: Populate() is NOT called here — FmsPageRouter.Update() pumps it every frame.

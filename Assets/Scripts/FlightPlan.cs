@@ -9,17 +9,26 @@ public class FlightPlan : MonoBehaviour
     public Transform[] waypoints = Array.Empty<Transform>();
 
     [Header("Scene References")]
-    [SerializeField] private LocalTileGrid tileGrid;        // GroundRoot/LocalTileGrid
-    [SerializeField] private Transform waypointParent;      // e.g., GroundRoot/WaypointRoot
-    [SerializeField] private Transform aircraftRoot;        // AircraftRoot (optional)
+    [SerializeField]
+    private LocalTileGrid tileGrid; // GroundRoot/LocalTileGrid
+
+    [SerializeField]
+    private Transform waypointParent; // e.g., GroundRoot/WaypointRoot
+
+    [SerializeField]
+    private Transform aircraftRoot; // AircraftRoot (optional)
 
     [Header("Debug")]
-    [SerializeField] private bool logBuild = true;
-    [SerializeField] private float gizmoRadiusM = 20f;
+    [SerializeField]
+    private bool logBuild = true;
+
+    [SerializeField]
+    private float gizmoRadiusM = 20f;
 
     private readonly List<Transform> spawned = new();
 
-    private void OnEnable()  => ScenarioRuntime.OnChanged += LoadScenario;
+    private void OnEnable() => ScenarioRuntime.OnChanged += LoadScenario;
+
     private void OnDisable() => ScenarioRuntime.OnChanged -= LoadScenario;
 
     private void Start()
@@ -31,7 +40,8 @@ public class FlightPlan : MonoBehaviour
 
     private void LoadScenario(ScenarioDefinition s)
     {
-        if (!s) return;
+        if (!s)
+            return;
 
         StopAllCoroutines();
         StartCoroutine(BuildWhenTileGridReady(s));
@@ -53,23 +63,31 @@ public class FlightPlan : MonoBehaviour
         ClearSpawned();
 
         int z = tileGrid ? tileGrid.z : s.baseZoom;
-        float tileSizeM = tileGrid ? tileGrid.tileSizeM : WebMercator.MetersPerTile(s.centerLatDeg, z);
+        float tileSizeM = tileGrid
+            ? tileGrid.tileSizeM
+            : WebMercator.MetersPerTile(s.centerLatDeg, z);
 
         if (!tileGrid && logBuild)
-            Debug.LogWarning("[FlightPlan] tileGrid not assigned; using scenario.baseZoom + WebMercator.");
+            Debug.LogWarning(
+                "[FlightPlan] tileGrid not assigned; using scenario.baseZoom + WebMercator."
+            );
 
         var center = LatLonToTileXYFrac(s.centerLatDeg, s.centerLonDeg, z);
 
         foreach (var ident in s.prefillRouteIdents)
         {
-            if (string.IsNullOrWhiteSpace(ident)) continue;
+            if (string.IsNullOrWhiteSpace(ident))
+                continue;
 
             var wpDef = s.waypoints.Find(w =>
-                string.Equals(w.ident, ident, StringComparison.OrdinalIgnoreCase));
+                string.Equals(w.ident, ident, StringComparison.OrdinalIgnoreCase)
+            );
 
             if (wpDef == null)
             {
-                Debug.LogWarning($"[FlightPlan] Missing waypoint '{ident}' in ScenarioDefinition.waypoints");
+                Debug.LogWarning(
+                    $"[FlightPlan] Missing waypoint '{ident}' in ScenarioDefinition.waypoints"
+                );
                 continue;
             }
 
@@ -92,13 +110,17 @@ public class FlightPlan : MonoBehaviour
         SnapAircraftToFirstWaypoint();
 
         if (logBuild)
-            Debug.Log($"[FlightPlan] Built ACTIVE plan: {waypoints.Length} @ z={z} tileSizeM={tileSizeM:0.00}");
+            Debug.Log(
+                $"[FlightPlan] Built ACTIVE plan: {waypoints.Length} @ z={z} tileSizeM={tileSizeM:0.00}"
+            );
     }
 
     private void SnapAircraftToFirstWaypoint()
     {
-        if (!aircraftRoot) return;
-        if (waypoints.Length == 0 || !waypoints[0]) return;
+        if (!aircraftRoot)
+            return;
+        if (waypoints.Length == 0 || !waypoints[0])
+            return;
 
         aircraftRoot.position = waypoints[0].position + Vector3.up * 1.5f;
 
@@ -110,21 +132,27 @@ public class FlightPlan : MonoBehaviour
     /// Rebuild the active waypoint list from a student-edited route (called by ActLegsView).
     /// Runs synchronously — safe to call at runtime once the tile grid is initialised.
     /// </summary>
-    public void RebuildRoute(List<ScenarioDefinition.WaypointDef> newWpts,
-                              double centerLat, double centerLon, int zoom)
+    public void RebuildRoute(
+        List<ScenarioDefinition.WaypointDef> newWpts,
+        double centerLat,
+        double centerLon,
+        int zoom
+    )
     {
         StopAllCoroutines();
         ClearSpawned();
 
-        float tileSizeM = tileGrid ? tileGrid.tileSizeM
-                                   : (float)WebMercator.MetersPerTile(centerLat, zoom);
+        float tileSizeM = tileGrid
+            ? tileGrid.tileSizeM
+            : (float)WebMercator.MetersPerTile(centerLat, zoom);
         var center = LatLonToTileXYFrac(centerLat, centerLon, zoom);
 
         foreach (var wpDef in newWpts)
         {
-            if (wpDef == null || string.IsNullOrWhiteSpace(wpDef.ident)) continue;
+            if (wpDef == null || string.IsNullOrWhiteSpace(wpDef.ident))
+                continue;
 
-            var tile    = LatLonToTileXYFrac(wpDef.latDeg, wpDef.lonDeg, zoom);
+            var tile = LatLonToTileXYFrac(wpDef.latDeg, wpDef.lonDeg, zoom);
             float dxTiles = (float)(tile.x - center.x);
             float dyTiles = (float)(tile.y - center.y);
 
@@ -147,7 +175,8 @@ public class FlightPlan : MonoBehaviour
         waypoints = Array.Empty<Transform>();
 
         for (int i = 0; i < spawned.Count; i++)
-            if (spawned[i]) Destroy(spawned[i].gameObject);
+            if (spawned[i])
+                Destroy(spawned[i].gameObject);
 
         spawned.Clear();
     }
@@ -158,7 +187,8 @@ public class FlightPlan : MonoBehaviour
         int n = 1 << z;
 
         double x = (lonDeg + 180.0) / 360.0 * n;
-        double y = (1.0 - Math.Log(Math.Tan(latRad) + (1.0 / Math.Cos(latRad))) / Math.PI) / 2.0 * n;
+        double y =
+            (1.0 - Math.Log(Math.Tan(latRad) + (1.0 / Math.Cos(latRad))) / Math.PI) / 2.0 * n;
 
         return (x, y);
     }
@@ -166,14 +196,16 @@ public class FlightPlan : MonoBehaviour
 #if UNITY_EDITOR
     private void OnDrawGizmos()
     {
-        if (waypoints == null || waypoints.Length == 0) return;
+        if (waypoints == null || waypoints.Length == 0)
+            return;
 
         Gizmos.color = Color.cyan;
 
         for (int i = 0; i < waypoints.Length; i++)
         {
             var wp = waypoints[i];
-            if (!wp) continue;
+            if (!wp)
+                continue;
 
             Gizmos.DrawSphere(wp.position, gizmoRadiusM);
 

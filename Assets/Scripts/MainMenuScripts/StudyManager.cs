@@ -1,5 +1,5 @@
-using UnityEngine;
 using System.IO;
+using UnityEngine;
 
 public class StudyManager : MonoBehaviour
 {
@@ -8,11 +8,7 @@ public class StudyManager : MonoBehaviour
 
     public void OpenStudyManual()
     {
-        string fullPath = Path.Combine(
-            Application.streamingAssetsPath,
-            "Study",
-            pdfFileName
-        );
+        string fullPath = Path.Combine(Application.streamingAssetsPath, "Study", pdfFileName);
 
         // iOS prefers an explicit file:// URL
         string url = "file://" + fullPath;

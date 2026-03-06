@@ -15,6 +15,7 @@ public enum FmsKey
     Prev,
     Next,
     Exec,
+    Tune,
 }
 
 /// <summary>
@@ -47,7 +48,7 @@ public class FmsPageRouter : MonoBehaviour
     public GameObject pageActLegs;
     public GameObject pageModLegs;
     public GameObject pageActFpln;
-    public GameObject pageFrequency;
+    public GameObject pageTune;
     public GameObject pageStatus;
     public GameObject pageProg;
     public GameObject pageGnssCtl;
@@ -158,6 +159,9 @@ public class FmsPageRouter : MonoBehaviour
             case FmsKey.Dir:
                 ShowPage("Dir");
                 break;
+            case FmsKey.Tune:
+                ShowPage("Tune");
+                break;
             case FmsKey.Exec:
                 if (_current is ActFplnView actFpln)
                 {
@@ -206,7 +210,7 @@ public class FmsPageRouter : MonoBehaviour
         Register("ActLegs", pageActLegs);
         Register("ModLegs", pageModLegs);
         Register("ActFpln", pageActFpln);
-        Register("Frequency", pageFrequency);
+        Register("Tune", pageTune);
         Register("Status", pageStatus);
         Register("Prog", pageProg);
         Register("GnssCtl", pageGnssCtl);

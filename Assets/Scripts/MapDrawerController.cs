@@ -5,15 +5,22 @@ using UnityEngine;
 public class MapDrawerController : MonoBehaviour, IDrawerController
 {
     [Header("Refs")]
-    [SerializeField] private RectTransform panel;        // MAP panel
-    [SerializeField] private RectTransform openTarget;   // OpenTarget
-    [SerializeField] private RectTransform closedTarget; // CloseTarget
+    [SerializeField]
+    private RectTransform panel; // MAP panel
+
+    [SerializeField]
+    private RectTransform openTarget; // OpenTarget
+
+    [SerializeField]
+    private RectTransform closedTarget; // CloseTarget
 
     [Header("UI")]
-    [SerializeField] private TMP_Text stateLabel;        // "Open" / "Close"
+    [SerializeField]
+    private TMP_Text stateLabel; // "Open" / "Close"
 
     [Header("Motion")]
-    [SerializeField, Range(0.05f, 0.5f)] private float snapDuration = 0.2f;
+    [SerializeField, Range(0.05f, 0.5f)]
+    private float snapDuration = 0.2f;
 
     private RectTransform panelParent;
     private Coroutine snapCo;
@@ -32,7 +39,8 @@ public class MapDrawerController : MonoBehaviour, IDrawerController
 
     void Awake()
     {
-        if (!panel) panel = GetComponent<RectTransform>();
+        if (!panel)
+            panel = GetComponent<RectTransform>();
         panelParent = panel.parent as RectTransform;
 
         RecalculateTargets();
@@ -44,7 +52,8 @@ public class MapDrawerController : MonoBehaviour, IDrawerController
 
     void OnRectTransformDimensionsChange()
     {
-        if (panelParent) RecalculateTargets();
+        if (panelParent)
+            RecalculateTargets();
     }
 
     public void RecalculateTargets()
@@ -55,7 +64,8 @@ public class MapDrawerController : MonoBehaviour, IDrawerController
 
     private float GetTargetYInParentSpace(RectTransform target)
     {
-        if (!target || !panelParent) return 0f;
+        if (!target || !panelParent)
+            return 0f;
         Vector2 local = panelParent.InverseTransformPoint(target.position);
         return local.y;
     }
@@ -76,17 +86,23 @@ public class MapDrawerController : MonoBehaviour, IDrawerController
         float mid = (OpenY + ClosedY) * 0.5f;
         bool openNow = OpenIsHigher ? (p.y >= mid) : (p.y <= mid);
 
-        if (openNow && !isConsideredOpen) DrawerGroup.RequestOpen(this);
-        if (!openNow && isConsideredOpen) DrawerGroup.NotifyClosed(this);
+        if (openNow && !isConsideredOpen)
+            DrawerGroup.RequestOpen(this);
+        if (!openNow && isConsideredOpen)
+            DrawerGroup.NotifyClosed(this);
         isConsideredOpen = openNow;
     }
 
     public void SnapToNearest()
     {
         float mid = (OpenY + ClosedY) * 0.5f;
-        bool openNow = OpenIsHigher ? (panel.anchoredPosition.y >= mid) : (panel.anchoredPosition.y <= mid);
-        if (openNow) SnapOpen();
-        else SnapClosed();
+        bool openNow = OpenIsHigher
+            ? (panel.anchoredPosition.y >= mid)
+            : (panel.anchoredPosition.y <= mid);
+        if (openNow)
+            SnapOpen();
+        else
+            SnapClosed();
     }
 
     public void SnapOpen()
@@ -104,7 +120,8 @@ public class MapDrawerController : MonoBehaviour, IDrawerController
 
     private void StartSnap(float targetY)
     {
-        if (snapCo != null) StopCoroutine(snapCo);
+        if (snapCo != null)
+            StopCoroutine(snapCo);
         snapCo = StartCoroutine(SnapRoutine(targetY));
     }
 
@@ -129,7 +146,8 @@ public class MapDrawerController : MonoBehaviour, IDrawerController
 
     private void SetStateLabel(bool isOpen)
     {
-        if (!stateLabel) return;
+        if (!stateLabel)
+            return;
         stateLabel.text = isOpen ? "CLOSE" : "OPEN";
     }
 }

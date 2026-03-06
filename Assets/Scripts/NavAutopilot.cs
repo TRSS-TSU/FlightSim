@@ -2,10 +2,14 @@ using UnityEngine;
 
 public class NavAutopilot : MonoBehaviour
 {
+    [HideInInspector]
+    public float activeDistance;
 
-    [HideInInspector] public float activeDistance;
-    [HideInInspector] public float activeBearing;
-    [HideInInspector] public float xtkM;           // cross-track error in meters (+ = right of track)
+    [HideInInspector]
+    public float activeBearing;
+
+    [HideInInspector]
+    public float xtkM; // cross-track error in meters (+ = right of track)
 
     public FlightPlan plan;
     public SimTargets targets;
@@ -26,7 +30,7 @@ public class NavAutopilot : MonoBehaviour
 
     [Header("Capture Robustness (v1)")]
     public float nearRadiusMultiplier = 1.25f; // 150 * 1.25 = 187.5m "near"
-    public int minNearFrames = 3;              // require a few frames near before capturing
+    public int minNearFrames = 3; // require a few frames near before capturing
 
     float prevDist = float.PositiveInfinity;
     bool wasNear = false;
@@ -36,13 +40,15 @@ public class NavAutopilot : MonoBehaviour
     public float advanceCooldownSec = 0.5f;
     float advanceCooldownT = 0f;
 
-
-
     [Header("Turn Anticipation")]
-    [Tooltip("Enable turn anticipation (lead distance) so NAV begins the next leg before the waypoint on course changes.")]
+    [Tooltip(
+        "Enable turn anticipation (lead distance) so NAV begins the next leg before the waypoint on course changes."
+    )]
     public bool enableTurnAnticipation = true;
 
-    [Tooltip("Bank angle used for lead-distance computation (deg). Should match PlaneController maxBankDeg for realism.")]
+    [Tooltip(
+        "Bank angle used for lead-distance computation (deg). Should match PlaneController maxBankDeg for realism."
+    )]
     public float anticipationBankDeg = 25f;
 
     [Tooltip("Ignore tiny course changes below this value (deg).")]
@@ -50,25 +56,21 @@ public class NavAutopilot : MonoBehaviour
 
     [Tooltip("Clamp lead distance to avoid huge anticipations at high speed (meters).")]
     public float maxLeadDistanceM = 2500f;
+
     static Vector3 Flat(Vector3 v) => Vector3.ProjectOnPlane(v, Vector3.up);
-
-
-
-
-
 
     void Awake()
     {
-        if (!plan) plan = GetComponent<FlightPlan>();
+        if (!plan)
+            plan = GetComponent<FlightPlan>();
     }
 
     void FixedUpdate()
     {
-
-
-        if (!plan || plan.waypoints == null || plan.waypoints.Length == 0) return;
-        if (!targets || !aircraft) return;
-
+        if (!plan || plan.waypoints == null || plan.waypoints.Length == 0)
+            return;
+        if (!targets || !aircraft)
+            return;
 
         xtkM = 0f;
 
@@ -80,10 +82,8 @@ public class NavAutopilot : MonoBehaviour
         Vector3 P = Flat(aircraft.position);
         Vector3 B = Flat(wp.position);
 
-
         Vector3 toWp = B - P;
         float dist = toWp.magnitude;
-
 
         float nearRadius = captureRadius * nearRadiusMultiplier;
 
@@ -93,8 +93,8 @@ public class NavAutopilot : MonoBehaviour
             nearFrames++;
         }
 
-        if (plan == null || plan.waypoints == null || plan.waypoints.Length == 0) return;
-
+        if (plan == null || plan.waypoints == null || plan.waypoints.Length == 0)
+            return;
 
         float bearingToWp = Mathf.Atan2(toWp.x, toWp.z) * Mathf.Rad2Deg;
         bearingToWp = (bearingToWp + 360f) % 360f;
@@ -103,7 +103,8 @@ public class NavAutopilot : MonoBehaviour
 
         if (activeIndex > 0)
         {
-            Vector3 A = plan.waypoints[activeIndex - 1].position; A.y = 0f;
+            Vector3 A = plan.waypoints[activeIndex - 1].position;
+            A.y = 0f;
             Vector3 AB = B - A;
             if (AB.sqrMagnitude > 1f)
             {
@@ -115,16 +116,21 @@ public class NavAutopilot : MonoBehaviour
                 float courseHdg = Mathf.Atan2(ABn.x, ABn.z) * Mathf.Rad2Deg;
                 courseHdg = (courseHdg + 360f) % 360f;
 
-                float intercept = Mathf.Clamp(xtk * xtkToInterceptDeg, -maxInterceptDeg, maxInterceptDeg);
+                float intercept = Mathf.Clamp(
+                    xtk * xtkToInterceptDeg,
+                    -maxInterceptDeg,
+                    maxInterceptDeg
+                );
                 desiredHeading = (courseHdg - intercept + 360f) % 360f;
             }
         }
 
-        if (navEngaged) targets.targetHdgDeg = desiredHeading;
+        if (navEngaged)
+            targets.targetHdgDeg = desiredHeading;
 
         // ND-friendly outputs: distance + bearing to active waypoint
         activeDistance = dist;
-        activeBearing  = bearingToWp;
+        activeBearing = bearingToWp;
 
         // Smart capture (use direction to waypoint, not desiredHeading)
         Vector3 forward = Flat(aircraft.forward).normalized;
@@ -151,7 +157,12 @@ public class NavAutopilot : MonoBehaviour
         //   lead = R * tan(deltaChi/2)
         bool anticipateAdvance = false;
         float leadDistanceM = 0f;
-        if (enableTurnAnticipation && advanceCooldownT <= 0f && activeIndex > 0 && activeIndex < plan.waypoints.Length - 1)
+        if (
+            enableTurnAnticipation
+            && advanceCooldownT <= 0f
+            && activeIndex > 0
+            && activeIndex < plan.waypoints.Length - 1
+        )
         {
             Vector3 A3 = Flat(plan.waypoints[activeIndex - 1].position);
             Vector3 B3 = B; // active waypoint
@@ -179,7 +190,10 @@ public class NavAutopilot : MonoBehaviour
                     {
                         float phi = Mathf.Max(1f, anticipationBankDeg) * Mathf.Deg2Rad; // prevent tan(0)
                         float R = (gs * gs) / (9.81f * Mathf.Tan(phi));
-                        leadDistanceM = Mathf.Min(maxLeadDistanceM, R * Mathf.Tan(0.5f * deltaChi * Mathf.Deg2Rad));
+                        leadDistanceM = Mathf.Min(
+                            maxLeadDistanceM,
+                            R * Mathf.Tan(0.5f * deltaChi * Mathf.Deg2Rad)
+                        );
 
                         // Switch early when within lead distance of the waypoint
                         anticipateAdvance = dist <= leadDistanceM;
@@ -188,19 +202,21 @@ public class NavAutopilot : MonoBehaviour
             }
         }
 
-
-
-
         bool movingAwayAfterNear = wasNear && nearFrames >= minNearFrames && dist > prevDist;
         bool inRadius = dist <= captureRadius;
 
-        if ((inRadius || movingAwayAfterNear || passedWaypoint || anticipateAdvance) && advanceCooldownT <= 0f)
+        if (
+            (inRadius || movingAwayAfterNear || passedWaypoint || anticipateAdvance)
+            && advanceCooldownT <= 0f
+        )
         {
             activeIndex++;
             if (activeIndex >= plan.waypoints.Length)
                 activeIndex = loop ? 0 : plan.waypoints.Length - 1;
 
-            wasNear = false; nearFrames = 0; prevDist = float.PositiveInfinity;
+            wasNear = false;
+            nearFrames = 0;
+            prevDist = float.PositiveInfinity;
             advanceCooldownT = advanceCooldownSec;
         }
         else
@@ -208,12 +224,8 @@ public class NavAutopilot : MonoBehaviour
             prevDist = dist;
         }
 
-
         Debug.DrawLine(aircraft.position, wp.position, Color.black);
-
     }
-
-
 
     public void SetNavEngaged(bool on)
     {
@@ -226,7 +238,4 @@ public class NavAutopilot : MonoBehaviour
     }
 
     public void ToggleNav() => SetNavEngaged(!navEngaged);
-
-
-
 }

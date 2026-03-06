@@ -48582,7 +48582,7 @@ MonoBehaviour:
   pageActLegs: {fileID: 1133571251}
   pageModLegs: {fileID: 1998060328}
   pageActFpln: {fileID: 1761125639}
-  pageFrequency: {fileID: 2068543248}
+  pageTune: {fileID: 2068543248}
   pageStatus: {fileID: 1693663433}
   pageProg: {fileID: 178516284}
   pageGnssCtl: {fileID: 975092660}
@@ -53680,8 +53680,9 @@ GameObject:
   - component: {fileID: 1366782990}
   - component: {fileID: 1366782989}
   - component: {fileID: 1366782988}
+  - component: {fileID: 1366782991}
   m_Layer: 5
-  m_Name: Button (04)
+  m_Name: TUN Button (04)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -53788,6 +53789,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1366782986}
   m_CullTransparentMesh: 1
+--- !u!114 &1366782991
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1366782986}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2545e08dc3aef9b4bb0aa0df1fbc6962, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FmsFunctionButton
+  key: 9
+  router: {fileID: 1247336097}
 --- !u!1 &1370258238
 GameObject:
   m_ObjectHideFlags: 0
@@ -81055,7 +81070,7 @@ GameObject:
   - component: {fileID: 2068543250}
   - component: {fileID: 2068543249}
   m_Layer: 5
-  m_Name: Frequency
+  m_Name: Tune
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -81070,7 +81085,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2068543248}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 22d9b9097a856d3469d10ebad585f8fc, type: 3}
+  m_Script: {fileID: 11500000, guid: dd229b83865bc0047887cf05e9dd11da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FrequencyView
 --- !u!224 &2068543250

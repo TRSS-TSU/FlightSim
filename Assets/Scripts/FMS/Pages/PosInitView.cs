@@ -28,16 +28,20 @@ using UnityEngine;
 public class PosInitView : FmsPageView, IMultiPage
 {
     // ── Formatting helpers ───────────────────────────────────────────────────────
-    private string FmtTitle()             => "POS INIT";
-    private string FmtLabel(string label) => string.IsNullOrEmpty(label) ? label : $"<color=#00FFFF>{label}</color>";
-    private string FmtValue(string value) => string.IsNullOrEmpty(value) ? value : $"<color=#FFFFFF>{value}</color>";
+    private string FmtTitle() => "POS INIT";
+
+    private string FmtLabel(string label) =>
+        string.IsNullOrEmpty(label) ? label : $"<color=#00FFFF>{label}</color>";
+
+    private string FmtValue(string value) =>
+        string.IsNullOrEmpty(value) ? value : $"<color=#FFFFFF>{value}</color>";
 
     // ── State ────────────────────────────────────────────────────────────────────
-    private int    _page            = 1;
-    private bool   _gnssPosSet     = false;
-    private string _confirmedPos   = null;
-    private string _initPos        = "---\u00B0--.-- ----\u00B0--.--";
-    private bool   _posLoadComplete = false;
+    private int _page = 1;
+    private bool _gnssPosSet = false;
+    private string _confirmedPos = null;
+    private string _initPos = "---\u00B0--.-- ----\u00B0--.--";
+    private bool _posLoadComplete = false;
 
     // ─────────────────────────────────────────────────────────────────────────
     // FmsPageView contract
@@ -50,8 +54,10 @@ public class PosInitView : FmsPageView, IMultiPage
         GetPageNumber()?.SetText($"{_page}/2");
         GetMessageLine()?.SetText("");
 
-        if (_page == 1) PopulatePage1();
-        else            PopulatePage2();
+        if (_page == 1)
+            PopulatePage1();
+        else
+            PopulatePage2();
     }
 
     private void PopulatePage1()
@@ -102,7 +108,7 @@ public class PosInitView : FmsPageView, IMultiPage
         SetLineLabels(5, "", "");
         SetLineValues(5, "", "");
 
-        SetLineLabels(6, FmtLabel("<INDEX"), FmtLabel("FPLN"));
+        SetLineLabels(6, FmtLabel("<INDEX"), FmtLabel("FPLN>"));
         SetLineValues(6, "", "");
     }
 
@@ -110,7 +116,7 @@ public class PosInitView : FmsPageView, IMultiPage
     {
         if (_page == 1)
         {
-            if (side == 0)  // Left
+            if (side == 0) // Left
             {
                 switch (row)
                 {
@@ -124,10 +130,12 @@ public class PosInitView : FmsPageView, IMultiPage
                         break;
                     case 5: // inactive
                         break;
-                    case 6: Router.ShowPage("Index"); break;
+                    case 6:
+                        Router.ShowPage("Index");
+                        break;
                 }
             }
-            else  // Right
+            else // Right
             {
                 switch (row)
                 {
@@ -137,16 +145,20 @@ public class PosInitView : FmsPageView, IMultiPage
                         break;
                     case 3: // inactive
                         break;
-                    case 4: SetPosToGnss(); break;
+                    case 4:
+                        SetPosToGnss();
+                        break;
                     case 5: // inactive (display only)
                         break;
-                    case 6: Router.ShowPage("ActFpln"); break;
+                    case 6:
+                        Router.ShowPage("ActFpln");
+                        break;
                 }
             }
         }
-        else  // page 2
+        else // page 2
         {
-            if (side == 0)  // Left
+            if (side == 0) // Left
             {
                 switch (row)
                 {
@@ -160,10 +172,12 @@ public class PosInitView : FmsPageView, IMultiPage
                         break;
                     case 5: // inactive
                         break;
-                    case 6: Router.ShowPage("Index"); break;
+                    case 6:
+                        Router.ShowPage("Index");
+                        break;
                 }
             }
-            else  // Right
+            else // Right
             {
                 switch (row)
                 {
@@ -177,7 +191,8 @@ public class PosInitView : FmsPageView, IMultiPage
                         break;
                     case 5: // inactive
                         break;
-                    case 6: // inactive
+                    case 6:
+                        Router.ShowPage("ActFpln");
                         break;
                 }
             }
@@ -193,9 +208,10 @@ public class PosInitView : FmsPageView, IMultiPage
     {
         _gnssPosSet = true;
         var wp = (Model.Scenario?.waypoints?.Count > 0) ? Model.Scenario.waypoints[0] : null;
-        _confirmedPos = wp != null
-            ? Model.FormatLatLon(wp.latDeg, wp.lonDeg)
-            : Model.FormatLatLon(Model.FmsPosLat, Model.FmsPosLon);
+        _confirmedPos =
+            wp != null
+                ? Model.FormatLatLon(wp.latDeg, wp.lonDeg)
+                : Model.FormatLatLon(Model.FmsPosLat, Model.FmsPosLon);
         StartCoroutine(LoadPosAfterDelay());
     }
 
@@ -210,5 +226,6 @@ public class PosInitView : FmsPageView, IMultiPage
     // ─────────────────────────────────────────────────────────────────────────
 
     public void NextPage() => _page = _page == 1 ? 2 : 1;
+
     public void PrevPage() => _page = _page == 2 ? 1 : 2;
 }

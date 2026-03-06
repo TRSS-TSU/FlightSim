@@ -4,9 +4,9 @@ public class SimTargets : MonoBehaviour
 {
     // Authoritative (pilot units)
     [Header("Authoritative Targets (Pilot Units)")]
-    public float targetIasKt = 50f;       // knots IAS
-    public float targetAltFtMsl = 100f;  // feet MSL (world Y in v1)
-    public float targetHdgDeg = 0f;        // degrees (0 = north/Z+)
+    public float targetIasKt = 50f; // knots IAS
+    public float targetAltFtMsl = 100f; // feet MSL (world Y in v1)
+    public float targetHdgDeg = 0f; // degrees (0 = north/Z+)
 
     [Header("Guardrails (v1)")]
     public float minIasKt = 0f;
