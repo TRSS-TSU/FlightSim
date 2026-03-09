@@ -69661,7 +69661,7 @@ MonoBehaviour:
   tilesFolder: tiles_nd_dark_v1
   bufferTiles: 3
   rebuildDelay: 0.1
-  verboseLogs: 1
+  verboseLogs: 0
   z: 16
   radius: 10
   tileSizeM: 610

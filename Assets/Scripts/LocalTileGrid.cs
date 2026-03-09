@@ -158,9 +158,6 @@ public class LocalTileGrid : MonoBehaviour
         if (verboseLogs)
         {
             float nominalWidthM = 2f * rangeNm * 1852f;
-            Debug.Log(
-                $"[ND-Tiles] range={rangeNm} z={z} tileSizeM={tileSizeM:F2} neededWidthM={neededWidthM:F0} nominalWidthM={nominalWidthM:F0} tilesAcross={tilesAcross} radius={radius}"
-            );
         }
 
         Rebuild();
@@ -257,9 +254,6 @@ public class LocalTileGrid : MonoBehaviour
         if (verboseLogs)
         {
             int across = 2 * radius + 1;
-            Debug.Log(
-                $"[TilePaging] center=({centerX},{centerY}) z={z} rendered={across}x{across} range={lastRangeNm}NM"
-            );
         }
 
         for (int dx = -radius; dx <= radius; dx++)
@@ -307,11 +301,6 @@ public class LocalTileGrid : MonoBehaviour
                 tc.SetTexture(tex);
             }
         }
-
-        Debug.Log(
-            $"[LocalTileGrid] scenario='{(scenario ? scenario.name : "null")}' z={z} center=({centerX},{centerY}) tileSizeM={tileSizeM:F2}m"
-        );
-        Debug.Log($"[LocalTileGrid] Built tiles: found={found}, missing={missing}, z={z}.");
     }
 
     static void LatLonToTileXY(double latDeg, double lonDeg, int zoom, out int x, out int y)

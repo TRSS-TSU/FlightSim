@@ -40,8 +40,9 @@ public class ActFplnView : FmsPageView
         string.IsNullOrEmpty(value) ? value : $"<color=#FFFFFF>{value}</color>";
 
     // ── MOD state ────────────────────────────────────────────────────────────────
-    private bool _modActive = false;
     private string _pendingRouteName = null;
+    private bool _init = false;
+    private bool _modActive = false;
     private bool _execArmed = false;
 
     private string origin = "";
@@ -62,78 +63,93 @@ public class ActFplnView : FmsPageView
         // Intentional lazy-init guard — fires only once; acceptable exception to render-only purity.
         if (!_modActive && string.IsNullOrEmpty(_pendingRouteName))
             _pendingRouteName = Model?.Scenario?.route ?? "";
+        origin = Model.ActiveRoute.Count > 0 ? Model.ActiveRoute[0].ident : "----";
+        dest =
+            Model.ActiveRoute.Count > 0
+                ? Model.ActiveRoute[Model.ActiveRoute.Count - 1].ident
+                : "----";
+        toIdent = Model.ActiveRoute.Count > 1 ? Model.ActiveRoute[1].ident : dest;
+        distNm = Mathf.RoundToInt(Model.TotalRouteDistNm);
 
         if (_modActive && _execArmed)
         {
             // ── STATE: MOD ARMED ─────────────────────────────────────────────────
-            // EXEC is primed; user can CANCEL or navigate away.
-            origin = Model.ActiveRoute.Count > 0 ? Model.ActiveRoute[0].ident : "----";
-            dest =
-                Model.ActiveRoute.Count > 0
-                    ? Model.ActiveRoute[Model.ActiveRoute.Count - 1].ident
-                    : "----";
-            toIdent = Model.ActiveRoute.Count > 1 ? Model.ActiveRoute[1].ident : dest;
-            distNm = Mathf.RoundToInt(Model.TotalRouteDistNm);
+            // EXEC is primed; user can CANCEL MOD or navigate away.
 
             GetTitle()?.SetText(FmtTitle("MOD FPLN"));
             SetLineLabels(1, FmtLabel("ORIGIN     DIST"), FmtLabel("DEST"));
             SetLineValues(1, FmtValue($"{origin, -14}{distNm, 5}"), FmtValue(dest));
             SetLineLabels(2, FmtLabel("ROUTE"), FmtLabel("ALTN"));
             SetLineValues(2, FmtValue(_pendingRouteName ?? ""), FmtValue("----"));
-            SetLineLabels(3, "", FmtLabel("ORIG RWY"));
+            SetLineLabels(3, FmtLabel(""), FmtLabel("ORIG  RWY"));
+            SetLineValues(3, FmtValue(""), FmtValue(""));
             SetLineLabels(4, FmtLabel("VIA"), FmtLabel("TO"));
             SetLineValues(4, FmtValue("DIRECT"), FmtValue(toIdent));
-            // L5 empty
+            SetLineLabels(5, FmtLabel(""), FmtLabel(""));
+            SetLineValues(5, FmtValue(""), FmtValue(""));
             SetLineLabels(6, "", "");
             SetLineValues(6, FmtValue("<CANCEL MOD"), FmtValue("OFFSET   ----"));
-            GetMessageLine()?.SetText("EXEC");
+            GetMessageLine()?.SetText("FMS DR                   EXEC");
         }
         else if (_modActive)
         {
             // ── STATE: MOD CONFIRM ───────────────────────────────────────────────
             // Prompting YES / NO to load new route.
-            origin = Model.ActiveRoute.Count > 0 ? Model.ActiveRoute[0].ident : "----";
-            dest =
-                Model.ActiveRoute.Count > 0
-                    ? Model.ActiveRoute[Model.ActiveRoute.Count - 1].ident
-                    : "----";
-            toIdent = Model.ActiveRoute.Count > 1 ? Model.ActiveRoute[1].ident : dest;
-            distNm = Mathf.RoundToInt(Model.TotalRouteDistNm);
 
             GetTitle()?.SetText(FmtTitle("MOD FPLN"));
             SetLineLabels(1, FmtLabel("ORIGIN     DIST"), FmtLabel("DEST"));
             SetLineValues(1, FmtValue($"{origin, -14}{distNm, 5}"), FmtValue(dest));
             SetLineLabels(2, FmtLabel("ROUTE"), FmtLabel("ALTN"));
             SetLineValues(2, FmtValue(_pendingRouteName ?? ""), FmtValue("----"));
-            SetLineLabels(3, "", FmtLabel("ORIG RWY"));
-            SetLineLabels(4, FmtLabel("VIA"), FmtLabel("TO"));
-            SetLineValues(4, FmtValue("DIRECT"), FmtValue(toIdent));
-            // L5 empty
+            SetLineLabels(3, FmtLabel("VIA"), FmtLabel("TO"));
+            SetLineValues(3, FmtValue("VECT . RNV  32"), FmtValue("RW32"));
+            SetLineLabels(4, FmtValue(""), FmtValue(""));
+            SetLineValues(4, FmtValue(""), FmtValue(""));
+            SetLineLabels(5, FmtValue(""), FmtValue(""));
+            SetLineValues(5, FmtValue(""), FmtValue(""));
             SetLineLabels(6, FmtLabel("---- LOAD NEW ROUTE ----"), "");
             SetLineValues(6, FmtValue("<YES"), FmtValue("NO>"));
-            GetMessageLine()?.SetText("EXEC");
+            GetMessageLine()?.SetText("FMS DR                   EXEC");
         }
-        else if (Model.ActiveRoute.Count > 0)
+        else if (_init)
         {
-            // ── STATE: ACT — ROUTE LOADED ────────────────────────────────────────
-            // Normal ACT display with live route data.
-            origin = Model.ActiveRoute[0].ident;
-            dest = Model.ActiveRoute[Model.ActiveRoute.Count - 1].ident;
-            toIdent = "----";
-            distNm = Mathf.RoundToInt(Model.TotalRouteDistNm);
+            // ── STATE: ACT — SCRATCHPAD SEEDED (pending L2 commit) ───────────────
+            // Route name is in scratchpad; pressing L2 again will enter MOD.
 
             GetTitle()?.SetText(FmtTitle("ACT FPLN"));
             SetLineLabels(1, FmtLabel("ORIGIN     DIST"), FmtLabel("DEST"));
             SetLineValues(1, FmtValue($"{origin, -14}{distNm, 5}"), FmtValue(dest));
             SetLineLabels(2, FmtLabel("ROUTE"), FmtLabel("ALTN"));
             SetLineValues(2, FmtValue(_pendingRouteName ?? ""), FmtValue("----"));
-            SetLineLabels(3, "", FmtLabel("ORIG RWY"));
-            SetLineLabels(4, FmtLabel("VIA"), FmtLabel("TO"));
-            SetLineValues(4, FmtValue("DIRECT"), FmtValue(toIdent));
-            // L5 empty
-            SetLineLabels(6, "", "");
-            SetLineValues(6, FmtValue("<SEC FPLN"), FmtValue("OFFSET   ----"));
-            GetMessageLine()?.SetText("");
+            SetLineLabels(3, FmtLabel("VIA"), FmtLabel("TO"));
+            SetLineValues(3, FmtValue("VECT . RNV  32"), FmtValue("RW32")); //TODO set these initial values to Green color
+            SetLineLabels(4, FmtValue(""), FmtValue(""));
+            SetLineValues(4, FmtValue(""), FmtValue(""));
+            SetLineLabels(5, FmtValue(""), FmtValue(""));
+            SetLineValues(5, FmtValue("<COPY ACTIVE"), FmtValue(""));
+            SetLineLabels(6, FmtValue(""), FmtValue(""));
+            SetLineValues(6, FmtValue("<SEC FPLN"), FmtValue(""));
+            GetMessageLine()?.SetText("GNSS  NOT  AVAILABLE");
+        }
+        else if (Model.ActiveRoute.Count > 0)
+        {
+            // ── STATE: ACT — ROUTE LOADED ────────────────────────────────────────
+            // Normal ACT display with live route data.
+
+            GetTitle()?.SetText(FmtTitle("ACT FPLN"));
+            SetLineLabels(1, FmtLabel("ORIGIN     DIST"), FmtLabel("DEST"));
+            SetLineValues(1, FmtValue($"{origin, -14}{distNm, 5}"), FmtValue(dest));
+            SetLineLabels(2, FmtLabel("ROUTE"), FmtLabel("ALTN"));
+            SetLineValues(2, FmtValue(_pendingRouteName ?? ""), FmtValue("----"));
+            SetLineLabels(3, FmtLabel("VIA"), FmtLabel("TO"));
+            SetLineValues(3, FmtValue("VECT . RNV  32"), FmtValue("RW32")); //TODO set these initial values to Green color
+            SetLineLabels(4, FmtValue(""), FmtValue(""));
+            SetLineValues(4, FmtValue(""), FmtValue(""));
+            SetLineLabels(5, FmtValue(""), FmtValue(""));
+            SetLineValues(5, FmtValue("<COPY ACTIVE"), FmtValue(""));
+            SetLineLabels(6, FmtValue(""), FmtValue(""));
+            SetLineValues(6, FmtValue("<SEC FPLN"), FmtValue(""));
+            GetMessageLine()?.SetText("DR  EXCEEDS  5MIN");
         }
         else
         {
@@ -144,13 +160,14 @@ public class ActFplnView : FmsPageView
             SetLineValues(1, FmtValue("----"), FmtValue("----"));
             SetLineLabels(2, FmtLabel("ROUTE"), FmtLabel("ALTN"));
             SetLineValues(2, "", FmtValue("----"));
-            SetLineLabels(3, "", FmtLabel("ORIG RWY"));
-            SetLineLabels(4, FmtLabel("VIA"), FmtLabel("TO"));
-            SetLineValues(4, FmtValue("DIRECT"), FmtValue("----"));
-            // L5 empty
+            SetLineLabels(3, FmtValue(""), FmtValue(""));
+            SetLineLabels(4, FmtValue(""), FmtValue(""));
+            SetLineValues(4, FmtValue(""), FmtValue(""));
+            SetLineLabels(5, "", "");
+            SetLineValues(5, FmtValue("<COPY ACTIVE"), FmtValue(""));
             SetLineLabels(6, "", "");
             SetLineValues(6, FmtValue("<SEC FPLN"), "");
-            GetMessageLine()?.SetText("");
+            GetMessageLine()?.SetText("DR  EXCEEDS  5MIN");
         }
     }
 
@@ -159,36 +176,45 @@ public class ActFplnView : FmsPageView
         if (_modActive && _execArmed)
         {
             // ── STATE: MOD ARMED ─────────────────────────────────────────────────
-            // Only L6 is active; all other keys are inactive.
+            // L6L: CANCEL MOD. R6: OFFSET — inactive.
             if (side == 0 && row == 6)
-                CancelMod(); // <CANCEL MOD
-            // R6: OFFSET — inactive
+                CancelMod();
         }
         else if (_modActive)
         {
             // ── STATE: MOD CONFIRM ───────────────────────────────────────────────
-            // L6 arms EXEC; R6 cancels MOD. All other keys inactive.
+            // L6L arms EXEC; R6R cancels MOD. All other keys inactive.
             if (side == 0 && row == 6)
                 _execArmed = true; // <YES — arm EXEC
             if (side == 1 && row == 6)
                 CancelMod(); // NO>  — cancel MOD
         }
+        else if (_init)
+        {
+            // ── STATE: ACT — SCRATCHPAD SEEDED ───────────────────────────────────
+            // L2: commit scratchpad value to enter MOD.
+            // L6L: navigate to SecFpln. All other keys inactive.
+            if (side == 0 && row == 2)
+            {
+                _modActive = true;
+                _pendingRouteName = Scratchpad.ReadAndClear();
+            }
+            if (side == 0 && row == 6)
+                Router.ShowPage("SecFpln");
+        }
         else if (Model.ActiveRoute.Count > 0)
         {
             // ── STATE: ACT — ROUTE LOADED ────────────────────────────────────────
-            // L2: scratchpad seed / commit to enter MOD.
-            // L6L: navigate to SecFpln. All other keys inactive.
+            // L2: scratchpad seed / commit. L6L: navigate to SecFpln.
             if (side == 0 && row == 2)
                 HandleL2();
             if (side == 0 && row == 6)
                 Router.ShowPage("SecFpln");
-            // R6: OFFSET — inactive
         }
         else
         {
             // ── STATE: ACT — NO ROUTE ────────────────────────────────────────────
-            // L2: scratchpad seed / commit to enter MOD.
-            // L6L: navigate to SecFpln. All other keys inactive.
+            // L2: scratchpad seed. L6L: navigate to SecFpln. All other keys inactive.
             if (side == 0 && row == 2)
                 HandleL2();
             if (side == 0 && row == 6)
@@ -220,7 +246,10 @@ public class ActFplnView : FmsPageView
             // Step A: seed the scratchpad with the scenario route name
             string routeName = Model.Scenario?.route ?? "";
             if (!string.IsNullOrEmpty(routeName))
+            {
                 Scratchpad.Append(routeName);
+                _init = true;
+            }
             else
                 Scratchpad.ShowMessage("NO ROUTE");
         }
@@ -228,8 +257,6 @@ public class ActFplnView : FmsPageView
         {
             // Step B: commit scratchpad content → enter MOD
             _pendingRouteName = Scratchpad.ReadAndClear();
-            _modActive = true;
-            _execArmed = false;
         }
     }
 
@@ -239,6 +266,7 @@ public class ActFplnView : FmsPageView
         _modActive = false;
         _pendingRouteName = null;
         _execArmed = false;
+        _init = false;
     }
 
     /// <summary>Called by the EXEC function key.</summary>
@@ -287,9 +315,8 @@ public class ActFplnView : FmsPageView
         var nav = Router.GetNavAutopilot();
         if (nav)
             nav.activeIndex = 0;
-
-        CancelMod();
         Model.ArrivalLoaded = false;
         Scratchpad.ShowMessage("ROUTE LOADED", 1.5f);
+        CancelMod();
     }
 }
