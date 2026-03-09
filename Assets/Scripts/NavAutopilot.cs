@@ -68,7 +68,12 @@ public class NavAutopilot : MonoBehaviour
     void FixedUpdate()
     {
         if (!plan || plan.waypoints == null || plan.waypoints.Length == 0)
+        {
+            // Freeze heading to current aircraft yaw so no stale intercept is held
+            if (navEngaged && targets && aircraft)
+                targets.targetHdgDeg = aircraft.eulerAngles.y;
             return;
+        }
         if (!targets || !aircraft)
             return;
 
@@ -238,4 +243,12 @@ public class NavAutopilot : MonoBehaviour
     }
 
     public void ToggleNav() => SetNavEngaged(!navEngaged);
+
+    public void ResetCaptureState()
+    {
+        wasNear = false;
+        nearFrames = 0;
+        prevDist = float.PositiveInfinity;
+        advanceCooldownT = 0f;
+    }
 }

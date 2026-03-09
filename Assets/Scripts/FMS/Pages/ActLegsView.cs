@@ -232,7 +232,10 @@ public class ActLegsView : FmsPageView, IMultiPage
 
         var nav = Router.GetNavAutopilot();
         if (nav)
+        {
             nav.activeIndex = Mathf.Clamp(Model.ActiveLegIndex, 0, Model.ActiveRoute.Count - 1);
+            nav.ResetCaptureState();
+        }
     }
 
     // ─────────────────────────────────────────────────────────────────────────
