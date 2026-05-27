@@ -66,12 +66,6 @@ public class PlaneController : MonoBehaviour
     [Tooltip("Maximum roll rate (deg/sec).")]
     public float maxRollRateDegPerSec = 15f;
 
-    [Tooltip("Heading error (deg) -> bank command (deg).")]
-    public float headingToBankGain = 0.5f;
-
-    [Tooltip("If heading error is within this value, command wings level.")]
-    public float wingsLevelErrorDeg = 2f;
-
     float currentBankDeg = 0f;
 
     [Header("Debug")]
@@ -219,19 +213,13 @@ public class PlaneController : MonoBehaviour
 
         float e_h = targetM - h;
 
-        // Hard capture: prevent asymptotic "never quite arrives"
+        // Altitude captured: smoothly drive Vy to zero (no position teleport)
         if (Mathf.Abs(e_h) <= altHoldToleranceM)
         {
             altMode = AltMode.Hold;
-            vyCmdSmoothed = 0f;
-
-            // Snap to target altitude (training-sim determinism)
-            Vector3 pSnap = rb.position;
-            pSnap.y = targetM;
-            rb.position = pSnap;
-
+            vyCmdSmoothed = Mathf.MoveTowards(vyCmdSmoothed, 0f, maxVyAccel * dt);
             Vector3 vHold = rb.linearVelocity;
-            vHold.y = 0f;
+            vHold.y = vyCmdSmoothed;
             rb.linearVelocity = vHold;
             return;
         }
@@ -256,10 +244,7 @@ public class PlaneController : MonoBehaviour
 
             vyDes = Mathf.Lerp(vyCap, vyVnav, blend);
         }
-        else // Hold
-        {
-            vyDes = 0f;
-        }
+        // No else — vyDes = vyCap when VNAV not available
 
         vyCmdSmoothed = Mathf.MoveTowards(vyCmdSmoothed, vyDes, maxVyAccel * dt);
 
@@ -276,5 +261,6 @@ public class PlaneController : MonoBehaviour
         _hdgLogT = 0f;
 
         float err = Mathf.DeltaAngle(currentYaw, targetYaw);
+        Debug.Log($"[HDG] err={err:F1}° bank={bankDeg:F1}° gs={groundSpeed * 1.944f:F0}kt");
     }
 }

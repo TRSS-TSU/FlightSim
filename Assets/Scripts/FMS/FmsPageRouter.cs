@@ -199,6 +199,68 @@ public class FmsPageRouter : MonoBehaviour
 
     public SimTargets GetSimTargets() => simTargets;
 
+    /// <summary>
+    /// Capture a continuity snapshot of the current route and nav state.
+    /// Call this BEFORE mutating Model.ActiveRoute, then pass the result to
+    /// CommitActiveRoute() after the mutation so the resolver can map old
+    /// navigation context onto the rebuilt waypoint array.
+    /// </summary>
+    public RouteContinuitySnapshot CaptureRouteContinuity()
+    {
+        int count = _model.ActiveRoute.Count;
+        int idx   = navAutopilot
+            ? Mathf.Clamp(navAutopilot.activeIndex, 0, Mathf.Max(0, count - 1))
+            : 0;
+
+        var idents = new List<string>(count);
+        foreach (var w in _model.ActiveRoute)
+            idents.Add(w.ident);
+
+        Vector3 flatPos = Vector3.zero;
+        Vector3 flatFwd = Vector3.forward;
+        if (navAutopilot && navAutopilot.aircraft)
+        {
+            flatPos = Vector3.ProjectOnPlane(navAutopilot.aircraft.position, Vector3.up);
+            flatFwd = Vector3.ProjectOnPlane(navAutopilot.aircraft.forward,  Vector3.up);
+            if (flatFwd.sqrMagnitude > 0.001f) flatFwd.Normalize();
+        }
+
+        return new RouteContinuitySnapshot
+        {
+            oldRouteIdents  = idents,
+            oldActiveIndex  = idx,
+            oldFromIdent    = (idx > 0 && count > 0) ? _model.ActiveRoute[idx - 1].ident : "",
+            oldToIdent      = (idx < count)           ? _model.ActiveRoute[idx].ident     : "",
+            aircraftFlatPos = flatPos,
+            aircraftFlatFwd = flatFwd,
+        };
+    }
+
+    /// <summary>
+    /// Rebuild the scene waypoints from Model.ActiveRoute, resolve the post-rebuild
+    /// active leg via RouteResolver, reset capture state, and immediately sync
+    /// Model.ActiveLegIndex. Call this after mutating Model.ActiveRoute.
+    /// </summary>
+    public void CommitActiveRoute(RouteContinuitySnapshot snapshot,
+                                   bool clearArrivalLoaded = false)
+    {
+        var sd = _model.Scenario;
+        if (!flightPlan || sd == null) return;
+
+        flightPlan.RebuildRoute(_model.ActiveRoute, sd.centerLatDeg, sd.centerLonDeg, sd.baseZoom);
+
+        if (navAutopilot)
+        {
+            navAutopilot.activeIndex =
+                RouteResolver.Resolve(snapshot, _model.ActiveRoute, flightPlan.waypoints);
+            navAutopilot.ResetCaptureState();
+            _model.ActiveLegIndex = navAutopilot.activeIndex; // immediate sync; Update() will confirm next frame
+        }
+
+        if (clearArrivalLoaded)
+            _model.ArrivalLoaded = false;
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // Private helpers
     // ─────────────────────────────────────────────────────────────────────────

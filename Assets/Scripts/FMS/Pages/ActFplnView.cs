@@ -282,8 +282,9 @@ public class ActFplnView : FmsPageView
 
     /// <summary>
     /// Apply the selected route: rebuild Model.ActiveRoute from
-    /// ScenarioDefinition.prefillRouteIdents, then commit to FlightPlan
-    /// and NavAutopilot. Mirrors ActLegsView.CommitRoute() pattern.
+    /// ScenarioDefinition.prefillRouteIdents, then commit via the shared
+    /// FmsPageRouter.CommitActiveRoute() which runs the five-tier continuity
+    /// resolver so the active leg is preserved whenever possible.
     /// </summary>
     private void ApplyRoute()
     {
@@ -294,7 +295,10 @@ public class ActFplnView : FmsPageView
             return;
         }
 
-        // Rebuild ActiveRoute from scenario prefill list
+        // 1. Capture continuity snapshot BEFORE mutating Model.ActiveRoute
+        var snap = Router.CaptureRouteContinuity();
+
+        // 2. Rebuild ActiveRoute from scenario prefill list
         Model.ActiveRoute.Clear();
         foreach (var ident in sd.prefillRouteIdents)
         {
@@ -304,18 +308,11 @@ public class ActFplnView : FmsPageView
             if (wp != null)
                 Model.ActiveRoute.Add(wp);
         }
-        Model.ActiveLegIndex = 0;
 
-        // Commit to FlightPlan (rebuilds scene waypoint objects)
-        var fp = Router.GetFlightPlan();
-        if (fp)
-            fp.RebuildRoute(Model.ActiveRoute, sd.centerLatDeg, sd.centerLonDeg, sd.baseZoom);
+        // 3. Rebuild scene waypoints, resolve active leg, reset capture state
+        Router.CommitActiveRoute(snap, clearArrivalLoaded: true);
 
-        // Reset autopilot leg index
-        var nav = Router.GetNavAutopilot();
-        if (nav)
-            nav.activeIndex = 0;
-        Model.ArrivalLoaded = false;
+        // 4. Page-local cleanup
         Scratchpad.ShowMessage("ROUTE LOADED", 1.5f);
         CancelMod();
     }

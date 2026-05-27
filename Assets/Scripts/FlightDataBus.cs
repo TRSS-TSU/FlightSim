@@ -17,7 +17,7 @@ public class FlightDataBus : MonoBehaviour
     Rigidbody _rb;
 
     [Header("Outputs (explicit units)")]
-    [Tooltip("Indicated airspeed proxy (knots). Rigidbody speed magnitude (includes vertical).")]
+    [Tooltip("Indicated airspeed proxy (knots). XZ-plane magnitude only (excludes vertical speed).")]
     public float iasKt;
 
     [Tooltip("Ground speed (knots). XZ-plane magnitude only.")]
@@ -103,10 +103,9 @@ public class FlightDataBus : MonoBehaviour
 
         Vector3 v = _rb.linearVelocity;
 
-        iasKt = v.magnitude * KT_PER_MS;
-
         Vector2 vXZ = new Vector2(v.x, v.z);
-        gsKt = vXZ.magnitude * KT_PER_MS;
+        iasKt = vXZ.magnitude * KT_PER_MS;
+        gsKt  = vXZ.magnitude * KT_PER_MS;
 
         altFtMsl = _rb.position.y * FT_PER_M;
         vsiFpm = v.y * FTMIN_PER_MS;

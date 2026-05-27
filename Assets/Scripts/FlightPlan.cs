@@ -25,6 +25,9 @@ public class FlightPlan : MonoBehaviour
     [SerializeField]
     private float gizmoRadiusM = 20f;
 
+    /// <summary>Fired after waypoints[] is fully built (both initial load and RebuildRoute).</summary>
+    public event System.Action OnRouteBuilt;
+
     private readonly List<Transform> spawned = new();
 
     private void OnEnable() => ScenarioRuntime.OnChanged += LoadScenario;
@@ -113,6 +116,8 @@ public class FlightPlan : MonoBehaviour
             Debug.Log(
                 $"[FlightPlan] Built ACTIVE plan: {waypoints.Length} @ z={z} tileSizeM={tileSizeM:0.00}"
             );
+
+        OnRouteBuilt?.Invoke();
     }
 
     private void SnapAircraftToFirstWaypoint()
@@ -168,6 +173,8 @@ public class FlightPlan : MonoBehaviour
 
         if (logBuild)
             Debug.Log($"[FlightPlan] RebuildRoute: {waypoints.Length} waypoints @ z={zoom}");
+
+        OnRouteBuilt?.Invoke();
     }
 
     private void ClearSpawned()

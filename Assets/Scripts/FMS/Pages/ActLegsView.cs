@@ -172,6 +172,10 @@ public class ActLegsView : FmsPageView, IMultiPage
         int routeIdx = _pageIndex * LEGS_PER_PAGE + slot;
         string sp = Scratchpad.CurrentText;
 
+        // Capture full route continuity BEFORE any mutation so CommitRoute can
+        // map the old nav state onto the rebuilt waypoint array.
+        var snap = Router.CaptureRouteContinuity();
+
         if (sp.Length == 0)
         {
             if (routeIdx < Model.ActiveRoute.Count)
@@ -185,7 +189,7 @@ public class ActLegsView : FmsPageView, IMultiPage
             {
                 Model.ActiveRoute.RemoveAt(routeIdx);
                 Scratchpad.ReadAndClear();
-                CommitRoute();
+                CommitRoute(snap);
                 _pageIndex = Mathf.Clamp(_pageIndex, 0, TotalPages - 1);
             }
             else
@@ -216,27 +220,20 @@ public class ActLegsView : FmsPageView, IMultiPage
         int insertAt = Mathf.Clamp(routeIdx, 0, Model.ActiveRoute.Count);
         Model.ActiveRoute.Insert(insertAt, wpDef);
         Scratchpad.ReadAndClear();
-        CommitRoute();
+        CommitRoute(snap);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // Route commit — rebuilds FlightPlan waypoints and resets NavAutopilot index
+    // Route commit — delegates to FmsPageRouter shared workflow
     // ─────────────────────────────────────────────────────────────────────────
 
-    private void CommitRoute()
-    {
-        var fp = Router.GetFlightPlan();
-        var sd = Model.Scenario;
-        if (fp && sd)
-            fp.RebuildRoute(Model.ActiveRoute, sd.centerLatDeg, sd.centerLonDeg, sd.baseZoom);
-
-        var nav = Router.GetNavAutopilot();
-        if (nav)
-        {
-            nav.activeIndex = Mathf.Clamp(Model.ActiveLegIndex, 0, Model.ActiveRoute.Count - 1);
-            nav.ResetCaptureState();
-        }
-    }
+    /// <summary>
+    /// Rebuild scene waypoints and resolve the post-rebuild active leg via the
+    /// shared five-tier continuity resolver in FmsPageRouter.CommitActiveRoute().
+    /// <paramref name="snap"/> must be captured BEFORE the route mutation.
+    /// </summary>
+    private void CommitRoute(RouteContinuitySnapshot snap)
+        => Router.CommitActiveRoute(snap);
 
     // ─────────────────────────────────────────────────────────────────────────
     // IMultiPage

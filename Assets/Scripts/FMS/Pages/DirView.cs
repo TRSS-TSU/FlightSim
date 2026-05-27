@@ -159,16 +159,22 @@ public class DirView : FmsPageView
             Model.ActiveRoute.RemoveRange(0, idx);
         }
 
-        Model.ActiveLegIndex = 0;
+        // Note: do NOT write Model.ActiveLegIndex here — FmsPageRouter.Update() owns it
+        // and will sync it from nav.activeIndex on the next frame.
 
         var fp = Router.GetFlightPlan();
         var sd = Model.Scenario;
         if (fp && sd != null)
             fp.RebuildRoute(Model.ActiveRoute, sd.centerLatDeg, sd.centerLonDeg, sd.baseZoom);
 
+        // Direct-To restructures the route so wpDef is now at index 0.
+        // FindBestLegIndex locates it by name and returns 0, then clears stale capture state.
         var nav = Router.GetNavAutopilot();
         if (nav)
-            nav.activeIndex = 0;
+        {
+            nav.activeIndex = nav.FindBestLegIndex(wpDef.ident);
+            nav.ResetCaptureState();
+        }
 
         // Approach fixes are at the end of route; they may have been truncated.
         Model.ArrivalLoaded = false;
