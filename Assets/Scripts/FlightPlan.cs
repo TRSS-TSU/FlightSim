@@ -18,6 +18,13 @@ public class FlightPlan : MonoBehaviour
     [SerializeField]
     private Transform aircraftRoot; // AircraftRoot (optional)
 
+    [Header("Training Scale")]
+    [Tooltip(
+        "Compresses scenario waypoint spacing for training gameplay. Keep parent transforms at scale 1."
+    )]
+    [Range(0.02f, 1f)]
+    public float trainingWorldScale = 0.04f;
+
     [Header("Debug")]
     [SerializeField]
     private bool logBuild = true;
@@ -29,6 +36,13 @@ public class FlightPlan : MonoBehaviour
     public event System.Action OnRouteBuilt;
 
     private readonly List<Transform> spawned = new();
+
+    private readonly List<ScenarioDefinition.WaypointDef> currentRouteDefs = new();
+
+    private ScenarioDefinition currentScenario;
+    private double currentCenterLat;
+    private double currentCenterLon;
+    private int currentZoom;
 
     private void OnEnable() => ScenarioRuntime.OnChanged += LoadScenario;
 
@@ -77,6 +91,12 @@ public class FlightPlan : MonoBehaviour
 
         var center = LatLonToTileXYFrac(s.centerLatDeg, s.centerLonDeg, z);
 
+        currentScenario = s;
+        currentCenterLat = s.centerLatDeg;
+        currentCenterLon = s.centerLonDeg;
+        currentZoom = z;
+        currentRouteDefs.Clear();
+
         foreach (var ident in s.prefillRouteIdents)
         {
             if (string.IsNullOrWhiteSpace(ident))
@@ -94,12 +114,18 @@ public class FlightPlan : MonoBehaviour
                 continue;
             }
 
+            currentRouteDefs.Add(wpDef);
+
             var tile = LatLonToTileXYFrac(wpDef.latDeg, wpDef.lonDeg, z);
             float dxTiles = (float)(tile.x - center.x);
             float dyTiles = (float)(tile.y - center.y);
 
             // Slippy Y increases south; Unity +Z is north → flip sign into Z.
-            Vector3 localPos = new(dxTiles * tileSizeM, 0f, -dyTiles * tileSizeM);
+            Vector3 localPos = new(
+                dxTiles * tileSizeM * trainingWorldScale,
+                0f,
+                -dyTiles * tileSizeM * trainingWorldScale
+            );
 
             var go = new GameObject($"WP_{wpDef.ident}");
             go.transform.SetParent(waypointParent ? waypointParent : transform, false);
@@ -147,6 +173,14 @@ public class FlightPlan : MonoBehaviour
         StopAllCoroutines();
         ClearSpawned();
 
+        currentCenterLat = centerLat;
+        currentCenterLon = centerLon;
+        currentZoom = zoom;
+
+        currentRouteDefs.Clear();
+        if (newWpts != null)
+            currentRouteDefs.AddRange(newWpts);
+
         float tileSizeM = tileGrid
             ? tileGrid.tileSizeM
             : (float)WebMercator.MetersPerTile(centerLat, zoom);
@@ -161,7 +195,11 @@ public class FlightPlan : MonoBehaviour
             float dxTiles = (float)(tile.x - center.x);
             float dyTiles = (float)(tile.y - center.y);
 
-            Vector3 localPos = new(dxTiles * tileSizeM, 0f, -dyTiles * tileSizeM);
+            Vector3 localPos = new(
+                dxTiles * tileSizeM * trainingWorldScale,
+                0f,
+                -dyTiles * tileSizeM * trainingWorldScale
+            );
 
             var go = new GameObject($"WP_{wpDef.ident}");
             go.transform.SetParent(waypointParent ? waypointParent : transform, false);
@@ -175,6 +213,19 @@ public class FlightPlan : MonoBehaviour
             Debug.Log($"[FlightPlan] RebuildRoute: {waypoints.Length} waypoints @ z={zoom}");
 
         OnRouteBuilt?.Invoke();
+    }
+
+    public void RebuildCurrentRoute()
+    {
+        if (currentRouteDefs.Count == 0)
+        {
+            if (currentScenario != null)
+                LoadScenario(currentScenario);
+
+            return;
+        }
+
+        RebuildRoute(currentRouteDefs, currentCenterLat, currentCenterLon, currentZoom);
     }
 
     private void ClearSpawned()

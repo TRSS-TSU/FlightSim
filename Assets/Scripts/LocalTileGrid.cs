@@ -38,6 +38,12 @@ public class LocalTileGrid : MonoBehaviour
     [Range(0, 6)]
     public int bufferTiles = 3;
     public float rebuildDelay = 0.05f;
+
+    [Header("Training Scale")]
+    [Tooltip("Compresses map tile spacing/size for training gameplay. Do not scale TileContainer.")]
+    [Range(0.02f, 1f)]
+    public float trainingWorldScale = 0.04f;
+
     public bool verboseLogs = true;
 
     // ---- Public (used by other scripts) ----
@@ -63,6 +69,8 @@ public class LocalTileGrid : MonoBehaviour
 
     // World-space anchor for the scenario center tile (meters)
     Vector3 scenarioOriginWorld;
+
+    float ScaledTileSizeM => tileSizeM * trainingWorldScale;
 
     Coroutine pending;
 
@@ -174,8 +182,8 @@ public class LocalTileGrid : MonoBehaviour
         Vector3 focus = GetFocusPos();
         Vector3 d = focus - scenarioOriginWorld;
 
-        int offX = Mathf.RoundToInt(d.x / tileSizeM);
-        int offY = -Mathf.RoundToInt(d.z / tileSizeM); // Unity +Z north, slippy y increases south
+        int offX = Mathf.RoundToInt(d.x / ScaledTileSizeM);
+        int offY = -Mathf.RoundToInt(d.z / ScaledTileSizeM);
 
         int cx = scenarioCenterX + offX;
         int cy = scenarioCenterY + offY;
@@ -205,8 +213,8 @@ public class LocalTileGrid : MonoBehaviour
         Vector3 focus = GetFocusPos();
         Vector3 d = focus - scenarioOriginWorld;
 
-        int offX = Mathf.RoundToInt(d.x / tileSizeM);
-        int offY = -Mathf.RoundToInt(d.z / tileSizeM);
+        int offX = Mathf.RoundToInt(d.x / ScaledTileSizeM);
+        int offY = -Mathf.RoundToInt(d.z / ScaledTileSizeM);
 
         centerX = scenarioCenterX + offX;
         centerY = scenarioCenterY + offY;
@@ -283,9 +291,10 @@ public class LocalTileGrid : MonoBehaviour
             int dtx = x - scenarioCenterX;
             int dty = y - scenarioCenterY;
 
-            go.transform.localScale = new Vector3(tileSizeM, tileSizeM, 1f);
+            go.transform.localScale = new Vector3(ScaledTileSizeM, ScaledTileSizeM, 1f);
             go.transform.position =
-                scenarioOriginWorld + new Vector3(dtx * tileSizeM, 0f, -dty * tileSizeM);
+                scenarioOriginWorld
+                + new Vector3(dtx * ScaledTileSizeM, 0f, -dty * ScaledTileSizeM);
             go.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
 
             go.name = $"tile z{z} {x}_{y}";

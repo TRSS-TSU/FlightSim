@@ -28,6 +28,13 @@ public class FollowAircraftCamera : MonoBehaviour
     public float fovDeg = 60f;
     public float farClipMin = 80000f;
 
+    [Header("Training Scale")]
+    [Tooltip(
+        "Matches the compressed scenario/map scale so the ND camera frames the shortened training world."
+    )]
+    [Range(0.02f, 1f)]
+    public float trainingWorldScale = 0.04f;
+
     private Coroutine pending;
     private Camera cam;
 
@@ -93,8 +100,8 @@ public class FollowAircraftCamera : MonoBehaviour
         float checkW = 2f * H * Mathf.Tan(0.5f * Mathf.Deg2Rad * cam.fieldOfView);
         Debug.Log($"[ND] range={nm}NM  H={H:F0}m  width={checkW:F0}m (expected {widthM:F0}m)");
 
-        offset = new Vector3(offset.x, H, offset.z);
-        cam.farClipPlane = Mathf.Max(farClipMin, H + 1000f);
+        offset = new Vector3(offset.x, H * trainingWorldScale, offset.z);
+        cam.farClipPlane = Mathf.Max(farClipMin, (H * trainingWorldScale) + 1000f);
 
         pending = null;
     }
