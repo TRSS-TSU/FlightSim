@@ -26,6 +26,9 @@ public class FlightDataBus : MonoBehaviour
     [Tooltip("Altitude (feet MSL). Rigidbody y position (meters) converted to feet.")]
     public float altFtMsl;
 
+    [Tooltip("Selected altitude (feet MSL). Passthrough from the authoritative pilot target.")]
+    public float selectedAltFtMsl;
+
     [Tooltip("Heading (degrees, 0..360).")]
     public float hdgDeg;
 
@@ -40,6 +43,9 @@ public class FlightDataBus : MonoBehaviour
 
     [Tooltip("Bank angle (degrees). Signed roll about Z.")]
     public float bankDeg;
+
+    [Tooltip("Pitch angle (degrees). Signed pitch about X.")]
+    public float pitchDeg;
 
     [Tooltip("NAV engaged passthrough (true when NavAutopilot is driving targets).")]
     public bool navEngaged;
@@ -108,12 +114,14 @@ public class FlightDataBus : MonoBehaviour
         gsKt  = vXZ.magnitude * KT_PER_MS;
 
         altFtMsl = _rb.position.y * FT_PER_M;
+        selectedAltFtMsl = targets ? targets.targetAltFtMsl : 0f;
         vsiFpm = v.y * FTMIN_PER_MS;
 
         float hdgNow = Mathf.Repeat(plane.transform.eulerAngles.y, 360f);
         hdgDeg = hdgNow;
 
         bankDeg = Mathf.DeltaAngle(0f, plane.transform.eulerAngles.z);
+        pitchDeg = Mathf.DeltaAngle(0f, plane.transform.eulerAngles.x);
 
         if (vXZ.sqrMagnitude > 1e-4f)
         {

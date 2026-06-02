@@ -63,6 +63,12 @@ public class PlaneController : MonoBehaviour
     [Tooltip("Maximum bank angle used by the turn model (deg).")]
     public float maxBankDeg = 25f;
 
+    [Header("Visual Pitch")]
+    public float maxVisualPitchDeg = 10f;
+    public float pitchResponseDegPerSec = 20f;
+
+    float currentPitchDeg = 0f;
+
     [Tooltip("Maximum roll rate (deg/sec).")]
     public float maxRollRateDegPerSec = 15f;
 
@@ -102,8 +108,8 @@ public class PlaneController : MonoBehaviour
         // Keep the sim deterministic and planar:
         rb.linearDamping = 0f;
         rb.angularDamping = 0f;
-        rb.constraints =
-            RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+        // rb.constraints =
+        //     RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
 
         rb.interpolation = RigidbodyInterpolation.None;
         rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
@@ -194,7 +200,28 @@ public class PlaneController : MonoBehaviour
 
         if (enableHeadingDebug)
             LogHeadingDebug(currentYaw, targetYaw, currentBankDeg, groundSpeed);
-        rb.MoveRotation(Quaternion.Euler(0f, newYaw, -currentBankDeg));
+        float vy = rb.linearVelocity.y;
+
+        // Positive climb = nose up, descent = nose down.
+        // This is visual attitude only, not a real aero model.
+        float pitchCmdDeg = 0f;
+
+        if (maxClimbRate > 0.01f)
+        {
+            pitchCmdDeg = Mathf.Clamp(
+                vy / maxClimbRate * maxVisualPitchDeg,
+                -maxVisualPitchDeg,
+                maxVisualPitchDeg
+            );
+        }
+
+        currentPitchDeg = Mathf.MoveTowards(
+            currentPitchDeg,
+            pitchCmdDeg,
+            pitchResponseDegPerSec * dt
+        );
+
+        rb.MoveRotation(Quaternion.Euler(-currentPitchDeg, newYaw, -currentBankDeg));
     }
 
     void UpdateAltitude()
