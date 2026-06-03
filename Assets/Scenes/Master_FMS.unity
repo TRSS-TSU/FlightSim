@@ -816,7 +816,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: 
+          m_StringArgument: o
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &8932252
@@ -59001,7 +59001,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: r
+          m_StringArgument: f
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &1063467400
@@ -105960,7 +105960,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1901936801}
   - component: {fileID: 1901936800}
-  - component: {fileID: 1901936799}
+  - component: {fileID: 1901936802}
   m_Layer: 0
   m_Name: EventSystem
   m_TagString: Untagged
@@ -105968,26 +105968,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1901936799
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1901936798}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f231c4fb786f3946a6b90b886c48677, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.EventSystems.StandaloneInputModule
-  m_SendPointerHoverToParent: 1
-  m_HorizontalAxis: Horizontal
-  m_VerticalAxis: Vertical
-  m_SubmitButton: Submit
-  m_CancelButton: Cancel
-  m_InputActionsPerSecond: 10
-  m_RepeatDelay: 0.5
-  m_ForceModuleActive: 0
 --- !u!114 &1901936800
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -106018,6 +105998,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1901936802
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1901936798}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01614664b831546d2ae94a42149d80ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.UI.InputSystemUIInputModule
+  m_SendPointerHoverToParent: 1
+  m_MoveRepeatDelay: 0.5
+  m_MoveRepeatRate: 0.1
+  m_XRTrackingOrigin: {fileID: 0}
+  m_ActionsAsset: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_PointAction: {fileID: 11400000, guid: 6641495fb7f465e40b51fa12c9c8fcf3, type: 2}
+  m_MoveAction: {fileID: 11400000, guid: bbbf5d2af2b607d46996039ce61dd628, type: 2}
+  m_SubmitAction: {fileID: 11400000, guid: 8cef17e132b9aea41a45360b8b803716, type: 2}
+  m_CancelAction: {fileID: 11400000, guid: 3460007797c1d7f45bfc3efdad0acafa, type: 2}
+  m_LeftClickAction: {fileID: 11400000, guid: a3dbd20e35a93bf43a10d9cba00273f0, type: 2}
+  m_MiddleClickAction: {fileID: 11400000, guid: f26ffc6c0c753bb418d9d139b8f4d987, type: 2}
+  m_RightClickAction: {fileID: 11400000, guid: dfcb198347dec0a438d149370d5910a3, type: 2}
+  m_ScrollWheelAction: {fileID: 11400000, guid: 8cb72081a74dc1b45922ed2fbe141900, type: 2}
+  m_TrackedDevicePositionAction: {fileID: 11400000, guid: 543a0aa92a960e74fb20f5088e644d98, type: 2}
+  m_TrackedDeviceOrientationAction: {fileID: 11400000, guid: 2595d4b9e992fc443b3c527da8b896db, type: 2}
+  m_DeselectOnBackgroundClick: 1
+  m_PointerBehavior: 0
+  m_CursorLockBehavior: 0
+  m_ScrollDeltaPerTick: 6
 --- !u!1 &1902115053
 GameObject:
   m_ObjectHideFlags: 0

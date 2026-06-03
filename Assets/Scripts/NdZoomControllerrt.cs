@@ -39,16 +39,6 @@ public class NdZoomController : MonoBehaviour
 
     void Start() => Apply(active);
 
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-            Apply(16);
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-            Apply(15);
-        if (Input.GetKeyDown(KeyCode.Alpha3))
-            Apply(14);
-    }
-
     public void Apply(int z)
     {
         ZoomLevel lvl =
