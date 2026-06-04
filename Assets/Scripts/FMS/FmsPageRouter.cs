@@ -40,6 +40,7 @@ public class FmsPageRouter : MonoBehaviour
     public FlightPlan flightPlan;
     public FmsScratchpad scratchpad;
     public SimTargets simTargets;
+    public FmsRouteActivationCoordinator routeActivationCoordinator;
 
     // ── Page GameObjects ────────────────────────────────────────────────────────
     [Header("CDU Pages (assign GameObjects in Inspector)")]
@@ -67,8 +68,12 @@ public class FmsPageRouter : MonoBehaviour
     private readonly Dictionary<string, FmsPageView> _pages = new();
     private float _refreshTimer;
     private const float RefreshInterval = 0.1f; // 10 Hz
+    private bool _hasPendingRouteActivation;
+    private bool _pendingClearArrivalLoaded;
+    private RouteContinuitySnapshot _pendingRouteSnapshot;
 
     public FmsPageView CurrentPage => _current;
+    public bool HasPendingRouteActivation => _hasPendingRouteActivation;
 
     /// <summary>
     /// Set by PerfInitView when the student stages weight data.
@@ -87,6 +92,13 @@ public class FmsPageRouter : MonoBehaviour
     private void Start()
     {
         BuildPageRegistry();
+
+        if (!routeActivationCoordinator)
+#if UNITY_2023_1_OR_NEWER
+            routeActivationCoordinator = FindFirstObjectByType<FmsRouteActivationCoordinator>();
+#else
+            routeActivationCoordinator = FindObjectOfType<FmsRouteActivationCoordinator>();
+#endif
 
         if (ScenarioRuntime.Current != null)
             _model.LoadFromScenario(ScenarioRuntime.Current);
@@ -163,9 +175,14 @@ public class FmsPageRouter : MonoBehaviour
                 ShowPage("Tune");
                 break;
             case FmsKey.Exec:
-                if (_current is ActFplnView actFpln)
+                if (_current is ActFplnView actFpln && actFpln.HasArmedMod)
                 {
                     actFpln.HandleExec();
+                    break;
+                }
+                if (_hasPendingRouteActivation)
+                {
+                    ExecutePendingActiveRoute();
                     break;
                 }
                 if (HasPendingPerf)
@@ -237,28 +254,114 @@ public class FmsPageRouter : MonoBehaviour
     }
 
     /// <summary>
-    /// Rebuild the scene waypoints from Model.ActiveRoute, resolve the post-rebuild
-    /// active leg via RouteResolver, reset capture state, and immediately sync
-    /// Model.ActiveLegIndex. Call this after mutating Model.ActiveRoute.
+    /// Stage or execute route activation after Model.ActiveRoute has been mutated.
+    /// Page edits stage a MOD route; EXEC performs tile preload and scene waypoint rebuild.
     /// </summary>
     public void CommitActiveRoute(RouteContinuitySnapshot snapshot,
-                                   bool clearArrivalLoaded = false)
+                                   bool clearArrivalLoaded = false,
+                                   bool executeNow = false)
     {
-        var sd = _model.Scenario;
-        if (!flightPlan || sd == null) return;
-
-        flightPlan.RebuildRoute(_model.ActiveRoute, sd.centerLatDeg, sd.centerLonDeg, sd.baseZoom);
-
-        if (navAutopilot)
-        {
-            navAutopilot.activeIndex =
-                RouteResolver.Resolve(snapshot, _model.ActiveRoute, flightPlan.waypoints);
-            navAutopilot.ResetCaptureState();
-            _model.ActiveLegIndex = navAutopilot.activeIndex; // immediate sync; Update() will confirm next frame
-        }
-
         if (clearArrivalLoaded)
             _model.ArrivalLoaded = false;
+
+        if (executeNow)
+        {
+            ExecuteActiveRoute(snapshot);
+            return;
+        }
+
+        _pendingRouteSnapshot = snapshot;
+        _pendingClearArrivalLoaded |= clearArrivalLoaded;
+        _hasPendingRouteActivation = true;
+        scratchpad?.ShowMessage("MOD ROUTE - EXEC", 1.5f);
+    }
+
+    public void ExecutePendingActiveRoute()
+    {
+        if (!_hasPendingRouteActivation)
+        {
+            scratchpad?.ShowMessage("NO MOD", 1.5f);
+            return;
+        }
+
+        if (_pendingClearArrivalLoaded)
+            _model.ArrivalLoaded = false;
+
+        ExecuteActiveRoute(_pendingRouteSnapshot);
+    }
+
+    private void ExecuteActiveRoute(RouteContinuitySnapshot snapshot)
+    {
+        var sd = _model.Scenario;
+        if (sd == null || _model.ActiveRoute.Count == 0)
+        {
+            scratchpad?.ShowMessage("NO ROUTE", 1.5f);
+            return;
+        }
+
+        var routeCopy = new List<ScenarioDefinition.WaypointDef>(_model.ActiveRoute);
+        bool forceFirstLeg = flightPlan == null
+            || flightPlan.waypoints == null
+            || flightPlan.waypoints.Length == 0;
+
+        if (routeActivationCoordinator)
+        {
+            if (routeActivationCoordinator.IsExecuting)
+            {
+                scratchpad?.ShowMessage("EXEC BUSY", 1.5f);
+                return;
+            }
+
+            if (!routeActivationCoordinator.flightPlan)
+                routeActivationCoordinator.flightPlan = flightPlan;
+            if (!routeActivationCoordinator.navAutopilot)
+                routeActivationCoordinator.navAutopilot = navAutopilot;
+
+            _hasPendingRouteActivation = false;
+            _pendingClearArrivalLoaded = false;
+
+            routeActivationCoordinator.ExecuteModifiedRoute(
+                sd,
+                routeCopy,
+                snapshot,
+                forceFirstLeg,
+                OnRouteActivationComplete
+            );
+            return;
+        }
+
+        if (!flightPlan)
+        {
+            scratchpad?.ShowMessage("NO FLIGHT PLAN", 1.5f);
+            return;
+        }
+
+        _hasPendingRouteActivation = false;
+        _pendingClearArrivalLoaded = false;
+
+        if (navAutopilot)
+            navAutopilot.SetNavEngaged(false);
+
+        int zoom = sd.preloadZoomOverride > 0 ? sd.preloadZoomOverride : sd.baseZoom;
+        flightPlan.ActivateRouteFromFms(sd, routeCopy, zoom);
+
+        int activeIndex = 0;
+        if (navAutopilot)
+        {
+            activeIndex = forceFirstLeg
+                ? 0
+                : RouteResolver.Resolve(snapshot, routeCopy, flightPlan.waypoints);
+            navAutopilot.activeIndex = activeIndex;
+            navAutopilot.ResetCaptureState();
+        }
+
+        OnRouteActivationComplete(activeIndex);
+    }
+
+    private void OnRouteActivationComplete(int activeIndex)
+    {
+        _model.ActiveLegIndex = activeIndex;
+        scratchpad?.ShowMessage("ROUTE EXEC", 1.5f);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -303,6 +406,8 @@ public class FmsPageRouter : MonoBehaviour
 
     private void OnScenarioChanged(ScenarioDefinition sd)
     {
+        _hasPendingRouteActivation = false;
+        _pendingClearArrivalLoaded = false;
         _model.LoadFromScenario(sd);
         ShowPage("Index");
     }

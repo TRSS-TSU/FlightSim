@@ -50,6 +50,8 @@ public class ActFplnView : FmsPageView
     private string toIdent = "";
     private int distNm = 0;
 
+    public bool HasArmedMod => _modActive && _execArmed;
+
     // ─────────────────────────────────────────────────────────────────────────
     // FmsPageView contract
     // ─────────────────────────────────────────────────────────────────────────
@@ -310,7 +312,7 @@ public class ActFplnView : FmsPageView
         }
 
         // 3. Rebuild scene waypoints, resolve active leg, reset capture state
-        Router.CommitActiveRoute(snap, clearArrivalLoaded: true);
+        Router.CommitActiveRoute(snap, clearArrivalLoaded: true, executeNow: true);
 
         // 4. Page-local cleanup
         Scratchpad.ShowMessage("ROUTE LOADED", 1.5f);

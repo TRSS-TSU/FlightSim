@@ -1,37 +1,33 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
+public enum TileLoadMode
+{
+    DisabledAtStartup,
+    FixedRoutePreload,
+    RuntimePagingLegacy,
+}
+
 /// <summary>
-/// Offline ND raster tile streamer.
-/// Reads: StreamingAssets/{tilesFolder}/{z}/{x}/{y}.png
-/// Places tiles in world meters (1 Unity unit = 1 meter) on the XZ plane (y=0).
-/// Pages tiles by updating the center (x,y) index as the focus point crosses tile boundaries.
+/// Offline ND raster tile renderer.
+/// Reads StreamingAssets/{tilesFolder}/{z}/{x}/{y}.png and places tiles in world meters on y=0.
 /// </summary>
 public class LocalTileGrid : MonoBehaviour
 {
+    [Header("Load Mode")]
+    public TileLoadMode loadMode = TileLoadMode.FixedRoutePreload;
+
     [Header("References")]
-    [Tooltip(
-        "Parent transform that holds spawned tiles. Recommended: GroundRoot/TileContainer (Rot 0,0,0 / Scale 1,1,1)."
-    )]
     public Transform tileParent;
-
-    [Tooltip("Aircraft transform (fallback focus if ndCamera is not set).")]
     public Transform aircraft;
-
-    [Tooltip(
-        "ND camera that renders to the square ND RenderTexture (preferred for sizing + focus)."
-    )]
     public Camera ndCamera;
-
-    [Tooltip("ScenarioDefinition providing center lat/lon.")]
     public ScenarioDefinition scenario;
-
-    [Tooltip("Prefab: Quad (1x1) + TileContent component.")]
     public GameObject tilePrefab;
 
     [Header("Tile Source")]
-    [Tooltip("Folder under StreamingAssets containing z/x/y.png structure.")]
     public string tilesFolder = "tiles_nd_dark_v1";
 
     [Header("Paging / Coverage")]
@@ -46,7 +42,6 @@ public class LocalTileGrid : MonoBehaviour
 
     public bool verboseLogs = true;
 
-    // ---- Public (used by other scripts) ----
     [HideInInspector]
     public int z = 14;
 
@@ -56,27 +51,24 @@ public class LocalTileGrid : MonoBehaviour
     [HideInInspector]
     public float tileSizeM;
 
-    // ---- Internals ----
-    int lastRangeNm = 20;
+    private int lastRangeNm = 20;
 
-    int scenarioCenterX,
-        scenarioCenterY; // scenario center tile at current z
-    int centerX,
-        centerY; // current paging center
-    int lastCenterX,
-        lastCenterY;
-    bool hasLastCenter;
+    private int scenarioCenterX;
+    private int scenarioCenterY;
+    private int centerX;
+    private int centerY;
+    private int lastCenterX;
+    private int lastCenterY;
+    private bool hasLastCenter;
 
-    // World-space anchor for the scenario center tile (meters)
-    Vector3 scenarioOriginWorld;
+    private Vector3 scenarioOriginWorld;
+    private Coroutine pending;
 
-    float ScaledTileSizeM => tileSizeM * trainingWorldScale;
+    private float ScaledTileSizeM => tileSizeM * trainingWorldScale;
 
-    Coroutine pending;
-
-    void Start()
+    private void Start()
     {
-        if (scenario != null)
+        if (scenario != null && loadMode != TileLoadMode.DisabledAtStartup)
             ApplyScenario();
     }
 
@@ -85,17 +77,12 @@ public class LocalTileGrid : MonoBehaviour
         if (!scenario)
             return;
 
-        // Anchor: if tileParent exists, treat its position as world origin for scenario center tile.
         Transform p = tileParent ? tileParent : transform;
         scenarioOriginWorld = new Vector3(p.position.x, 0f, p.position.z);
 
         SetNdRangeNm(lastRangeNm);
     }
 
-    /// <summary>
-    /// Range → zoom mapping + coverage sizing based on ND camera frustum at ground (y=0),
-    /// using the ND RenderTexture aspect (square RT => aspect 1.0).
-    /// </summary>
     public void SetNdRangeNm(int rangeNm)
     {
         if (!scenario)
@@ -103,7 +90,6 @@ public class LocalTileGrid : MonoBehaviour
 
         lastRangeNm = rangeNm;
 
-        // Range → zoom mapping (your convention)
         z =
             (rangeNm == 20) ? 13
             : (rangeNm == 10) ? 14
@@ -112,7 +98,6 @@ public class LocalTileGrid : MonoBehaviour
 
         tileSizeM = WebMercator.MetersPerTile(scenario.centerLatDeg, z);
 
-        // Scenario center tile must be recomputed for THIS zoom
         LatLonToTileXY(
             scenario.centerLatDeg,
             scenario.centerLonDeg,
@@ -121,7 +106,6 @@ public class LocalTileGrid : MonoBehaviour
             out scenarioCenterY
         );
 
-        // ---- Frustum footprint sizing ----
         float neededWidthM;
         bool usedFallback = false;
 
@@ -135,7 +119,7 @@ public class LocalTileGrid : MonoBehaviour
             if (camH < 1f)
             {
                 usedFallback = true;
-                neededWidthM = 2f * rangeNm * 1852f; // fallback
+                neededWidthM = 2f * rangeNm * 1852f;
             }
             else
             {
@@ -158,24 +142,24 @@ public class LocalTileGrid : MonoBehaviour
         int neededAcross = Mathf.CeilToInt(neededWidthM / tileSizeM);
         int tilesAcross = neededAcross + bufferTiles * 2;
         if ((tilesAcross & 1) == 0)
-            tilesAcross += 1; // odd
+            tilesAcross += 1;
         radius = (tilesAcross - 1) / 2;
 
         RecomputeCenterFromFocus(forceResetLast: true);
 
-        if (verboseLogs)
-        {
-            float nominalWidthM = 2f * rangeNm * 1852f;
-        }
+        if (loadMode != TileLoadMode.RuntimePagingLegacy)
+            return;
 
         Rebuild();
 
         if (usedFallback)
-            Rebuild(); // will rebuild again after rebuildDelay once camera height is updated
+            Rebuild();
     }
 
-    void Update()
+    private void Update()
     {
+        if (loadMode != TileLoadMode.RuntimePagingLegacy)
+            return;
         if (!scenario || tileSizeM <= 0.1f)
             return;
 
@@ -208,7 +192,160 @@ public class LocalTileGrid : MonoBehaviour
         }
     }
 
-    void RecomputeCenterFromFocus(bool forceResetLast)
+    public IEnumerator BuildFixedTileSet(
+        ScenarioDefinition scenario,
+        IReadOnlyList<Vector2Int> tileIndexes,
+        int zoom,
+        Action<int, int> onProgress = null
+    )
+    {
+        if (!scenario || tileIndexes == null)
+            yield break;
+
+        if (pending != null)
+        {
+            StopCoroutine(pending);
+            pending = null;
+        }
+
+        this.scenario = scenario;
+        z = zoom;
+        tileSizeM = WebMercator.MetersPerTile(scenario.centerLatDeg, z);
+
+        Transform parent = tileParent ? tileParent : transform;
+        scenarioOriginWorld = new Vector3(parent.position.x, 0f, parent.position.z);
+
+        LatLonToTileXY(
+            scenario.centerLatDeg,
+            scenario.centerLonDeg,
+            z,
+            out scenarioCenterX,
+            out scenarioCenterY
+        );
+
+        ClearTiles(parent);
+
+        int found = 0;
+        int missing = 0;
+        int total = tileIndexes.Count;
+
+        if (verboseLogs)
+            Debug.Log($"[LocalTileGrid] Fixed preload started: {total} requested tiles");
+
+        for (int i = 0; i < total; i++)
+        {
+            Vector2Int tile = tileIndexes[i];
+            if (TryInstantiateTile(tile.x, tile.y, z, parent))
+                found++;
+            else
+                missing++;
+
+            onProgress?.Invoke(i + 1, total);
+
+            if ((i + 1) % 8 == 0)
+                yield return null;
+        }
+
+        if (verboseLogs)
+            Debug.Log($"[LocalTileGrid] Fixed preload complete: found={found} missing={missing}");
+    }
+
+    public void Rebuild()
+    {
+        if (loadMode != TileLoadMode.RuntimePagingLegacy)
+            return;
+
+        if (pending != null)
+            StopCoroutine(pending);
+        pending = StartCoroutine(RebuildAfterDelay());
+    }
+
+    private IEnumerator RebuildAfterDelay()
+    {
+        yield return new WaitForSeconds(rebuildDelay);
+
+        if (loadMode == TileLoadMode.RuntimePagingLegacy)
+            BuildTiles();
+
+        pending = null;
+    }
+
+    private void BuildTiles()
+    {
+        int found = 0;
+        int missing = 0;
+        Transform parent = tileParent ? tileParent : transform;
+
+        ClearTiles(parent);
+
+        for (int dx = -radius; dx <= radius; dx++)
+        for (int dy = -radius; dy <= radius; dy++)
+        {
+            int x = centerX + dx;
+            int y = centerY + dy;
+
+            if (TryInstantiateTile(x, y, z, parent))
+                found++;
+            else
+                missing++;
+        }
+
+        if (verboseLogs)
+            Debug.Log($"[LocalTileGrid] Legacy rebuild complete: found={found} missing={missing}");
+    }
+
+    private bool TryInstantiateTile(int x, int y, int zoom, Transform parent)
+    {
+        if (!tilePrefab)
+        {
+            if (verboseLogs)
+                Debug.LogWarning("[LocalTileGrid] tilePrefab is not assigned.");
+            return false;
+        }
+
+        string path = Path.Combine(
+            Application.streamingAssetsPath,
+            tilesFolder,
+            zoom.ToString(),
+            x.ToString(),
+            y + ".png"
+        );
+
+        if (!File.Exists(path))
+            return false;
+
+        GameObject go = Instantiate(tilePrefab, parent);
+
+        int dtx = x - scenarioCenterX;
+        int dty = y - scenarioCenterY;
+
+        go.transform.localScale = new Vector3(ScaledTileSizeM, ScaledTileSizeM, 1f);
+        go.transform.position =
+            scenarioOriginWorld + new Vector3(dtx * ScaledTileSizeM, 0f, -dty * ScaledTileSizeM);
+        go.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
+        go.name = $"tile z{zoom} {x}_{y}";
+
+        TileContent tc = go.GetComponent<TileContent>();
+        if (tc != null)
+        {
+            byte[] bytes = File.ReadAllBytes(path);
+            var tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+            tex.LoadImage(bytes);
+            tex.wrapMode = TextureWrapMode.Clamp;
+            tex.filterMode = FilterMode.Bilinear;
+            tc.SetTexture(tex);
+        }
+
+        return true;
+    }
+
+    private void ClearTiles(Transform parent)
+    {
+        for (int i = parent.childCount - 1; i >= 0; i--)
+            Destroy(parent.GetChild(i).gameObject);
+    }
+
+    private void RecomputeCenterFromFocus(bool forceResetLast)
     {
         Vector3 focus = GetFocusPos();
         Vector3 d = focus - scenarioOriginWorld;
@@ -227,7 +364,7 @@ public class LocalTileGrid : MonoBehaviour
         }
     }
 
-    Vector3 GetFocusPos()
+    private Vector3 GetFocusPos()
     {
         if (ndCamera != null)
             return ndCamera.transform.position;
@@ -236,83 +373,7 @@ public class LocalTileGrid : MonoBehaviour
         return scenarioOriginWorld;
     }
 
-    public void Rebuild()
-    {
-        if (pending != null)
-            StopCoroutine(pending);
-        pending = StartCoroutine(RebuildAfterDelay());
-    }
-
-    IEnumerator RebuildAfterDelay()
-    {
-        yield return new WaitForSeconds(rebuildDelay);
-        BuildTiles();
-        pending = null;
-    }
-
-    void BuildTiles()
-    {
-        int found = 0,
-            missing = 0;
-        Transform parent = tileParent ? tileParent : transform;
-
-        for (int i = parent.childCount - 1; i >= 0; i--)
-            Destroy(parent.GetChild(i).gameObject);
-
-        if (verboseLogs)
-        {
-            int across = 2 * radius + 1;
-        }
-
-        for (int dx = -radius; dx <= radius; dx++)
-        for (int dy = -radius; dy <= radius; dy++)
-        {
-            int x = centerX + dx;
-            int y = centerY + dy;
-
-            string path = Path.Combine(
-                Application.streamingAssetsPath,
-                tilesFolder,
-                z.ToString(),
-                x.ToString(),
-                y + ".png"
-            );
-
-            if (!File.Exists(path))
-            {
-                missing++;
-                continue;
-            }
-
-            found++;
-
-            GameObject go = Instantiate(tilePrefab, parent);
-
-            int dtx = x - scenarioCenterX;
-            int dty = y - scenarioCenterY;
-
-            go.transform.localScale = new Vector3(ScaledTileSizeM, ScaledTileSizeM, 1f);
-            go.transform.position =
-                scenarioOriginWorld
-                + new Vector3(dtx * ScaledTileSizeM, 0f, -dty * ScaledTileSizeM);
-            go.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
-
-            go.name = $"tile z{z} {x}_{y}";
-
-            TileContent tc = go.GetComponent<TileContent>();
-            if (tc != null)
-            {
-                byte[] bytes = File.ReadAllBytes(path);
-                var tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
-                tex.LoadImage(bytes);
-                tex.wrapMode = TextureWrapMode.Clamp;
-                tex.filterMode = FilterMode.Bilinear;
-                tc.SetTexture(tex);
-            }
-        }
-    }
-
-    static void LatLonToTileXY(double latDeg, double lonDeg, int zoom, out int x, out int y)
+    public static void LatLonToTileXY(double latDeg, double lonDeg, int zoom, out int x, out int y)
     {
         double latRad = latDeg * Mathf.Deg2Rad;
         int n = 1 << zoom;
@@ -320,8 +381,8 @@ public class LocalTileGrid : MonoBehaviour
         y = (int)(
             (
                 1.0
-                - System.Math.Log(System.Math.Tan(latRad) + 1.0 / System.Math.Cos(latRad))
-                    / System.Math.PI
+                - Math.Log(Math.Tan(latRad) + 1.0 / Math.Cos(latRad))
+                    / Math.PI
             )
             / 2.0
             * n

@@ -20,67 +20,208 @@ MonoBehaviour:
   centerLatDeg: 30.3
   centerLonDeg: -87.3
   baseZoom: 14
+  preloadPaddingTiles: 2
+  preloadZoomOverride: 0
+  preloadTilesOnRouteExecute: 1
   waypoints:
   - ident: KNPA
     latDeg: 30.35
     lonDeg: -87.32
     distance: 0
+    role: 0
+    includeInActiveRoute: 1
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
+  - ident: KNPA_EOR25R_START
+    latDeg: 30.34
+    lonDeg: -87.33
+    distance: 0
+    role: 1
+    includeInActiveRoute: 0
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 250
+  - ident: KNPA_RW25R_THRESH
+    latDeg: 30.34
+    lonDeg: -87.34
+    distance: 0
+    role: 2
+    includeInActiveRoute: 0
+    targetAltFtMsl: 200
+    targetIasKt: 250
+    targetHdgDeg: 250
+  - ident: KNPA_DEP_1DME
+    latDeg: 30.33
+    lonDeg: -87.36
+    distance: 0
+    role: 2
+    includeInActiveRoute: 0
+    targetAltFtMsl: 3000
+    targetIasKt: 400
+    targetHdgDeg: 0
   - ident: TEEZY
     latDeg: 30.18
     lonDeg: -87.69
     distance: 0
+    role: 0
+    includeInActiveRoute: 1
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
   - ident: TRADR
     latDeg: 30.3
     lonDeg: -88.06
     distance: 0
+    role: 0
+    includeInActiveRoute: 1
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
   - ident: BFM
     latDeg: 30.61
     lonDeg: -88.06
     distance: 0
+    role: 0
+    includeInActiveRoute: 1
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
   - ident: VR1020_A
     latDeg: 31
     lonDeg: -88
     distance: 0
+    role: 0
+    includeInActiveRoute: 1
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
   - ident: VR1020_B
     latDeg: 31.55
     lonDeg: -87.52
     distance: 0
+    role: 0
+    includeInActiveRoute: 1
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
   - ident: VR1020_C
     latDeg: 32.08
     lonDeg: -87.4
     distance: 0
+    role: 0
+    includeInActiveRoute: 1
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
   - ident: VR1020_D
     latDeg: 31.4
     lonDeg: -86.73
     distance: 0
+    role: 0
+    includeInActiveRoute: 1
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
   - ident: VR1020_E
     latDeg: 31.1
     lonDeg: -86.57
     distance: 0
+    role: 0
+    includeInActiveRoute: 1
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
   - ident: CEW
     latDeg: 30.83
     lonDeg: -86.68
     distance: 0
+    role: 0
+    includeInActiveRoute: 1
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
   - ident: PENSI
     latDeg: 30.79
     lonDeg: -87.27
     distance: 0
+    role: 0
+    includeInActiveRoute: 1
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
   - ident: CUPER
     latDeg: 30.17
     lonDeg: -87.15
     distance: 0
+    role: 3
+    includeInActiveRoute: 0
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
   - ident: POOVE
     latDeg: 30.32
     lonDeg: -87.07
     distance: 0
+    role: 3
+    includeInActiveRoute: 0
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
   - ident: APUCE
     latDeg: 30.42
     lonDeg: -87.13
     distance: 0
+    role: 3
+    includeInActiveRoute: 0
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
   - ident: ALCOME
     latDeg: 30.38
     lonDeg: -87.22
     distance: 0
+    role: 3
+    includeInActiveRoute: 0
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
+  - ident: KNPA_RW25L_FINAL
+    latDeg: 30.37
+    lonDeg: -87.28
+    distance: 0
+    role: 3
+    includeInActiveRoute: 0
+    targetAltFtMsl: 3000
+    targetIasKt: 200
+    targetHdgDeg: 0
+  - ident: KNPA_RW25L_TOUCHDOWN
+    latDeg: 30.36
+    lonDeg: -87.29
+    distance: 0
+    role: 4
+    includeInActiveRoute: 0
+    targetAltFtMsl: 200
+    targetIasKt: 100
+    targetHdgDeg: 250
+  - ident: KNPA_FINAL_STOP
+    latDeg: 30.36
+    lonDeg: -87.32
+    distance: 0
+    role: 6
+    includeInActiveRoute: 0
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 250
+  - ident: KNPA
+    latDeg: 30.35
+    lonDeg: -87.32
+    distance: 0
+    role: 0
+    includeInActiveRoute: 1
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
   prefillRouteIdents:
   - KNPA
   - TEEZY

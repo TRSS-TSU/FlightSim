@@ -10,13 +10,13 @@ public class FlightPlan : MonoBehaviour
 
     [Header("Scene References")]
     [SerializeField]
-    private LocalTileGrid tileGrid; // GroundRoot/LocalTileGrid
+    private LocalTileGrid tileGrid;
 
     [SerializeField]
-    private Transform waypointParent; // e.g., GroundRoot/WaypointRoot
+    private Transform waypointParent;
 
     [SerializeField]
-    private Transform aircraftRoot; // AircraftRoot (optional)
+    private Transform aircraftRoot;
 
     [Header("Training Scale")]
     [Tooltip(
@@ -25,6 +25,13 @@ public class FlightPlan : MonoBehaviour
     [Range(0.02f, 1f)]
     public float trainingWorldScale = 0.04f;
 
+    [Header("Startup Behavior")]
+    [SerializeField]
+    private bool autoBuildScenarioOnStart = false;
+
+    [SerializeField]
+    private bool snapAircraftToScenarioStartOnLoad = true;
+
     [Header("Debug")]
     [SerializeField]
     private bool logBuild = true;
@@ -32,11 +39,10 @@ public class FlightPlan : MonoBehaviour
     [SerializeField]
     private float gizmoRadiusM = 20f;
 
-    /// <summary>Fired after waypoints[] is fully built (both initial load and RebuildRoute).</summary>
+    /// <summary>Fired after waypoints[] is fully built.</summary>
     public event System.Action OnRouteBuilt;
 
     private readonly List<Transform> spawned = new();
-
     private readonly List<ScenarioDefinition.WaypointDef> currentRouteDefs = new();
 
     private ScenarioDefinition currentScenario;
@@ -50,8 +56,13 @@ public class FlightPlan : MonoBehaviour
 
     private void Start()
     {
-        // Catch up if scenario was selected in Menu scene.
-        if (ScenarioRuntime.Current != null && waypoints.Length == 0)
+        if (ScenarioRuntime.Current == null)
+            return;
+
+        if (snapAircraftToScenarioStartOnLoad)
+            SnapAircraftToScenarioStart(ScenarioRuntime.Current);
+
+        if (autoBuildScenarioOnStart && waypoints.Length == 0)
             LoadScenario(ScenarioRuntime.Current);
     }
 
@@ -60,13 +71,20 @@ public class FlightPlan : MonoBehaviour
         if (!s)
             return;
 
+        currentScenario = s;
+
+        if (snapAircraftToScenarioStartOnLoad)
+            SnapAircraftToScenarioStart(s);
+
+        if (!autoBuildScenarioOnStart)
+            return;
+
         StopAllCoroutines();
         StartCoroutine(BuildWhenTileGridReady(s));
     }
 
     private IEnumerator BuildWhenTileGridReady(ScenarioDefinition s)
     {
-        // Wait until LocalTileGrid has applied scenario (tileSizeM becomes "large").
         const float readyTileSizeM = 1000f;
         const float timeoutSec = 2f;
 
@@ -77,91 +95,74 @@ public class FlightPlan : MonoBehaviour
             yield return null;
         }
 
-        ClearSpawned();
-
         int z = tileGrid ? tileGrid.z : s.baseZoom;
-        float tileSizeM = tileGrid
-            ? tileGrid.tileSizeM
-            : WebMercator.MetersPerTile(s.centerLatDeg, z);
-
-        if (!tileGrid && logBuild)
-            Debug.LogWarning(
-                "[FlightPlan] tileGrid not assigned; using scenario.baseZoom + WebMercator."
-            );
-
-        var center = LatLonToTileXYFrac(s.centerLatDeg, s.centerLonDeg, z);
-
-        currentScenario = s;
-        currentCenterLat = s.centerLatDeg;
-        currentCenterLon = s.centerLonDeg;
-        currentZoom = z;
-        currentRouteDefs.Clear();
-
-        foreach (var ident in s.prefillRouteIdents)
-        {
-            if (string.IsNullOrWhiteSpace(ident))
-                continue;
-
-            var wpDef = s.waypoints.Find(w =>
-                string.Equals(w.ident, ident, StringComparison.OrdinalIgnoreCase)
-            );
-
-            if (wpDef == null)
-            {
-                Debug.LogWarning(
-                    $"[FlightPlan] Missing waypoint '{ident}' in ScenarioDefinition.waypoints"
-                );
-                continue;
-            }
-
-            currentRouteDefs.Add(wpDef);
-
-            var tile = LatLonToTileXYFrac(wpDef.latDeg, wpDef.lonDeg, z);
-            float dxTiles = (float)(tile.x - center.x);
-            float dyTiles = (float)(tile.y - center.y);
-
-            // Slippy Y increases south; Unity +Z is north → flip sign into Z.
-            Vector3 localPos = new(
-                dxTiles * tileSizeM * trainingWorldScale,
-                0f,
-                -dyTiles * tileSizeM * trainingWorldScale
-            );
-
-            var go = new GameObject($"WP_{wpDef.ident}");
-            go.transform.SetParent(waypointParent ? waypointParent : transform, false);
-            go.transform.localPosition = localPos;
-
-            spawned.Add(go.transform);
-        }
-
-        waypoints = spawned.ToArray();
-
-        SnapAircraftToFirstWaypoint();
+        var route = ResolveRouteFromIdents(s, s.prefillRouteIdents);
+        RebuildRoute(route, s.centerLatDeg, s.centerLonDeg, z);
 
         if (logBuild)
-            Debug.Log(
-                $"[FlightPlan] Built ACTIVE plan: {waypoints.Length} @ z={z} tileSizeM={tileSizeM:0.00}"
-            );
-
-        OnRouteBuilt?.Invoke();
+            Debug.Log($"[FlightPlan] Built startup route: {waypoints.Length} @ z={z}");
     }
 
-    private void SnapAircraftToFirstWaypoint()
+    public void SnapAircraftToScenarioStart(ScenarioDefinition s)
     {
-        if (!aircraftRoot)
-            return;
-        if (waypoints.Length == 0 || !waypoints[0])
+        if (!aircraftRoot || !s)
             return;
 
-        aircraftRoot.position = waypoints[0].position + Vector3.up * 1.5f;
+        int z = GetEffectiveZoom(s);
+        float tileSizeM = GetEffectiveTileSizeM(s.centerLatDeg, z);
+        var startDef = FindAircraftStartDef(s);
 
-        if (logBuild)
-            Debug.Log($"[FlightPlan] Snapped aircraft to {waypoints[0].name}");
+        if (startDef != null)
+        {
+            Vector3 localPos = WaypointDefToLocalPosition(
+                startDef,
+                s.centerLatDeg,
+                s.centerLonDeg,
+                z,
+                tileSizeM
+            );
+            Transform parent = waypointParent ? waypointParent : transform;
+            aircraftRoot.position = parent.TransformPoint(localPos) + Vector3.up * 0.45f;
+
+            if (Mathf.Abs(startDef.targetHdgDeg) > 0.001f)
+                aircraftRoot.rotation = Quaternion.Euler(0f, startDef.targetHdgDeg, 0f);
+
+            Rigidbody rb = aircraftRoot.GetComponent<Rigidbody>();
+            if (rb)
+            {
+                rb.linearVelocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
+                rb.Sleep();
+            }
+
+            if (logBuild)
+                Debug.Log($"[FlightPlan] Snapped aircraft to scenario start {startDef.ident}");
+            return;
+        }
+
+        SnapAircraftToFirstWaypoint();
+    }
+
+    public void ActivateRouteFromFms(
+        ScenarioDefinition scenario,
+        List<ScenarioDefinition.WaypointDef> routeWaypoints,
+        int zoom
+    )
+    {
+        if (!scenario || routeWaypoints == null || routeWaypoints.Count == 0)
+        {
+            if (logBuild)
+                Debug.LogWarning("[FlightPlan] ActivateRouteFromFms aborted: missing route data.");
+            return;
+        }
+
+        currentScenario = scenario;
+        RebuildRoute(routeWaypoints, scenario.centerLatDeg, scenario.centerLonDeg, zoom);
     }
 
     /// <summary>
-    /// Rebuild the active waypoint list from a student-edited route (called by ActLegsView).
-    /// Runs synchronously — safe to call at runtime once the tile grid is initialised.
+    /// Rebuild the active waypoint list from a student-edited route.
+    /// Runs synchronously once the tile grid is initialized.
     /// </summary>
     public void RebuildRoute(
         List<ScenarioDefinition.WaypointDef> newWpts,
@@ -181,30 +182,24 @@ public class FlightPlan : MonoBehaviour
         if (newWpts != null)
             currentRouteDefs.AddRange(newWpts);
 
-        float tileSizeM = tileGrid
-            ? tileGrid.tileSizeM
-            : (float)WebMercator.MetersPerTile(centerLat, zoom);
-        var center = LatLonToTileXYFrac(centerLat, centerLon, zoom);
+        float tileSizeM = GetEffectiveTileSizeM(centerLat, zoom);
 
-        foreach (var wpDef in newWpts)
+        if (newWpts != null)
         {
-            if (wpDef == null || string.IsNullOrWhiteSpace(wpDef.ident))
-                continue;
+            foreach (var wpDef in newWpts)
+            {
+                if (wpDef == null || string.IsNullOrWhiteSpace(wpDef.ident))
+                    continue;
 
-            var tile = LatLonToTileXYFrac(wpDef.latDeg, wpDef.lonDeg, zoom);
-            float dxTiles = (float)(tile.x - center.x);
-            float dyTiles = (float)(tile.y - center.y);
-
-            Vector3 localPos = new(
-                dxTiles * tileSizeM * trainingWorldScale,
-                0f,
-                -dyTiles * tileSizeM * trainingWorldScale
-            );
-
-            var go = new GameObject($"WP_{wpDef.ident}");
-            go.transform.SetParent(waypointParent ? waypointParent : transform, false);
-            go.transform.localPosition = localPos;
-            spawned.Add(go.transform);
+                var localPos = WaypointDefToLocalPosition(
+                    wpDef,
+                    centerLat,
+                    centerLon,
+                    zoom,
+                    tileSizeM
+                );
+                spawned.Add(SpawnWaypointTransform(wpDef, localPos, "WP"));
+            }
         }
 
         waypoints = spawned.ToArray();
@@ -219,13 +214,65 @@ public class FlightPlan : MonoBehaviour
     {
         if (currentRouteDefs.Count == 0)
         {
-            if (currentScenario != null)
+            if (currentScenario != null && autoBuildScenarioOnStart)
                 LoadScenario(currentScenario);
 
             return;
         }
 
         RebuildRoute(currentRouteDefs, currentCenterLat, currentCenterLon, currentZoom);
+    }
+
+    private void SnapAircraftToFirstWaypoint()
+    {
+        if (!aircraftRoot)
+            return;
+        if (waypoints.Length == 0 || !waypoints[0])
+            return;
+
+        aircraftRoot.position = waypoints[0].position + Vector3.up * 1.5f;
+
+        if (logBuild)
+            Debug.Log($"[FlightPlan] Snapped aircraft to {waypoints[0].name}");
+    }
+
+    private ScenarioDefinition.WaypointDef FindAircraftStartDef(ScenarioDefinition s)
+    {
+        if (!s || s.waypoints == null)
+            return null;
+
+        return s.waypoints.Find(w =>
+            w != null && w.role == ScenarioDefinition.WaypointRole.AircraftStart
+        );
+    }
+
+    private List<ScenarioDefinition.WaypointDef> ResolveRouteFromIdents(
+        ScenarioDefinition s,
+        List<string> idents
+    )
+    {
+        var route = new List<ScenarioDefinition.WaypointDef>();
+        if (!s || idents == null)
+            return route;
+
+        foreach (var ident in idents)
+        {
+            if (string.IsNullOrWhiteSpace(ident))
+                continue;
+
+            var wpDef = s.waypoints.Find(w =>
+                string.Equals(w.ident, ident, StringComparison.OrdinalIgnoreCase)
+            );
+
+            if (wpDef != null)
+                route.Add(wpDef);
+            else if (logBuild)
+                Debug.LogWarning(
+                    $"[FlightPlan] Missing waypoint '{ident}' in ScenarioDefinition.waypoints"
+                );
+        }
+
+        return route;
     }
 
     private void ClearSpawned()
@@ -237,6 +284,52 @@ public class FlightPlan : MonoBehaviour
                 Destroy(spawned[i].gameObject);
 
         spawned.Clear();
+    }
+
+    private int GetEffectiveZoom(ScenarioDefinition s)
+    {
+        if (tileGrid && tileGrid.z > 0)
+            return tileGrid.z;
+        return s ? s.baseZoom : 14;
+    }
+
+    private float GetEffectiveTileSizeM(double centerLat, int zoom)
+    {
+        if (tileGrid && tileGrid.tileSizeM > 0.1f)
+            return tileGrid.tileSizeM;
+        return WebMercator.MetersPerTile(centerLat, zoom);
+    }
+
+    private Vector3 WaypointDefToLocalPosition(
+        ScenarioDefinition.WaypointDef wpDef,
+        double centerLat,
+        double centerLon,
+        int zoom,
+        float tileSizeM
+    )
+    {
+        var center = LatLonToTileXYFrac(centerLat, centerLon, zoom);
+        var tile = LatLonToTileXYFrac(wpDef.latDeg, wpDef.lonDeg, zoom);
+        float dxTiles = (float)(tile.x - center.x);
+        float dyTiles = (float)(tile.y - center.y);
+
+        return new Vector3(
+            dxTiles * tileSizeM * trainingWorldScale,
+            0f,
+            -dyTiles * tileSizeM * trainingWorldScale
+        );
+    }
+
+    private Transform SpawnWaypointTransform(
+        ScenarioDefinition.WaypointDef wpDef,
+        Vector3 localPos,
+        string prefix
+    )
+    {
+        var go = new GameObject($"{prefix}_{wpDef.ident}");
+        go.transform.SetParent(waypointParent ? waypointParent : transform, false);
+        go.transform.localPosition = localPos;
+        return go.transform;
     }
 
     private static (double x, double y) LatLonToTileXYFrac(double latDeg, double lonDeg, int z)

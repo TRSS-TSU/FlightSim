@@ -123,6 +123,8 @@ public class DepArrView : FmsPageView
             return;
         }
 
+        var snap = Router.CaptureRouteContinuity();
+
         foreach (var ident in sd.rnav25LFixes)
         {
             var wp = sd.waypoints.Find(w =>
@@ -132,11 +134,8 @@ public class DepArrView : FmsPageView
                 Model.ActiveRoute.Add(wp);
         }
 
-        var fp = Router.GetFlightPlan();
-        if (fp != null)
-            fp.RebuildRoute(Model.ActiveRoute, sd.centerLatDeg, sd.centerLonDeg, sd.baseZoom);
-
         Model.ArrivalLoaded = true;
-        Scratchpad.ShowMessage("ARR LOADED", 1.5f);
+        Router.CommitActiveRoute(snap);
+        Scratchpad.ShowMessage("ARR MOD - EXEC", 1.5f);
     }
 }

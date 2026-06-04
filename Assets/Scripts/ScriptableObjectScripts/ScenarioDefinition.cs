@@ -19,6 +19,23 @@ public class ScenarioDefinition : ScriptableObject
     [Header("ND Tile Set")]
     public int baseZoom = 14;
 
+    [Header("Map Preload")]
+    [Min(0)]
+    public int preloadPaddingTiles = 2;
+    public int preloadZoomOverride = 0; // 0 = use baseZoom
+    public bool preloadTilesOnRouteExecute = true;
+
+    public enum WaypointRole
+    {
+        Route,
+        AircraftStart,
+        Takeoff,
+        Approach,
+        Landing,
+        Hold,
+        FinalStop,
+    }
+
     [Serializable]
     public class WaypointDef
     {
@@ -26,6 +43,11 @@ public class ScenarioDefinition : ScriptableObject
         public double latDeg;
         public double lonDeg; // West = negative
         public int distance; // Distance
+        public WaypointRole role = WaypointRole.Route;
+        public bool includeInActiveRoute = true;
+        public float targetAltFtMsl = 0f;
+        public float targetIasKt = 0f;
+        public float targetHdgDeg = 0f;
     }
 
     [Header("Waypoint Database (known points)")]

@@ -143,6 +143,8 @@ public class DirView : FmsPageView
             return;
         }
 
+        var snap = Router.CaptureRouteContinuity();
+
         // STRICT strategy: truncate all legs before the target waypoint.
         int idx = Model.ActiveRoute.FindIndex(w =>
             string.Equals(w.ident, wpDef.ident, System.StringComparison.OrdinalIgnoreCase)
@@ -162,25 +164,11 @@ public class DirView : FmsPageView
         // Note: do NOT write Model.ActiveLegIndex here — FmsPageRouter.Update() owns it
         // and will sync it from nav.activeIndex on the next frame.
 
-        var fp = Router.GetFlightPlan();
-        var sd = Model.Scenario;
-        if (fp && sd != null)
-            fp.RebuildRoute(Model.ActiveRoute, sd.centerLatDeg, sd.centerLonDeg, sd.baseZoom);
-
-        // Direct-To restructures the route so wpDef is now at index 0.
-        // FindBestLegIndex locates it by name and returns 0, then clears stale capture state.
-        var nav = Router.GetNavAutopilot();
-        if (nav)
-        {
-            nav.activeIndex = nav.FindBestLegIndex(wpDef.ident);
-            nav.ResetCaptureState();
-        }
-
         // Approach fixes are at the end of route; they may have been truncated.
-        Model.ArrivalLoaded = false;
+        Router.CommitActiveRoute(snap, clearArrivalLoaded: true);
 
         Scratchpad.ReadAndClear();
-        Scratchpad.ShowMessage("DIRECT TO " + wpDef.ident, 2.0f);
+        Scratchpad.ShowMessage("DIR MOD - EXEC", 2.0f);
         Router.ShowPage("ActLegs");
     }
 }

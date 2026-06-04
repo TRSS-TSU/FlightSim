@@ -29216,7 +29216,7 @@ MonoBehaviour:
   maxClimbRate: 15
   altitudeCaptureBandM: 1
   maxVyAccel: 1
-  useInitialHoldAltitude: 1
+  useInitialHoldAltitude: 0
   initialHoldAltFtMsl: 200
   altHoldToleranceFt: 5
   altMode: 1
@@ -29248,13 +29248,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 489fe74d047254e448f31a0074c2cb2b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SimTargets
-  targetIasKt: 60
-  targetAltFtMsl: 200
-  targetHdgDeg: 0
+  targetIasKt: 0
+  targetAltFtMsl: 0
+  targetHdgDeg: 250
   minIasKt: 0
-  maxIasKt: 100
-  minAltFt: 1
-  maxAltFt: 300
+  maxIasKt: 500
+  minAltFt: 0
+  maxAltFt: 10000
   minHdgDeg: 0
   maxHdgDeg: 360
 --- !u!54 &556070997
@@ -29374,6 +29374,8 @@ MonoBehaviour:
   waypointParent: {fileID: 2104837905}
   aircraftRoot: {fileID: 556070994}
   trainingWorldScale: 0.05
+  autoBuildScenarioOnStart: 0
+  snapAircraftToScenarioStartOnLoad: 1
   logBuild: 1
   gizmoRadiusM: 20
 --- !u!114 &556071002
@@ -70376,6 +70378,7 @@ MonoBehaviour:
   flightPlan: {fileID: 556071001}
   scratchpad: {fileID: 348894425}
   simTargets: {fileID: 556070996}
+  routeActivationCoordinator: {fileID: 0}
   pageIndex: {fileID: 1658530986}
   pagePosInit: {fileID: 1918352373}
   pageActLegs: {fileID: 1133571251}
@@ -89864,6 +89867,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1603726616}
+  - component: {fileID: 1603726617}
   m_Layer: 0
   m_Name: WorldRoot
   m_TagString: Untagged
@@ -89889,6 +89893,22 @@ Transform:
   - {fileID: 500226503}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1603726617
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1603726615}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02dd7b4acf834f87a0addcc67df6df47, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RouteTilePreloader
+  tileGrid: {fileID: 1796302381}
+  loadingOverlay: {fileID: 0}
+  defaultPaddingTiles: 2
+  largeTileCountWarning: 1024
 --- !u!1 &1604628252
 GameObject:
   m_ObjectHideFlags: 0
@@ -100237,6 +100257,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25db2bac42443f64fa319771bf8718f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LocalTileGrid
+  loadMode: 1
   tileParent: {fileID: 1885233896}
   aircraft: {fileID: 556070994}
   ndCamera: {fileID: 1877253058}
