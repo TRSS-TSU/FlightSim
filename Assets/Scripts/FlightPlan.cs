@@ -60,7 +60,11 @@ public class FlightPlan : MonoBehaviour
             return;
 
         if (snapAircraftToScenarioStartOnLoad)
-            SnapAircraftToScenarioStart(ScenarioRuntime.Current);
+        {
+            Physics.SyncTransforms();
+            StabilizeAircraftAfterSnap();
+            StartCoroutine(StabilizeAircraftNextFixedUpdate());
+        }
 
         if (autoBuildScenarioOnStart && waypoints.Length == 0)
             LoadScenario(ScenarioRuntime.Current);
@@ -141,6 +145,30 @@ public class FlightPlan : MonoBehaviour
         }
 
         SnapAircraftToFirstWaypoint();
+    }
+
+    private IEnumerator StabilizeAircraftNextFixedUpdate()
+    {
+        yield return new WaitForFixedUpdate();
+        StabilizeAircraftAfterSnap();
+    }
+
+    private void StabilizeAircraftAfterSnap()
+    {
+        if (!aircraftRoot)
+            return;
+
+        Rigidbody rb = aircraftRoot.GetComponent<Rigidbody>();
+        if (!rb)
+            return;
+
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+
+        rb.position = aircraftRoot.position;
+        rb.rotation = aircraftRoot.rotation;
+
+        rb.Sleep();
     }
 
     public void ActivateRouteFromFms(

@@ -2,13 +2,17 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class FmsRouteActivationCoordinator : MonoBehaviour
 {
-    public RouteTilePreloader tilePreloader;
     public MapLoadingOverlay loadingOverlay;
     public FlightPlan flightPlan;
     public NavAutopilot navAutopilot;
+    public RouteTilePreloader tilePreloader;
+    public RouteTileAuditLogger tileAuditLogger;
+
+    public UnityEvent routeActivated;
 
     public bool IsExecuting { get; private set; }
 
@@ -22,12 +26,20 @@ public class FmsRouteActivationCoordinator : MonoBehaviour
     {
         if (IsExecuting)
         {
-            Debug.LogWarning("[FmsRouteActivationCoordinator] Route activation already in progress.");
+            Debug.LogWarning(
+                "[FmsRouteActivationCoordinator] Route activation already in progress."
+            );
             return;
         }
 
         StartCoroutine(
-            ExecuteModifiedRouteRoutine(scenario, routeWaypoints, snapshot, forceFirstLeg, onComplete)
+            ExecuteModifiedRouteRoutine(
+                scenario,
+                routeWaypoints,
+                snapshot,
+                forceFirstLeg,
+                onComplete
+            )
         );
     }
 
@@ -43,7 +55,9 @@ public class FmsRouteActivationCoordinator : MonoBehaviour
 
         if (!scenario || routeWaypoints == null || routeWaypoints.Count == 0)
         {
-            Debug.LogWarning("[FmsRouteActivationCoordinator] Activation aborted: missing route data.");
+            Debug.LogWarning(
+                "[FmsRouteActivationCoordinator] Activation aborted: missing route data."
+            );
             IsExecuting = false;
             yield break;
         }
@@ -51,7 +65,10 @@ public class FmsRouteActivationCoordinator : MonoBehaviour
         if (navAutopilot)
             navAutopilot.SetNavEngaged(false);
 
-        int zoom = scenario.preloadZoomOverride > 0 ? scenario.preloadZoomOverride : scenario.baseZoom;
+        int zoom =
+            scenario.preloadZoomOverride > 0 ? scenario.preloadZoomOverride : scenario.baseZoom;
+
+        tileAuditLogger?.AuditRoute(scenario, routeWaypoints, zoom);
 
         if (scenario.preloadTilesOnRouteExecute && tilePreloader)
         {
@@ -71,7 +88,11 @@ public class FmsRouteActivationCoordinator : MonoBehaviour
         {
             activeIndex = forceFirstLeg
                 ? 0
-                : RouteResolver.Resolve(snapshot, routeWaypoints, flightPlan ? flightPlan.waypoints : null);
+                : RouteResolver.Resolve(
+                    snapshot,
+                    routeWaypoints,
+                    flightPlan ? flightPlan.waypoints : null
+                );
 
             navAutopilot.activeIndex = activeIndex;
             navAutopilot.ResetCaptureState();
@@ -80,5 +101,6 @@ public class FmsRouteActivationCoordinator : MonoBehaviour
         loadingOverlay?.Hide();
         IsExecuting = false;
         onComplete?.Invoke(activeIndex);
+        routeActivated?.Invoke();
     }
 }

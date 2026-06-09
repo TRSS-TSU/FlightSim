@@ -1,0 +1,678 @@
+{
+    "sceneName": "Menu",
+    "exportedAt": "2026-06-09 13:45:08",
+    "roots": [
+        {
+            "name": "ScenarioManager",
+            "path": "ScenarioManager",
+            "activeSelf": true,
+            "activeInHierarchy": true,
+            "tag": "Untagged",
+            "layer": "Default",
+            "components": [
+                "Transform",
+                "ScenarioSelection"
+            ],
+            "children": []
+        },
+        {
+            "name": "iPad",
+            "path": "iPad",
+            "activeSelf": true,
+            "activeInHierarchy": true,
+            "tag": "Untagged",
+            "layer": "Default",
+            "components": [
+                "Transform"
+            ],
+            "children": [
+                {
+                    "name": "Main Camera",
+                    "path": "iPad/Main Camera",
+                    "activeSelf": true,
+                    "activeInHierarchy": true,
+                    "tag": "MainCamera",
+                    "layer": "Default",
+                    "components": [
+                        "Transform",
+                        "Camera",
+                        "UniversalAdditionalCameraData"
+                    ],
+                    "children": []
+                },
+                {
+                    "name": "MainCanvas",
+                    "path": "iPad/MainCanvas",
+                    "activeSelf": true,
+                    "activeInHierarchy": true,
+                    "tag": "Untagged",
+                    "layer": "Default",
+                    "components": [
+                        "RectTransform",
+                        "Canvas",
+                        "CanvasScaler",
+                        "GraphicRaycaster"
+                    ],
+                    "children": [
+                        {
+                            "name": "Menu_Panel",
+                            "path": "iPad/MainCanvas/Menu_Panel",
+                            "activeSelf": true,
+                            "activeInHierarchy": true,
+                            "tag": "Untagged",
+                            "layer": "Default",
+                            "components": [
+                                "RectTransform",
+                                "CanvasRenderer",
+                                "Image"
+                            ],
+                            "children": [
+                                {
+                                    "name": "Menu_Items",
+                                    "path": "iPad/MainCanvas/Menu_Panel/Menu_Items",
+                                    "activeSelf": true,
+                                    "activeInHierarchy": true,
+                                    "tag": "Untagged",
+                                    "layer": "Default",
+                                    "components": [
+                                        "RectTransform",
+                                        "GridLayoutGroup",
+                                        "StudyManager"
+                                    ],
+                                    "children": [
+                                        {
+                                            "name": "HowToButton",
+                                            "path": "iPad/MainCanvas/Menu_Panel/Menu_Items/HowToButton",
+                                            "activeSelf": true,
+                                            "activeInHierarchy": true,
+                                            "tag": "Untagged",
+                                            "layer": "Default",
+                                            "components": [
+                                                "RectTransform",
+                                                "CanvasRenderer",
+                                                "Image",
+                                                "Button"
+                                            ],
+                                            "children": [
+                                                {
+                                                    "name": "Text (TMP)",
+                                                    "path": "iPad/MainCanvas/Menu_Panel/Menu_Items/HowToButton/Text (TMP)",
+                                                    "activeSelf": true,
+                                                    "activeInHierarchy": true,
+                                                    "tag": "Untagged",
+                                                    "layer": "Default",
+                                                    "components": [
+                                                        "RectTransform",
+                                                        "CanvasRenderer",
+                                                        "TextMeshProUGUI"
+                                                    ],
+                                                    "children": []
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "name": "StudyButton",
+                                            "path": "iPad/MainCanvas/Menu_Panel/Menu_Items/StudyButton",
+                                            "activeSelf": true,
+                                            "activeInHierarchy": true,
+                                            "tag": "Untagged",
+                                            "layer": "Default",
+                                            "components": [
+                                                "RectTransform",
+                                                "CanvasRenderer",
+                                                "Image",
+                                                "Button"
+                                            ],
+                                            "children": [
+                                                {
+                                                    "name": "Text (TMP)",
+                                                    "path": "iPad/MainCanvas/Menu_Panel/Menu_Items/StudyButton/Text (TMP)",
+                                                    "activeSelf": true,
+                                                    "activeInHierarchy": true,
+                                                    "tag": "Untagged",
+                                                    "layer": "Default",
+                                                    "components": [
+                                                        "RectTransform",
+                                                        "CanvasRenderer",
+                                                        "TextMeshProUGUI"
+                                                    ],
+                                                    "children": []
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "name": "Scenario_1_Button",
+                                            "path": "iPad/MainCanvas/Menu_Panel/Menu_Items/Scenario_1_Button",
+                                            "activeSelf": true,
+                                            "activeInHierarchy": true,
+                                            "tag": "Untagged",
+                                            "layer": "Default",
+                                            "components": [
+                                                "RectTransform",
+                                                "CanvasRenderer",
+                                                "Image",
+                                                "Button",
+                                                "ScenarioSelectButton"
+                                            ],
+                                            "children": [
+                                                {
+                                                    "name": "Text (TMP)",
+                                                    "path": "iPad/MainCanvas/Menu_Panel/Menu_Items/Scenario_1_Button/Text (TMP)",
+                                                    "activeSelf": true,
+                                                    "activeInHierarchy": true,
+                                                    "tag": "Untagged",
+                                                    "layer": "Default",
+                                                    "components": [
+                                                        "RectTransform",
+                                                        "CanvasRenderer",
+                                                        "TextMeshProUGUI"
+                                                    ],
+                                                    "children": []
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "name": "Scenario_2_Button",
+                                            "path": "iPad/MainCanvas/Menu_Panel/Menu_Items/Scenario_2_Button",
+                                            "activeSelf": true,
+                                            "activeInHierarchy": true,
+                                            "tag": "Untagged",
+                                            "layer": "Default",
+                                            "components": [
+                                                "RectTransform",
+                                                "CanvasRenderer",
+                                                "Image",
+                                                "Button",
+                                                "ScenarioSelectButton"
+                                            ],
+                                            "children": [
+                                                {
+                                                    "name": "Text (TMP)",
+                                                    "path": "iPad/MainCanvas/Menu_Panel/Menu_Items/Scenario_2_Button/Text (TMP)",
+                                                    "activeSelf": true,
+                                                    "activeInHierarchy": true,
+                                                    "tag": "Untagged",
+                                                    "layer": "Default",
+                                                    "components": [
+                                                        "RectTransform",
+                                                        "CanvasRenderer",
+                                                        "TextMeshProUGUI"
+                                                    ],
+                                                    "children": []
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "name": "Scenario_3_Button",
+                                            "path": "iPad/MainCanvas/Menu_Panel/Menu_Items/Scenario_3_Button",
+                                            "activeSelf": true,
+                                            "activeInHierarchy": true,
+                                            "tag": "Untagged",
+                                            "layer": "Default",
+                                            "components": [
+                                                "RectTransform",
+                                                "CanvasRenderer",
+                                                "Image",
+                                                "Button",
+                                                "ScenarioSelectButton"
+                                            ],
+                                            "children": [
+                                                {
+                                                    "name": "Text (TMP)",
+                                                    "path": "iPad/MainCanvas/Menu_Panel/Menu_Items/Scenario_3_Button/Text (TMP)",
+                                                    "activeSelf": true,
+                                                    "activeInHierarchy": true,
+                                                    "tag": "Untagged",
+                                                    "layer": "Default",
+                                                    "components": [
+                                                        "RectTransform",
+                                                        "CanvasRenderer",
+                                                        "TextMeshProUGUI"
+                                                    ],
+                                                    "children": []
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "name": "Scenario_4_Button",
+                                            "path": "iPad/MainCanvas/Menu_Panel/Menu_Items/Scenario_4_Button",
+                                            "activeSelf": true,
+                                            "activeInHierarchy": true,
+                                            "tag": "Untagged",
+                                            "layer": "Default",
+                                            "components": [
+                                                "RectTransform",
+                                                "CanvasRenderer",
+                                                "Image",
+                                                "Button",
+                                                "ScenarioSelectButton"
+                                            ],
+                                            "children": [
+                                                {
+                                                    "name": "Text (TMP)",
+                                                    "path": "iPad/MainCanvas/Menu_Panel/Menu_Items/Scenario_4_Button/Text (TMP)",
+                                                    "activeSelf": true,
+                                                    "activeInHierarchy": true,
+                                                    "tag": "Untagged",
+                                                    "layer": "Default",
+                                                    "components": [
+                                                        "RectTransform",
+                                                        "CanvasRenderer",
+                                                        "TextMeshProUGUI"
+                                                    ],
+                                                    "children": []
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "name": "Scenario_Popup_Panel",
+                                    "path": "iPad/MainCanvas/Menu_Panel/Scenario_Popup_Panel",
+                                    "activeSelf": false,
+                                    "activeInHierarchy": false,
+                                    "tag": "Untagged",
+                                    "layer": "Default",
+                                    "components": [
+                                        "RectTransform",
+                                        "CanvasRenderer",
+                                        "Image",
+                                        "ScenarioConfirmPanel"
+                                    ],
+                                    "children": [
+                                        {
+                                            "name": "Yes_Button",
+                                            "path": "iPad/MainCanvas/Menu_Panel/Scenario_Popup_Panel/Yes_Button",
+                                            "activeSelf": true,
+                                            "activeInHierarchy": false,
+                                            "tag": "Untagged",
+                                            "layer": "Default",
+                                            "components": [
+                                                "RectTransform",
+                                                "CanvasRenderer",
+                                                "Image",
+                                                "Button"
+                                            ],
+                                            "children": [
+                                                {
+                                                    "name": "Text (TMP)",
+                                                    "path": "iPad/MainCanvas/Menu_Panel/Scenario_Popup_Panel/Yes_Button/Text (TMP)",
+                                                    "activeSelf": true,
+                                                    "activeInHierarchy": false,
+                                                    "tag": "Untagged",
+                                                    "layer": "Default",
+                                                    "components": [
+                                                        "RectTransform",
+                                                        "CanvasRenderer",
+                                                        "TextMeshProUGUI"
+                                                    ],
+                                                    "children": []
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "name": "No_Button",
+                                            "path": "iPad/MainCanvas/Menu_Panel/Scenario_Popup_Panel/No_Button",
+                                            "activeSelf": true,
+                                            "activeInHierarchy": false,
+                                            "tag": "Untagged",
+                                            "layer": "Default",
+                                            "components": [
+                                                "RectTransform",
+                                                "CanvasRenderer",
+                                                "Image",
+                                                "Button"
+                                            ],
+                                            "children": [
+                                                {
+                                                    "name": "Text (TMP)",
+                                                    "path": "iPad/MainCanvas/Menu_Panel/Scenario_Popup_Panel/No_Button/Text (TMP)",
+                                                    "activeSelf": true,
+                                                    "activeInHierarchy": false,
+                                                    "tag": "Untagged",
+                                                    "layer": "Default",
+                                                    "components": [
+                                                        "RectTransform",
+                                                        "CanvasRenderer",
+                                                        "TextMeshProUGUI"
+                                                    ],
+                                                    "children": []
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "name": "Scroll View",
+                                            "path": "iPad/MainCanvas/Menu_Panel/Scenario_Popup_Panel/Scroll View",
+                                            "activeSelf": true,
+                                            "activeInHierarchy": false,
+                                            "tag": "Untagged",
+                                            "layer": "Default",
+                                            "components": [
+                                                "RectTransform",
+                                                "CanvasRenderer",
+                                                "Image",
+                                                "ScrollRect"
+                                            ],
+                                            "children": [
+                                                {
+                                                    "name": "Viewport",
+                                                    "path": "iPad/MainCanvas/Menu_Panel/Scenario_Popup_Panel/Scroll View/Viewport",
+                                                    "activeSelf": true,
+                                                    "activeInHierarchy": false,
+                                                    "tag": "Untagged",
+                                                    "layer": "Default",
+                                                    "components": [
+                                                        "RectTransform",
+                                                        "CanvasRenderer",
+                                                        "Image",
+                                                        "Mask"
+                                                    ],
+                                                    "children": [
+                                                        {
+                                                            "name": "Content",
+                                                            "path": "iPad/MainCanvas/Menu_Panel/Scenario_Popup_Panel/Scroll View/Viewport/Content",
+                                                            "activeSelf": true,
+                                                            "activeInHierarchy": false,
+                                                            "tag": "Untagged",
+                                                            "layer": "Default",
+                                                            "components": [
+                                                                "RectTransform",
+                                                                "ContentSizeFitter",
+                                                                "VerticalLayoutGroup"
+                                                            ],
+                                                            "children": [
+                                                                {
+                                                                    "name": "Description_Text",
+                                                                    "path": "iPad/MainCanvas/Menu_Panel/Scenario_Popup_Panel/Scroll View/Viewport/Content/Description_Text",
+                                                                    "activeSelf": true,
+                                                                    "activeInHierarchy": false,
+                                                                    "tag": "Untagged",
+                                                                    "layer": "Default",
+                                                                    "components": [
+                                                                        "RectTransform",
+                                                                        "CanvasRenderer",
+                                                                        "TextMeshProUGUI"
+                                                                    ],
+                                                                    "children": []
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "name": "Scrollbar Vertical",
+                                                    "path": "iPad/MainCanvas/Menu_Panel/Scenario_Popup_Panel/Scroll View/Scrollbar Vertical",
+                                                    "activeSelf": true,
+                                                    "activeInHierarchy": false,
+                                                    "tag": "Untagged",
+                                                    "layer": "Default",
+                                                    "components": [
+                                                        "RectTransform",
+                                                        "CanvasRenderer",
+                                                        "Image",
+                                                        "Scrollbar"
+                                                    ],
+                                                    "children": [
+                                                        {
+                                                            "name": "Sliding Area",
+                                                            "path": "iPad/MainCanvas/Menu_Panel/Scenario_Popup_Panel/Scroll View/Scrollbar Vertical/Sliding Area",
+                                                            "activeSelf": true,
+                                                            "activeInHierarchy": false,
+                                                            "tag": "Untagged",
+                                                            "layer": "Default",
+                                                            "components": [
+                                                                "RectTransform"
+                                                            ],
+                                                            "children": [
+                                                                {
+                                                                    "name": "Handle",
+                                                                    "path": "iPad/MainCanvas/Menu_Panel/Scenario_Popup_Panel/Scroll View/Scrollbar Vertical/Sliding Area/Handle",
+                                                                    "activeSelf": true,
+                                                                    "activeInHierarchy": false,
+                                                                    "tag": "Untagged",
+                                                                    "layer": "Default",
+                                                                    "components": [
+                                                                        "RectTransform",
+                                                                        "CanvasRenderer",
+                                                                        "Image"
+                                                                    ],
+                                                                    "children": []
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "name": "How_To_Instruction_Panel",
+                            "path": "iPad/MainCanvas/How_To_Instruction_Panel",
+                            "activeSelf": true,
+                            "activeInHierarchy": true,
+                            "tag": "Untagged",
+                            "layer": "Default",
+                            "components": [
+                                "RectTransform",
+                                "CanvasRenderer",
+                                "Image",
+                                "Animator",
+                                "HowToPanel_Toggle"
+                            ],
+                            "children": [
+                                {
+                                    "name": "Scroll View",
+                                    "path": "iPad/MainCanvas/How_To_Instruction_Panel/Scroll View",
+                                    "activeSelf": true,
+                                    "activeInHierarchy": true,
+                                    "tag": "Untagged",
+                                    "layer": "Default",
+                                    "components": [
+                                        "RectTransform",
+                                        "CanvasRenderer",
+                                        "Image",
+                                        "ScrollRect"
+                                    ],
+                                    "children": [
+                                        {
+                                            "name": "Viewport",
+                                            "path": "iPad/MainCanvas/How_To_Instruction_Panel/Scroll View/Viewport",
+                                            "activeSelf": true,
+                                            "activeInHierarchy": true,
+                                            "tag": "Untagged",
+                                            "layer": "Default",
+                                            "components": [
+                                                "RectTransform",
+                                                "CanvasRenderer",
+                                                "Image",
+                                                "Mask"
+                                            ],
+                                            "children": [
+                                                {
+                                                    "name": "Content",
+                                                    "path": "iPad/MainCanvas/How_To_Instruction_Panel/Scroll View/Viewport/Content",
+                                                    "activeSelf": true,
+                                                    "activeInHierarchy": true,
+                                                    "tag": "Untagged",
+                                                    "layer": "Default",
+                                                    "components": [
+                                                        "RectTransform",
+                                                        "VerticalLayoutGroup",
+                                                        "ContentSizeFitter"
+                                                    ],
+                                                    "children": [
+                                                        {
+                                                            "name": "Panel_Title_Text",
+                                                            "path": "iPad/MainCanvas/How_To_Instruction_Panel/Scroll View/Viewport/Content/Panel_Title_Text",
+                                                            "activeSelf": true,
+                                                            "activeInHierarchy": true,
+                                                            "tag": "Untagged",
+                                                            "layer": "Default",
+                                                            "components": [
+                                                                "RectTransform",
+                                                                "CanvasRenderer",
+                                                                "TextMeshProUGUI"
+                                                            ],
+                                                            "children": []
+                                                        },
+                                                        {
+                                                            "name": "Intruction_Text",
+                                                            "path": "iPad/MainCanvas/How_To_Instruction_Panel/Scroll View/Viewport/Content/Intruction_Text",
+                                                            "activeSelf": true,
+                                                            "activeInHierarchy": true,
+                                                            "tag": "Untagged",
+                                                            "layer": "Default",
+                                                            "components": [
+                                                                "RectTransform",
+                                                                "CanvasRenderer",
+                                                                "TextMeshProUGUI"
+                                                            ],
+                                                            "children": [
+                                                                {
+                                                                    "name": "TMP SubMeshUI [LiberationSans SDF Material]",
+                                                                    "path": "iPad/MainCanvas/How_To_Instruction_Panel/Scroll View/Viewport/Content/Intruction_Text/TMP SubMeshUI [LiberationSans SDF Material]",
+                                                                    "activeSelf": true,
+                                                                    "activeInHierarchy": true,
+                                                                    "tag": "Untagged",
+                                                                    "layer": "Default",
+                                                                    "components": [
+                                                                        "RectTransform",
+                                                                        "LayoutElement",
+                                                                        "CanvasRenderer",
+                                                                        "TMP_SubMeshUI"
+                                                                    ],
+                                                                    "children": []
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "name": "Scrollbar Vertical",
+                                            "path": "iPad/MainCanvas/How_To_Instruction_Panel/Scroll View/Scrollbar Vertical",
+                                            "activeSelf": true,
+                                            "activeInHierarchy": true,
+                                            "tag": "Untagged",
+                                            "layer": "Default",
+                                            "components": [
+                                                "RectTransform",
+                                                "CanvasRenderer",
+                                                "Image",
+                                                "Scrollbar"
+                                            ],
+                                            "children": [
+                                                {
+                                                    "name": "Sliding Area",
+                                                    "path": "iPad/MainCanvas/How_To_Instruction_Panel/Scroll View/Scrollbar Vertical/Sliding Area",
+                                                    "activeSelf": true,
+                                                    "activeInHierarchy": true,
+                                                    "tag": "Untagged",
+                                                    "layer": "Default",
+                                                    "components": [
+                                                        "RectTransform"
+                                                    ],
+                                                    "children": [
+                                                        {
+                                                            "name": "Handle",
+                                                            "path": "iPad/MainCanvas/How_To_Instruction_Panel/Scroll View/Scrollbar Vertical/Sliding Area/Handle",
+                                                            "activeSelf": true,
+                                                            "activeInHierarchy": true,
+                                                            "tag": "Untagged",
+                                                            "layer": "Default",
+                                                            "components": [
+                                                                "RectTransform",
+                                                                "CanvasRenderer",
+                                                                "Image"
+                                                            ],
+                                                            "children": []
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "name": "Close_How_To_Instuction_Button",
+                                    "path": "iPad/MainCanvas/How_To_Instruction_Panel/Close_How_To_Instuction_Button",
+                                    "activeSelf": true,
+                                    "activeInHierarchy": true,
+                                    "tag": "Untagged",
+                                    "layer": "Default",
+                                    "components": [
+                                        "RectTransform",
+                                        "CanvasRenderer",
+                                        "Image",
+                                        "Button"
+                                    ],
+                                    "children": [
+                                        {
+                                            "name": "Text (TMP)",
+                                            "path": "iPad/MainCanvas/How_To_Instruction_Panel/Close_How_To_Instuction_Button/Text (TMP)",
+                                            "activeSelf": true,
+                                            "activeInHierarchy": true,
+                                            "tag": "Untagged",
+                                            "layer": "Default",
+                                            "components": [
+                                                "RectTransform",
+                                                "CanvasRenderer",
+                                                "TextMeshProUGUI"
+                                            ],
+                                            "children": []
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Sys",
+            "path": "Sys",
+            "activeSelf": true,
+            "activeInHierarchy": true,
+            "tag": "Untagged",
+            "layer": "Default",
+            "components": [
+                "Transform"
+            ],
+            "children": [
+                {
+                    "name": "Directional Light",
+                    "path": "Sys/Directional Light",
+                    "activeSelf": true,
+                    "activeInHierarchy": true,
+                    "tag": "Untagged",
+                    "layer": "Default",
+                    "components": [
+                        "Transform",
+                        "Light",
+                        "UniversalAdditionalLightData"
+                    ],
+                    "children": []
+                },
+                {
+                    "name": "EventSystem",
+                    "path": "Sys/EventSystem",
+                    "activeSelf": true,
+                    "activeInHierarchy": true,
+                    "tag": "Untagged",
+                    "layer": "Default",
+                    "components": [
+                        "Transform",
+                        "EventSystem",
+                        "InputSystemUIInputModule"
+                    ],
+                    "children": []
+                }
+            ]
+        }
+    ]
+}

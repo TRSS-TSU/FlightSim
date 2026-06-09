@@ -20,8 +20,8 @@ MonoBehaviour:
   centerLatDeg: 30.3
   centerLonDeg: -87.3
   baseZoom: 14
-  preloadPaddingTiles: 2
-  preloadZoomOverride: 0
+  preloadPaddingTiles: 0
+  preloadZoomOverride: 14
   preloadTilesOnRouteExecute: 1
   waypoints:
   - ident: KNPA
