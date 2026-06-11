@@ -1,6 +1,0 @@
-sandbox_mode = "workspace-write"
-[mcp_servers.UnityMCP]
-url = "http://localhost:6060/mcp"
-
-[sandbox_workspace_write]
-network_access = true
