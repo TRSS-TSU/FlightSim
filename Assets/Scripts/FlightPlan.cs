@@ -61,6 +61,7 @@ public class FlightPlan : MonoBehaviour
 
         if (snapAircraftToScenarioStartOnLoad)
         {
+            SnapAircraftToScenarioStart(ScenarioRuntime.Current);
             Physics.SyncTransforms();
             StabilizeAircraftAfterSnap();
             StartCoroutine(StabilizeAircraftNextFixedUpdate());
