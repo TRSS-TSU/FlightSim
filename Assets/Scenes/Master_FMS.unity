@@ -29913,7 +29913,7 @@ MonoBehaviour:
   waypointParent: {fileID: 2104837905}
   aircraftRoot: {fileID: 556070994}
   trainingWorldScale: 0.05
-  autoBuildScenarioOnStart: 0
+  autoBuildScenarioOnStart: 1
   snapAircraftToScenarioStartOnLoad: 1
   logBuild: 1
   gizmoRadiusM: 20
@@ -56265,11 +56265,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc55018d31b0f7a4c838984479c24c2b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TakeoffEngageButton
-  targets: {fileID: 556070996}
   nav: {fileID: 556071000}
   takeoffButtonToHide: {fileID: 1598477895}
-  takeoffIasKt: 160
-  initialAltFtMsl: 1500
 --- !u!1 &1006946073
 GameObject:
   m_ObjectHideFlags: 0
@@ -83096,11 +83093,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc55018d31b0f7a4c838984479c24c2b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TakeoffEngageButton
-  targets: {fileID: 0}
   nav: {fileID: 0}
   takeoffButtonToHide: {fileID: 0}
-  takeoffIasKt: 160
-  initialAltFtMsl: 1500
 --- !u!114 &1452687814
 MonoBehaviour:
   m_ObjectHideFlags: 0
