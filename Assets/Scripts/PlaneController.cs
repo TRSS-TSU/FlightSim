@@ -31,7 +31,7 @@ public class PlaneController : MonoBehaviour
     float vyCmdSmoothed = 0f;
 
     [Header("Altitude Init")]
-    public bool useInitialHoldAltitude = true;
+    public bool useInitialHoldAltitude = false;
     public float initialHoldAltFtMsl = 3000f;
     const float M_TO_FT = 3.2808399f; // 1 / 0.3048
 
@@ -173,6 +173,22 @@ public class PlaneController : MonoBehaviour
             yawInit = true;
         }
 
+        Vector3 v = rb.linearVelocity;
+        float groundSpeed = new Vector2(v.x, v.z).magnitude;
+
+        // Parked / pre-takeoff guard:
+        // Do not let the heading controller rotate the aircraft while it has no real forward motion.
+        if (groundSpeed < 0.5f)
+        {
+            prevYawDeg = currentYaw;
+            currentBankDeg = 0f;
+            currentPitchDeg = 0f;
+
+            rb.angularVelocity = Vector3.zero;
+            rb.MoveRotation(Quaternion.Euler(0f, currentYaw, 0f));
+            return;
+        }
+
         float yawRateMeas = Mathf.DeltaAngle(prevYawDeg, currentYaw) / dt; // deg/s
         prevYawDeg = currentYaw;
 
@@ -181,8 +197,6 @@ public class PlaneController : MonoBehaviour
         float yawRateCmd = yawRateP * headingError - yawRateD * yawRateMeas;
         yawRateCmd = Mathf.Clamp(yawRateCmd, -maxYawRateDegPerSec, +maxYawRateDegPerSec);
 
-        Vector3 v = rb.linearVelocity;
-        float groundSpeed = new Vector2(v.x, v.z).magnitude;
         groundSpeed = Mathf.Max(groundSpeed, 0.1f);
 
         float bankRad = Mathf.Atan((groundSpeed * (yawRateCmd * Mathf.Deg2Rad)) / 9.81f);
@@ -200,6 +214,7 @@ public class PlaneController : MonoBehaviour
 
         if (enableHeadingDebug)
             LogHeadingDebug(currentYaw, targetYaw, currentBankDeg, groundSpeed);
+
         float vy = rb.linearVelocity.y;
 
         // Positive climb = nose up, descent = nose down.

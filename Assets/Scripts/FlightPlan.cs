@@ -126,14 +126,16 @@ public class FlightPlan : MonoBehaviour
                 z,
                 tileSizeM
             );
-
             Transform parent = waypointParent ? waypointParent : transform;
-            aircraftRoot.position = parent.TransformPoint(localPos) + Vector3.up * 0.45f;
+
+            Vector3 worldPos = parent.TransformPoint(localPos);
+            worldPos.y = 0f; // ground invariant: ground y = 0
+
+            aircraftRoot.position = worldPos;
 
             float startHeading = NormalizeHeading(startDef.targetHdgDeg);
 
-            if (Mathf.Abs(startHeading) > 0.001f)
-                aircraftRoot.rotation = Quaternion.Euler(0f, startHeading, 0f);
+            aircraftRoot.rotation = Quaternion.Euler(0f, startHeading, 0f);
 
             SimTargets targets = aircraftRoot.GetComponent<SimTargets>();
             if (targets)
@@ -141,6 +143,18 @@ public class FlightPlan : MonoBehaviour
                 targets.targetIasKt = Mathf.Max(0f, startDef.targetIasKt);
                 targets.targetAltFtMsl = Mathf.Max(0f, startDef.targetAltFtMsl);
                 targets.targetHdgDeg = startHeading;
+            }
+
+            NavAutopilot nav = aircraftRoot.GetComponent<NavAutopilot>();
+            if (nav)
+            {
+                nav.SetNavEngaged(false);
+                nav.activeIndex = 0;
+                nav.ResetCaptureState();
+
+                // Re-assert after SetNavEngaged(false), just to keep the runway heading authoritative.
+                if (targets)
+                    targets.targetHdgDeg = startHeading;
             }
 
             Rigidbody rb = aircraftRoot.GetComponent<Rigidbody>();
@@ -185,6 +199,10 @@ public class FlightPlan : MonoBehaviour
         if (!aircraftRoot)
             return;
 
+        Vector3 p = aircraftRoot.position;
+        p.y = 0f;
+        aircraftRoot.position = p;
+
         Rigidbody rb = aircraftRoot.GetComponent<Rigidbody>();
         if (!rb)
             return;
@@ -213,6 +231,86 @@ public class FlightPlan : MonoBehaviour
 
         currentScenario = scenario;
         RebuildRoute(routeWaypoints, scenario.centerLatDeg, scenario.centerLonDeg, zoom);
+    }
+
+    public bool TryWorldPositionToLatLon(
+        ScenarioDefinition scenario,
+        Vector3 worldPos,
+        out double latDeg,
+        out double lonDeg
+    )
+    {
+        latDeg = 0d;
+        lonDeg = 0d;
+
+        if (!scenario)
+            return false;
+
+        int z = GetEffectiveZoom(scenario);
+        float tileSizeM = GetEffectiveTileSizeM(scenario.centerLatDeg, z);
+
+        if (tileSizeM <= 0.001f || trainingWorldScale <= 0.001f)
+            return false;
+
+        Transform parent = waypointParent ? waypointParent : transform;
+
+        Vector3 localPos = parent.InverseTransformPoint(worldPos);
+
+        var center = LatLonToTileXYFrac(scenario.centerLatDeg, scenario.centerLonDeg, z);
+
+        double dxTiles = localPos.x / (tileSizeM * trainingWorldScale);
+        double dyTiles = -localPos.z / (tileSizeM * trainingWorldScale);
+
+        double tileX = center.x + dxTiles;
+        double tileY = center.y + dyTiles;
+
+        TileXYFracToLatLon(tileX, tileY, z, out latDeg, out lonDeg);
+        return true;
+    }
+
+    private static void TileXYFracToLatLon(
+        double tileX,
+        double tileY,
+        int z,
+        out double latDeg,
+        out double lonDeg
+    )
+    {
+        double n = 1 << z;
+
+        lonDeg = tileX / n * 360.0 - 180.0;
+
+        double y = Math.PI * (1.0 - 2.0 * tileY / n);
+        latDeg = Math.Atan(Math.Sinh(y)) * 180.0 / Math.PI;
+    }
+
+    public bool TryGetWaypointWorldPosition(
+        ScenarioDefinition scenario,
+        ScenarioDefinition.WaypointDef wpDef,
+        out Vector3 worldPos
+    )
+    {
+        worldPos = default;
+
+        if (!scenario || wpDef == null)
+            return false;
+
+        int z = GetEffectiveZoom(scenario);
+        float tileSizeM = GetEffectiveTileSizeM(scenario.centerLatDeg, z);
+
+        Vector3 localPos = WaypointDefToLocalPosition(
+            wpDef,
+            scenario.centerLatDeg,
+            scenario.centerLonDeg,
+            z,
+            tileSizeM
+        );
+
+        Transform parent = waypointParent ? waypointParent : transform;
+        worldPos = parent.TransformPoint(localPos);
+        worldPos.y = 0f;
+
+        return true;
     }
 
     /// <summary>

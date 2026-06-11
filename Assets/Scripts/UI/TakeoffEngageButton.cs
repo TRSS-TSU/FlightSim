@@ -2,18 +2,19 @@ using UnityEngine;
 
 public class TakeoffEngageButton : MonoBehaviour
 {
-    public NavAutopilot nav;
-
+    public TakeoffProcedureController takeoffProcedure;
     public GameObject takeoffButtonToHide;
 
     public void Press()
     {
-        if (nav)
-            nav.SetNavEngaged(true);
+        if (takeoffProcedure)
+            takeoffProcedure.BeginTakeoff();
+        else
+            Debug.LogWarning("[TakeoffEngageButton] No TakeoffProcedureController assigned.");
 
         if (takeoffButtonToHide)
             takeoffButtonToHide.SetActive(false);
 
-        Debug.Log("[TakeoffEngageButton] Takeoff engaged. Takeoff button hidden.");
+        Debug.Log("[TakeoffEngageButton] Takeoff requested. Takeoff button hidden.");
     }
 }

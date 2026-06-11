@@ -25,8 +25,8 @@ MonoBehaviour:
   preloadTilesOnRouteExecute: 1
   waypoints:
   - ident: KNPA
-    latDeg: 30.35
-    lonDeg: -87.32
+    latDeg: 30.35119059
+    lonDeg: -87.29687867
     distance: 0
     role: 0
     includeInActiveRoute: 1
@@ -34,8 +34,8 @@ MonoBehaviour:
     targetIasKt: 0
     targetHdgDeg: 0
   - ident: KNPA_EOR25R_START
-    latDeg: 30.34
-    lonDeg: -87.33
+    latDeg: 30.35119059
+    lonDeg: -87.29687867
     distance: 0
     role: 1
     includeInActiveRoute: 0
@@ -43,13 +43,13 @@ MonoBehaviour:
     targetIasKt: 0
     targetHdgDeg: 250
   - ident: KNPA_RW25R_THRESH
-    latDeg: 30.34
-    lonDeg: -87.34
+    latDeg: 30.34346882
+    lonDeg: -87.32018463
     distance: 0
     role: 2
     includeInActiveRoute: 0
     targetAltFtMsl: 200
-    targetIasKt: 250
+    targetIasKt: 110
     targetHdgDeg: 250
   - ident: KNPA_DEP_1DME
     latDeg: 30.33
@@ -205,8 +205,8 @@ MonoBehaviour:
     targetIasKt: 100
     targetHdgDeg: 250
   - ident: KNPA_FINAL_STOP
-    latDeg: 30.36
-    lonDeg: -87.32
+    latDeg: 30.35119059
+    lonDeg: -87.29687867
     distance: 0
     role: 6
     includeInActiveRoute: 0
@@ -214,8 +214,8 @@ MonoBehaviour:
     targetIasKt: 0
     targetHdgDeg: 250
   - ident: KNPA
-    latDeg: 30.35
-    lonDeg: -87.32
+    latDeg: 30.35119059
+    lonDeg: -87.29687867
     distance: 0
     role: 0
     includeInActiveRoute: 1
