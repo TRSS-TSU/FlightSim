@@ -59,6 +59,14 @@ public class FlightPlan : MonoBehaviour
         if (ScenarioRuntime.Current == null)
             return;
 
+        // If startup route building is enabled, let LoadScenario/BuildWhenTileGridReady
+        // handle the snap after the tile grid is ready.
+        if (autoBuildScenarioOnStart && waypoints.Length == 0)
+        {
+            LoadScenario(ScenarioRuntime.Current);
+            return;
+        }
+
         if (snapAircraftToScenarioStartOnLoad)
         {
             SnapAircraftToScenarioStart(ScenarioRuntime.Current);
@@ -66,9 +74,6 @@ public class FlightPlan : MonoBehaviour
             StabilizeAircraftAfterSnap();
             StartCoroutine(StabilizeAircraftNextFixedUpdate());
         }
-
-        if (autoBuildScenarioOnStart && waypoints.Length == 0)
-            LoadScenario(ScenarioRuntime.Current);
     }
 
     private void LoadScenario(ScenarioDefinition s)
@@ -78,14 +83,20 @@ public class FlightPlan : MonoBehaviour
 
         currentScenario = s;
 
-        if (snapAircraftToScenarioStartOnLoad)
-            SnapAircraftToScenarioStart(s);
-
-        if (!autoBuildScenarioOnStart)
+        if (autoBuildScenarioOnStart)
+        {
+            StopAllCoroutines();
+            StartCoroutine(BuildWhenTileGridReady(s));
             return;
+        }
 
-        StopAllCoroutines();
-        StartCoroutine(BuildWhenTileGridReady(s));
+        if (snapAircraftToScenarioStartOnLoad)
+        {
+            SnapAircraftToScenarioStart(s);
+            Physics.SyncTransforms();
+            StabilizeAircraftAfterSnap();
+            StartCoroutine(StabilizeAircraftNextFixedUpdate());
+        }
     }
 
     private IEnumerator BuildWhenTileGridReady(ScenarioDefinition s)
@@ -101,6 +112,19 @@ public class FlightPlan : MonoBehaviour
         }
 
         int z = tileGrid ? tileGrid.z : s.baseZoom;
+
+        // Important:
+        // Snap only after the tile grid has had a chance to initialize.
+        // This keeps spawn conversion consistent with calibration conversion.
+        if (snapAircraftToScenarioStartOnLoad)
+        {
+            SnapAircraftToScenarioStart(s);
+            Physics.SyncTransforms();
+            StabilizeAircraftAfterSnap();
+            yield return new WaitForFixedUpdate();
+            StabilizeAircraftAfterSnap();
+        }
+
         var route = ResolveRouteFromIdents(s, s.prefillRouteIdents);
         RebuildRoute(route, s.centerLatDeg, s.centerLonDeg, z);
 
@@ -172,7 +196,8 @@ public class FlightPlan : MonoBehaviour
                 Debug.Log(
                     $"[FlightPlan] Snapped aircraft to scenario start {startDef.ident} "
                         + $"pos={aircraftRoot.position} hdg={startHeading:F0} "
-                        + $"ias={startDef.targetIasKt:F0} alt={startDef.targetAltFtMsl:F0}"
+                        + $"ias={startDef.targetIasKt:F0} alt={startDef.targetAltFtMsl:F0} "
+                        + $"z={z} tileSizeM={tileSizeM:F2} trainingScale={trainingWorldScale:F3}"
                 );
             }
 
