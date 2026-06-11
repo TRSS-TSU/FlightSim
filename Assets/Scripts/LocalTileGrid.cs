@@ -28,7 +28,7 @@ public class LocalTileGrid : MonoBehaviour
     public GameObject tilePrefab;
 
     [Header("Tile Source")]
-    public string tilesFolder = "tiles_nd_dark_v1";
+    public string tilesFolder = "tiles_nd_fms_v2";
 
     [Header("Paging / Coverage")]
     [Range(0, 6)]
@@ -91,7 +91,7 @@ public class LocalTileGrid : MonoBehaviour
         lastRangeNm = rangeNm;
 
         z =
-            (rangeNm == 20) ? 13
+            (rangeNm == 20) ? 14
             : (rangeNm == 10) ? 14
             : (rangeNm == 5) ? 14
             : z;
@@ -378,14 +378,6 @@ public class LocalTileGrid : MonoBehaviour
         double latRad = latDeg * Mathf.Deg2Rad;
         int n = 1 << zoom;
         x = (int)((lonDeg + 180.0) / 360.0 * n);
-        y = (int)(
-            (
-                1.0
-                - Math.Log(Math.Tan(latRad) + 1.0 / Math.Cos(latRad))
-                    / Math.PI
-            )
-            / 2.0
-            * n
-        );
+        y = (int)((1.0 - Math.Log(Math.Tan(latRad) + 1.0 / Math.Cos(latRad)) / Math.PI) / 2.0 * n);
     }
 }
