@@ -126,26 +126,52 @@ public class FlightPlan : MonoBehaviour
                 z,
                 tileSizeM
             );
+
             Transform parent = waypointParent ? waypointParent : transform;
             aircraftRoot.position = parent.TransformPoint(localPos) + Vector3.up * 0.45f;
 
-            if (Mathf.Abs(startDef.targetHdgDeg) > 0.001f)
-                aircraftRoot.rotation = Quaternion.Euler(0f, startDef.targetHdgDeg, 0f);
+            float startHeading = NormalizeHeading(startDef.targetHdgDeg);
+
+            if (Mathf.Abs(startHeading) > 0.001f)
+                aircraftRoot.rotation = Quaternion.Euler(0f, startHeading, 0f);
+
+            SimTargets targets = aircraftRoot.GetComponent<SimTargets>();
+            if (targets)
+            {
+                targets.targetIasKt = Mathf.Max(0f, startDef.targetIasKt);
+                targets.targetAltFtMsl = Mathf.Max(0f, startDef.targetAltFtMsl);
+                targets.targetHdgDeg = startHeading;
+            }
 
             Rigidbody rb = aircraftRoot.GetComponent<Rigidbody>();
             if (rb)
             {
                 rb.linearVelocity = Vector3.zero;
                 rb.angularVelocity = Vector3.zero;
+                rb.position = aircraftRoot.position;
+                rb.rotation = aircraftRoot.rotation;
                 rb.Sleep();
             }
 
             if (logBuild)
-                Debug.Log($"[FlightPlan] Snapped aircraft to scenario start {startDef.ident}");
+            {
+                Debug.Log(
+                    $"[FlightPlan] Snapped aircraft to scenario start {startDef.ident} "
+                        + $"pos={aircraftRoot.position} hdg={startHeading:F0} "
+                        + $"ias={startDef.targetIasKt:F0} alt={startDef.targetAltFtMsl:F0}"
+                );
+            }
+
             return;
         }
 
         SnapAircraftToFirstWaypoint();
+    }
+
+    private static float NormalizeHeading(float hdg)
+    {
+        hdg %= 360f;
+        return hdg < 0f ? hdg + 360f : hdg;
     }
 
     private IEnumerator StabilizeAircraftNextFixedUpdate()
