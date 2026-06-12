@@ -8,6 +8,10 @@ public class PlaneController : MonoBehaviour
     public NavAutopilot nav;
 
     Rigidbody rb;
+    float forwardSpeedMps;
+
+    public float CurrentGroundSpeedMps => Mathf.Abs(forwardSpeedMps);
+    public float CurrentVerticalSpeedMps => vyCmdSmoothed;
 
     [Header("Speed Hold")]
     [Tooltip("Proportional gain that turns speed error into commanded acceleration.")]
@@ -120,11 +124,12 @@ public class PlaneController : MonoBehaviour
 
         rb.useGravity = false;
 
-        // Keep the sim deterministic and planar:
+        // Keep the sim deterministic and planar. The training sim owns pose integration;
+        // do not let dynamic collision response suppress commanded takeoff motion.
+        rb.isKinematic = true;
         rb.linearDamping = 0f;
         rb.angularDamping = 0f;
-        // rb.constraints =
-        //     RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+        rb.constraints = RigidbodyConstraints.None;
 
         rb.interpolation = RigidbodyInterpolation.None;
         rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
@@ -145,6 +150,28 @@ public class PlaneController : MonoBehaviour
         UpdateSpeed();
         UpdateHeading();
         UpdateAltitude();
+        ApplyCommandedMotion();
+    }
+
+    private void ApplyCommandedMotion()
+    {
+        float dt = Time.fixedDeltaTime;
+
+        Vector3 fwd = rb.rotation * Vector3.forward;
+        fwd.y = 0f;
+        if (fwd.sqrMagnitude < 1e-6f)
+            fwd = Vector3.forward;
+        fwd.Normalize();
+
+        Vector3 commandedVelocity = fwd * forwardSpeedMps + Vector3.up * vyCmdSmoothed;
+
+        if (!rb.isKinematic)
+            rb.linearVelocity = commandedVelocity;
+
+        Vector3 nextPosition = rb.position + commandedVelocity * dt;
+        rb.MovePosition(nextPosition);
+        rb.position = nextPosition;
+        transform.position = nextPosition;
     }
 
     public void ArmParkedPoseHold(Vector3 worldPosition, float headingDeg)
@@ -178,8 +205,18 @@ public class PlaneController : MonoBehaviour
             return;
 
         Quaternion parkedRotation = Quaternion.Euler(0f, parkedHeadingDeg, 0f);
-        rb.linearVelocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
+        forwardSpeedMps = 0f;
+        vyCmdSmoothed = 0f;
+        currentBankDeg = 0f;
+        currentPitchDeg = 0f;
+        yawInit = false;
+
+        if (!rb.isKinematic)
+        {
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
+
         rb.position = parkedWorldPosition;
         rb.rotation = parkedRotation;
         transform.SetPositionAndRotation(parkedWorldPosition, parkedRotation);
@@ -195,32 +232,18 @@ public class PlaneController : MonoBehaviour
     // "Throttle" / speed hold: accel-limited, XZ only so altitude control stays independent.
     void UpdateSpeed()
     {
-        Vector3 v = rb.linearVelocity;
-        float vy = v.y;
-
-        // Forward direction on the ground plane
-        Vector3 fwd = transform.forward;
-        fwd.y = 0f;
-        if (fwd.sqrMagnitude < 1e-6f)
-            fwd = Vector3.forward;
-        fwd.Normalize();
-
-        // Current forward ground speed (m/s)
-        Vector3 vXZ = new Vector3(v.x, 0f, v.z);
-        float vFwd = Vector3.Dot(vXZ, fwd);
-
-        float target = targets ? targets.TargetSpeedMS * worldSpeedScale : vFwd;
-        float e_v = target - vFwd;
+        float target = targets ? targets.TargetSpeedMS * worldSpeedScale : forwardSpeedMps;
+        float e_v = target - forwardSpeedMps;
 
         // Accel command (m/s^2)
         float accel = Mathf.Clamp(e_v * speedResponse, -maxAccel, +maxAccel);
-        vFwd += accel * Time.fixedDeltaTime;
+        forwardSpeedMps += accel * Time.fixedDeltaTime;
 
-        Vector3 newVXZ = fwd * vFwd;
-        rb.linearVelocity = new Vector3(newVXZ.x, vy, newVXZ.z);
+        if (target <= 0.01f && Mathf.Abs(forwardSpeedMps) <= 0.05f)
+            forwardSpeedMps = 0f;
     }
 
-    // Bank-based coordinated turn: heading error -> bank -> turn rate depends on ground speed.
+    // Bank-based coordinated turn: heading error -> bank -> turn rate depends on commanded ground speed.
     void UpdateHeading()
     {
         if (!targets)
@@ -236,8 +259,7 @@ public class PlaneController : MonoBehaviour
             yawInit = true;
         }
 
-        Vector3 v = rb.linearVelocity;
-        float groundSpeed = new Vector2(v.x, v.z).magnitude;
+        float groundSpeed = Mathf.Abs(forwardSpeedMps);
 
         // Parked / pre-takeoff guard:
         // Do not let the heading controller rotate the aircraft while it has no real forward motion.
@@ -247,8 +269,13 @@ public class PlaneController : MonoBehaviour
             currentBankDeg = 0f;
             currentPitchDeg = 0f;
 
-            rb.angularVelocity = Vector3.zero;
-            rb.MoveRotation(Quaternion.Euler(0f, currentYaw, 0f));
+            if (!rb.isKinematic)
+                rb.angularVelocity = Vector3.zero;
+
+            Quaternion holdRotation = Quaternion.Euler(0f, currentYaw, 0f);
+            rb.MoveRotation(holdRotation);
+            rb.rotation = holdRotation;
+            transform.rotation = holdRotation;
             return;
         }
 
@@ -278,7 +305,7 @@ public class PlaneController : MonoBehaviour
         if (enableHeadingDebug)
             LogHeadingDebug(currentYaw, targetYaw, currentBankDeg, groundSpeed);
 
-        float vy = rb.linearVelocity.y;
+        float vy = vyCmdSmoothed;
 
         // Positive climb = nose up, descent = nose down.
         // This is visual attitude only, not a real aero model.
@@ -299,7 +326,10 @@ public class PlaneController : MonoBehaviour
             pitchResponseDegPerSec * dt
         );
 
-        rb.MoveRotation(Quaternion.Euler(-currentPitchDeg, newYaw, -currentBankDeg));
+        Quaternion commandedRotation = Quaternion.Euler(-currentPitchDeg, newYaw, -currentBankDeg);
+        rb.MoveRotation(commandedRotation);
+        rb.rotation = commandedRotation;
+        transform.rotation = commandedRotation;
     }
 
     void UpdateAltitude()
@@ -323,9 +353,6 @@ public class PlaneController : MonoBehaviour
         {
             altMode = AltMode.Hold;
             vyCmdSmoothed = Mathf.MoveTowards(vyCmdSmoothed, 0f, maxVyAccel * dt);
-            Vector3 vHold = rb.linearVelocity;
-            vHold.y = vyCmdSmoothed;
-            rb.linearVelocity = vHold;
             return;
         }
 
@@ -339,7 +366,7 @@ public class PlaneController : MonoBehaviour
 
         if (vnavLiteEnabled && nav && nav.navEngaged)
         {
-            float gs = new Vector2(rb.linearVelocity.x, rb.linearVelocity.z).magnitude;
+            float gs = Mathf.Abs(forwardSpeedMps);
             float d = Mathf.Max(nav.activeDistance, vnavMinDistanceM);
 
             float vyVnav = Mathf.Clamp((e_h * gs) / d, -maxClimbRate, +maxClimbRate);
@@ -352,10 +379,6 @@ public class PlaneController : MonoBehaviour
         // No else — vyDes = vyCap when VNAV not available
 
         vyCmdSmoothed = Mathf.MoveTowards(vyCmdSmoothed, vyDes, maxVyAccel * dt);
-
-        Vector3 v = rb.linearVelocity;
-        v.y = vyCmdSmoothed;
-        rb.linearVelocity = v;
     }
 
     void LogHeadingDebug(float currentYaw, float targetYaw, float bankDeg, float groundSpeed)

@@ -184,8 +184,12 @@ public class FlightPlan : MonoBehaviour
             Rigidbody rb = aircraftRoot.GetComponent<Rigidbody>();
             if (rb)
             {
-                rb.linearVelocity = Vector3.zero;
-                rb.angularVelocity = Vector3.zero;
+                if (!rb.isKinematic)
+                {
+                    rb.linearVelocity = Vector3.zero;
+                    rb.angularVelocity = Vector3.zero;
+                }
+
                 rb.position = aircraftRoot.position;
                 rb.rotation = aircraftRoot.rotation;
                 rb.Sleep();
@@ -236,8 +240,11 @@ public class FlightPlan : MonoBehaviour
         if (!rb)
             return;
 
-        rb.linearVelocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
+        if (!rb.isKinematic)
+        {
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
 
         rb.position = aircraftRoot.position;
         rb.rotation = aircraftRoot.rotation;

@@ -216,6 +216,12 @@ public class TakeoffProcedureController : MonoBehaviour
 
         float startTime = Time.time;
         float radius = Mathf.Max(1f, gateRadiusM);
+        float lastLogTime = Time.time;
+        float lastDist = -1f;
+
+        Rigidbody aircraftRb = aircraft.GetComponent<Rigidbody>();
+        PlaneController plane = aircraft.GetComponent<PlaneController>();
+        SimTargets simTargets = aircraft.GetComponent<SimTargets>();
 
         while (Time.time - startTime < timeoutSeconds)
         {
@@ -226,7 +232,23 @@ public class TakeoffProcedureController : MonoBehaviour
 
             if (logProcedure)
             {
-                Debug.Log($"[TakeoffProcedure] Gate distance: {dist:F1}m / radius={radius:F1}m");
+                float now = Time.time;
+                float dt = Mathf.Max(0.001f, now - lastLogTime);
+                float closingMps = lastDist >= 0f ? (lastDist - dist) / dt : 0f;
+                Vector3 v = aircraftRb ? aircraftRb.linearVelocity : Vector3.zero;
+                float gsMps = plane ? plane.CurrentGroundSpeedMps : new Vector2(v.x, v.z).magnitude;
+                float targetIasKt = simTargets ? simTargets.targetIasKt : 0f;
+                float worldSpeedScale = plane ? plane.worldSpeedScale : 1f;
+
+                Debug.Log(
+                    $"[TakeoffProcedure] Gate distance: {dist:F1}m / radius={radius:F1}m "
+                        + $"closing={closingMps:F2}m/s gs={gsMps:F2}m/s "
+                        + $"pos=({aircraft.position.x:F1},{aircraft.position.z:F1}) "
+                        + $"yaw={aircraft.eulerAngles.y:F1} IAS={targetIasKt:F0} scale={worldSpeedScale:F2}"
+                );
+
+                lastLogTime = now;
+                lastDist = dist;
             }
 
             if (dist <= radius)
