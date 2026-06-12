@@ -191,6 +191,10 @@ public class FlightPlan : MonoBehaviour
                 rb.Sleep();
             }
 
+            PlaneController plane = aircraftRoot.GetComponent<PlaneController>();
+            if (plane)
+                plane.ArmParkedPoseHold(worldPos, startHeading);
+
             if (logBuild)
             {
                 Debug.Log(

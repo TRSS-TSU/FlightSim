@@ -29897,6 +29897,7 @@ MonoBehaviour:
   nav: {fileID: 556071000}
   speedResponse: 1.5
   maxAccel: 5
+  worldSpeedScale: 0.05
   altitudeResponse: 1.5
   maxClimbRate: 15
   altitudeCaptureBandM: 1
@@ -29916,6 +29917,7 @@ MonoBehaviour:
   pitchResponseDegPerSec: 20
   maxRollRateDegPerSec: 15
   enableHeadingDebug: 0
+  parkedPoseHoldEnabled: 1
   yawRateP: 0.8
   yawRateD: 0.6
   maxYawRateDegPerSec: 12
@@ -29988,8 +29990,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 20, y: 10, z: 97.85}
-  m_Center: {x: 0, y: 7, z: 0}
+  m_Size: {x: 2.36, y: 0.5, z: 0.5}
+  m_Center: {x: 0, y: 0.3, z: -0.4}
 --- !u!65 &556070999
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -30009,8 +30011,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 76.93, y: 10, z: 15.87}
-  m_Center: {x: 0, y: 7, z: -7.16}
+  m_Size: {x: 0.5, y: 0.5, z: 3}
+  m_Center: {x: 0, y: 0.3, z: -0.16}
 --- !u!114 &556071000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30034,7 +30036,7 @@ MonoBehaviour:
   loop: 1
   lookAheadSec: 30
   lookAheadMinM: 300
-  navEngaged: 1
+  navEngaged: 0
   nearRadiusMultiplier: 1.25
   minNearFrames: 3
   advanceCooldownSec: 0.5
@@ -30062,7 +30064,7 @@ MonoBehaviour:
   autoBuildScenarioOnStart: 1
   snapAircraftToScenarioStartOnLoad: 1
   logBuild: 1
-  gizmoRadiusM: 20
+  gizmoRadiusM: 0.3
 --- !u!114 &556071002
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30111,10 +30113,10 @@ MonoBehaviour:
   aircraft: {fileID: 556070994}
   runwayHeadingDeg: 250
   departureHeadingDeg: 220
-  rollIasKt: 8
-  liftoffIasKt: 12
-  climbIasKt: 16
-  departureIasKt: 20
+  rollIasKt: 60
+  liftoffIasKt: 110
+  climbIasKt: 130
+  departureIasKt: 150
   runwayAltFt: 0
   liftoffAltFt: 50
   departureAltFt: 500
@@ -30127,7 +30129,7 @@ MonoBehaviour:
   flightPlan: {fileID: 556071001}
   thresholdGateRadiusM: 10
   departureGateRadiusM: 20
-  maxGateWaitSeconds: 60
+  maxGateWaitSeconds: 180
   runwayThresholdIdent: KNPA_RW25R_THRESH
   departureIdent: KNPA_DEP_1DME
 --- !u!114 &556071004

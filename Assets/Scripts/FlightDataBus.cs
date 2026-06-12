@@ -110,8 +110,13 @@ public class FlightDataBus : MonoBehaviour
         Vector3 v = _rb.linearVelocity;
 
         Vector2 vXZ = new Vector2(v.x, v.z);
-        iasKt = vXZ.magnitude * KT_PER_MS;
-        gsKt  = vXZ.magnitude * KT_PER_MS;
+        float physicalGroundSpeedKt = vXZ.magnitude * KT_PER_MS;
+        float speedScale = plane ? Mathf.Max(plane.worldSpeedScale, 0.0001f) : 1f;
+
+        // Rigidbody XZ motion may be compressed for the training world, but IAS is a
+        // displayed/training value and should remain in pilot units.
+        iasKt = physicalGroundSpeedKt / speedScale;
+        gsKt  = physicalGroundSpeedKt;
 
         altFtMsl = _rb.position.y * FT_PER_M;
         selectedAltFtMsl = targets ? targets.targetAltFtMsl : 0f;

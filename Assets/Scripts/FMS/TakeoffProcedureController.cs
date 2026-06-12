@@ -13,10 +13,10 @@ public class TakeoffProcedureController : MonoBehaviour
     public float departureHeadingDeg = 220f;
 
     [Header("Stage Targets")]
-    public float rollIasKt = 80f;
-    public float liftoffIasKt = 130f;
-    public float climbIasKt = 160f;
-    public float departureIasKt = 180f;
+    public float rollIasKt = 60f;
+    public float liftoffIasKt = 110f;
+    public float climbIasKt = 130f;
+    public float departureIasKt = 150f;
 
     public float runwayAltFt = 0f;
     public float liftoffAltFt = 250f;
@@ -29,7 +29,7 @@ public class TakeoffProcedureController : MonoBehaviour
     public float departureTurnSeconds = 5f;
 
     [Header("Options")]
-    public bool engageNavAfterProcedure = true;
+    public bool engageNavAfterProcedure = false;
     public bool logProcedure = true;
 
     Coroutine routine;
@@ -41,7 +41,7 @@ public class TakeoffProcedureController : MonoBehaviour
     public FlightPlan flightPlan;
     public float thresholdGateRadiusM = 10f;
     public float departureGateRadiusM = 20f;
-    public float maxGateWaitSeconds = 60f;
+    public float maxGateWaitSeconds = 180f;
 
     public string runwayThresholdIdent = "KNPA_RW25R_THRESH";
     public string departureIdent = "KNPA_DEP_1DME";
@@ -116,6 +116,11 @@ public class TakeoffProcedureController : MonoBehaviour
         // Stage 2: liftoff / gentle initial climb.
         SetTargets(liftoffIasKt, liftoffAltFt, runwayHeadingDeg);
 
+        yield return WaitStage(liftoffSeconds);
+
+        // Stage 2b: climb straight ahead until the departure gate is reached.
+        SetTargets(climbIasKt, departureAltFt, runwayHeadingDeg);
+
         if (hasDeparture)
             yield return WaitUntilNearWaypoint(
                 departurePos,
@@ -123,7 +128,7 @@ public class TakeoffProcedureController : MonoBehaviour
                 maxGateWaitSeconds
             );
         else
-            yield return WaitStage(liftoffSeconds + climbSeconds);
+            yield return WaitStage(climbSeconds);
 
         if (logProcedure)
             Debug.Log("[TakeoffProcedure] Departure gate reached. Turn heading 220.");

@@ -16,6 +16,12 @@ public class PlaneController : MonoBehaviour
     [Tooltip("Maximum forward acceleration/deceleration (m/s^2).")]
     public float maxAccel = 5f; // m/s^2
 
+    [Header("Training Movement Scale")]
+    [Tooltip(
+        "Scales actual Rigidbody forward movement for compressed training worlds. Does not change displayed IAS."
+    )]
+    public float worldSpeedScale = 1f;
+
     [Header("Altitude Hold")]
     [Tooltip("Proportional gain that turns altitude error into commanded vertical speed.")]
     public float altitudeResponse = 1.5f; // 1/s
@@ -78,6 +84,14 @@ public class PlaneController : MonoBehaviour
     public bool enableHeadingDebug = false;
     float _hdgLogT;
 
+    [Header("Parked Pose Hold")]
+    [Tooltip("When armed, holds the aircraft at the scenario start while IAS target is zero and NAV is off.")]
+    public bool parkedPoseHoldEnabled = true;
+
+    Vector3 parkedWorldPosition;
+    float parkedHeadingDeg;
+    bool parkedPoseArmed;
+
     [Header("Heading Capture PD")]
     [Tooltip("P gain: heading error (deg) -> commanded yaw rate (deg/sec).")]
     public float yawRateP = 0.8f;
@@ -124,9 +138,57 @@ public class PlaneController : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (ApplyParkedPoseHold())
+            return;
+
         UpdateSpeed();
         UpdateHeading();
         UpdateAltitude();
+    }
+
+    public void ArmParkedPoseHold(Vector3 worldPosition, float headingDeg)
+    {
+        parkedWorldPosition = new Vector3(worldPosition.x, 0f, worldPosition.z);
+        parkedHeadingDeg = NormalizeHeading(headingDeg);
+        parkedPoseArmed = true;
+        ApplyParkedPoseImmediate();
+    }
+
+    private bool ApplyParkedPoseHold()
+    {
+        if (!parkedPoseHoldEnabled || !parkedPoseArmed || !targets)
+            return false;
+
+        bool navActive = nav && nav.navEngaged;
+        bool shouldHold = targets.targetIasKt <= 0.1f && !navActive;
+        if (!shouldHold)
+        {
+            parkedPoseArmed = false;
+            return false;
+        }
+
+        ApplyParkedPoseImmediate();
+        return true;
+    }
+
+    private void ApplyParkedPoseImmediate()
+    {
+        if (!rb)
+            return;
+
+        Quaternion parkedRotation = Quaternion.Euler(0f, parkedHeadingDeg, 0f);
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        rb.position = parkedWorldPosition;
+        rb.rotation = parkedRotation;
+        transform.SetPositionAndRotation(parkedWorldPosition, parkedRotation);
+        rb.Sleep();
+    }
+
+    private static float NormalizeHeading(float hdg)
+    {
+        hdg %= 360f;
+        return hdg < 0f ? hdg + 360f : hdg;
     }
 
     // "Throttle" / speed hold: accel-limited, XZ only so altitude control stays independent.
@@ -146,7 +208,7 @@ public class PlaneController : MonoBehaviour
         Vector3 vXZ = new Vector3(v.x, 0f, v.z);
         float vFwd = Vector3.Dot(vXZ, fwd);
 
-        float target = targets ? targets.TargetSpeedMS : vFwd;
+        float target = targets ? targets.TargetSpeedMS * worldSpeedScale : vFwd;
         float e_v = target - vFwd;
 
         // Accel command (m/s^2)
