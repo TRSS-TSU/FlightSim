@@ -18,7 +18,8 @@ public class PlaneController : MonoBehaviour
 
     [Header("Training Movement Scale")]
     [Tooltip(
-        "Scales actual Rigidbody forward movement for compressed training worlds. Does not change displayed IAS."
+        "Scales actual Rigidbody forward movement for compressed training worlds. Does not change displayed IAS. "
+            + "Use this as a training time/visual speed scale; it does not have to equal FlightPlan.trainingWorldScale."
     )]
     public float worldSpeedScale = 1f;
 

@@ -29897,7 +29897,7 @@ MonoBehaviour:
   nav: {fileID: 556071000}
   speedResponse: 1.5
   maxAccel: 5
-  worldSpeedScale: 0.05
+  worldSpeedScale: 0.25
   altitudeResponse: 1.5
   maxClimbRate: 15
   altitudeCaptureBandM: 1
