@@ -7,14 +7,20 @@ public class TakeoffEngageButton : MonoBehaviour
 
     public void Press()
     {
+        bool started = false;
+
         if (takeoffProcedure)
-            takeoffProcedure.BeginTakeoff();
+            started = takeoffProcedure.BeginTakeoff();
         else
             Debug.LogWarning("[TakeoffEngageButton] No TakeoffProcedureController assigned.");
 
-        if (takeoffButtonToHide)
+        if (started && takeoffButtonToHide)
             takeoffButtonToHide.SetActive(false);
 
-        Debug.Log("[TakeoffEngageButton] Takeoff requested. Takeoff button hidden.");
+        Debug.Log(
+            started
+                ? "[TakeoffEngageButton] Takeoff requested. Takeoff button hidden."
+                : "[TakeoffEngageButton] Takeoff request rejected. Takeoff button remains visible."
+        );
     }
 }

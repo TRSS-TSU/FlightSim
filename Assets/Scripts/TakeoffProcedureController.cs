@@ -29,7 +29,7 @@ public class TakeoffProcedureController : MonoBehaviour
     public float departureTurnSeconds = 5f;
 
     [Header("Options")]
-    public bool engageNavAfterProcedure = false;
+    public bool engageNavAfterProcedure = true;
     public bool logProcedure = true;
 
     Coroutine routine;
@@ -46,7 +46,12 @@ public class TakeoffProcedureController : MonoBehaviour
     public string runwayThresholdIdent = "KNPA_RW25R_THRESH";
     public string departureIdent = "KNPA_DEP_1DME";
 
-    public void BeginTakeoff()
+    [Header("Departure Handoff")]
+    public float navHandoffMinAltitudeFt = 2500f;
+    public int navHandoffRouteIndex = 1;
+    public bool allowHandoffAfterDepartureGate = true;
+
+    public bool BeginTakeoff()
     {
         if (isRunning)
         {
@@ -54,19 +59,20 @@ public class TakeoffProcedureController : MonoBehaviour
                 Debug.LogWarning(
                     "[TakeoffProcedure] BeginTakeoff ignored: procedure already running."
                 );
-            return;
+            return false;
         }
 
         if (!targets)
         {
             Debug.LogWarning("[TakeoffProcedure] Cannot begin: SimTargets is not assigned.");
-            return;
+            return false;
         }
 
         if (nav)
             nav.SetNavEngaged(false);
 
         routine = StartCoroutine(TakeoffRoutine());
+        return true;
     }
 
     private IEnumerator TakeoffRoutine()
@@ -77,16 +83,20 @@ public class TakeoffProcedureController : MonoBehaviour
 
         Vector3 thresholdPos;
         Vector3 departurePos;
+        ScenarioDefinition.WaypointDef thresholdDef;
+        ScenarioDefinition.WaypointDef departureDef;
 
-        bool hasThreshold = TryFindScenarioWaypointWorldPosition(
+        bool hasThreshold = TryFindTakeoffWaypointWorldPosition(
             scenario,
             runwayThresholdIdent,
+            out thresholdDef,
             out thresholdPos
         );
 
-        bool hasDeparture = TryFindScenarioWaypointWorldPosition(
+        bool hasDeparture = TryFindTakeoffWaypointWorldPosition(
             scenario,
             departureIdent,
+            out departureDef,
             out departurePos
         );
 
@@ -114,35 +124,59 @@ public class TakeoffProcedureController : MonoBehaviour
             Debug.Log("[TakeoffProcedure] Threshold gate reached. Liftoff stage.");
 
         // Stage 2: liftoff / gentle initial climb.
-        SetTargets(liftoffIasKt, liftoffAltFt, runwayHeadingDeg);
+        SetTargets(
+            ResolveScenarioIas(thresholdDef, liftoffIasKt),
+            ResolveScenarioAltitude(thresholdDef, liftoffAltFt),
+            ResolveScenarioHeading(thresholdDef, runwayHeadingDeg)
+        );
 
         yield return WaitStage(liftoffSeconds);
 
-        // Stage 2b: climb straight ahead until the departure gate is reached.
-        SetTargets(climbIasKt, departureAltFt, runwayHeadingDeg);
+        // Stage 2b: climb straight ahead until the departure gate and altitude handoff are satisfied.
+        SetTargets(
+            climbIasKt,
+            ResolveScenarioAltitude(departureDef, departureAltFt),
+            runwayHeadingDeg
+        );
 
         if (hasDeparture)
-            yield return WaitUntilNearWaypoint(
+        {
+            yield return WaitUntilDepartureHandoff(
                 departurePos,
                 departureGateRadiusM,
                 maxGateWaitSeconds
             );
+        }
         else
             yield return WaitStage(climbSeconds);
 
-        if (logProcedure)
-            Debug.Log("[TakeoffProcedure] Departure gate reached. Turn heading 220.");
-
-        // Stage 3: departure turn.
-        SetTargets(departureIasKt, departureAltFt, departureHeadingDeg);
-        yield return WaitStage(departureTurnSeconds);
+        SetTargets(
+            departureIasKt,
+            ResolveScenarioAltitude(departureDef, departureAltFt),
+            departureHeadingDeg
+        );
 
         if (engageNavAfterProcedure && nav)
         {
+            PrepareNavForDepartureHandoff();
             nav.SetNavEngaged(true);
 
             if (logProcedure)
-                Debug.Log("[TakeoffProcedure] NAV engaged. Route handoff complete.");
+            {
+                string activeName =
+                    nav.plan
+                    && nav.plan.waypoints != null
+                    && nav.activeIndex >= 0
+                    && nav.activeIndex < nav.plan.waypoints.Length
+                    && nav.plan.waypoints[nav.activeIndex]
+                        ? nav.plan.waypoints[nav.activeIndex].name
+                        : "<none>";
+
+                Debug.Log(
+                    $"[TakeoffProcedure] NAV engaged. Route handoff complete. "
+                        + $"activeIndex={nav.activeIndex} activeWaypoint={activeName}"
+                );
+            }
         }
 
         isRunning = false;
@@ -178,19 +212,23 @@ public class TakeoffProcedureController : MonoBehaviour
         return hdg < 0f ? hdg + 360f : hdg;
     }
 
-    private bool TryFindScenarioWaypointWorldPosition(
+    private bool TryFindTakeoffWaypointWorldPosition(
         ScenarioDefinition scenario,
         string ident,
+        out ScenarioDefinition.WaypointDef wp,
         out Vector3 worldPos
     )
     {
+        wp = null;
         worldPos = default;
 
         if (!scenario || scenario.waypoints == null || string.IsNullOrWhiteSpace(ident))
             return false;
 
-        ScenarioDefinition.WaypointDef wp = scenario.waypoints.Find(w =>
-            w != null && string.Equals(w.ident, ident, System.StringComparison.OrdinalIgnoreCase)
+        wp = scenario.waypoints.Find(w =>
+            w != null
+            && w.role == ScenarioDefinition.WaypointRole.Takeoff
+            && string.Equals(w.ident, ident, System.StringComparison.OrdinalIgnoreCase)
         );
 
         if (wp == null)
@@ -203,6 +241,88 @@ public class TakeoffProcedureController : MonoBehaviour
         }
 
         return flightPlan.TryGetWaypointWorldPosition(scenario, wp, out worldPos);
+    }
+
+    private float ResolveScenarioAltitude(ScenarioDefinition.WaypointDef wp, float fallbackFt)
+    {
+        return wp != null && wp.targetAltFtMsl > 0f ? wp.targetAltFtMsl : fallbackFt;
+    }
+
+    private float ResolveScenarioHeading(ScenarioDefinition.WaypointDef wp, float fallbackDeg)
+    {
+        return wp != null && wp.targetHdgDeg > 0f ? wp.targetHdgDeg : fallbackDeg;
+    }
+
+    private float ResolveScenarioIas(ScenarioDefinition.WaypointDef wp, float fallbackKt)
+    {
+        if (wp == null || wp.targetIasKt <= 0f)
+            return fallbackKt;
+
+        return wp.targetIasKt <= targets.maxIasKt ? wp.targetIasKt : fallbackKt;
+    }
+
+    private IEnumerator WaitUntilDepartureHandoff(
+        Vector3 waypointWorldPos,
+        float gateRadiusM,
+        float timeoutSeconds
+    )
+    {
+        if (!aircraft)
+            yield break;
+
+        float startTime = Time.time;
+        float radius = Mathf.Max(1f, gateRadiusM);
+        bool reachedDepartureGate = false;
+
+        while (Time.time - startTime < timeoutSeconds)
+        {
+            float dist = FlatDistanceTo(waypointWorldPos);
+            float altitudeFt = aircraft.position.y * 3.2808399f;
+
+            if (dist <= radius)
+                reachedDepartureGate = true;
+
+            bool inGateNow = dist <= radius;
+            bool altitudeReady = altitudeFt >= navHandoffMinAltitudeFt;
+
+            bool gateReady = inGateNow || (allowHandoffAfterDepartureGate && reachedDepartureGate);
+
+            if (gateReady && altitudeReady)
+            {
+                if (logProcedure)
+                {
+                    Debug.Log(
+                        $"[TakeoffProcedure] Departure handoff condition met. "
+                            + $"dist={dist:F1}m altitude={altitudeFt:F0}ft "
+                            + $"gateReached={reachedDepartureGate}"
+                    );
+                }
+
+                yield break;
+            }
+
+            yield return new WaitForSeconds(0.25f);
+        }
+
+        Debug.LogWarning(
+            "[TakeoffProcedure] Departure handoff wait timed out. Continuing procedure."
+        );
+    }
+
+    private float FlatDistanceTo(Vector3 waypointWorldPos)
+    {
+        Vector3 aircraftFlat = Vector3.ProjectOnPlane(aircraft.position, Vector3.up);
+        Vector3 waypointFlat = Vector3.ProjectOnPlane(waypointWorldPos, Vector3.up);
+        return Vector3.Distance(aircraftFlat, waypointFlat);
+    }
+
+    private void PrepareNavForDepartureHandoff()
+    {
+        if (!nav || !nav.plan || nav.plan.waypoints == null || nav.plan.waypoints.Length == 0)
+            return;
+
+        nav.activeIndex = Mathf.Clamp(navHandoffRouteIndex, 0, nav.plan.waypoints.Length - 1);
+        nav.ResetCaptureState();
     }
 
     private IEnumerator WaitUntilNearWaypoint(

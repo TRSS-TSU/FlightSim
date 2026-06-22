@@ -30213,7 +30213,7 @@ MonoBehaviour:
   liftoffSeconds: 8
   climbSeconds: 12
   departureTurnSeconds: 8
-  engageNavAfterProcedure: 0
+  engageNavAfterProcedure: 1
   logProcedure: 1
   flightPlan: {fileID: 556071001}
   thresholdGateRadiusM: 10
@@ -30221,6 +30221,9 @@ MonoBehaviour:
   maxGateWaitSeconds: 180
   runwayThresholdIdent: KNPA_RW25R_THRESH
   departureIdent: KNPA_DEP_1DME
+  navHandoffMinAltitudeFt: 2500
+  navHandoffRouteIndex: 1
+  allowHandoffAfterDepartureGate: 1
 --- !u!114 &556071004
 MonoBehaviour:
   m_ObjectHideFlags: 0
