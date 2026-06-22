@@ -2,21 +2,36 @@ using UnityEngine;
 
 public static class DrawerGroup
 {
-    private static IDrawerController currentOpen;
+    private static MonoBehaviour currentOpen;
 
     public static void RequestOpen(IDrawerController requester)
     {
-        var prev = currentOpen;
-        if (currentOpen != null && currentOpen != requester)
-            currentOpen.SnapClosed();
+        var requesterMb = requester as MonoBehaviour;
+        if (!requesterMb)
+            return;
 
-        currentOpen = requester;
-        Debug.Log($"RequestOpen: {requester} (was {prev})");
+        if (currentOpen && currentOpen != requesterMb)
+        {
+            if (currentOpen is IDrawerController prev)
+                prev.SnapClosed();
+        }
+
+        currentOpen = requesterMb;
+        Debug.Log($"RequestOpen: {requesterMb.name}");
     }
 
     public static void NotifyClosed(IDrawerController requester)
     {
-        if (currentOpen == requester)
+        var requesterMb = requester as MonoBehaviour;
+        if (!requesterMb)
+            return;
+
+        if (currentOpen == requesterMb)
             currentOpen = null;
+    }
+
+    public static void Clear()
+    {
+        currentOpen = null;
     }
 }
