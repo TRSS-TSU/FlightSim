@@ -82,3 +82,19 @@ node_modules/
 CLAUDE.md
 bash.exe.stackdump
 *.slnx
+
+# Project-specific non-repo folders/files
+/Editor/
+/EditorThemes/
+/dev/
+/StreamingAssets.meta
+/Editor.meta
+/EditorThemes.meta
+/dev.meta
+/Assets/Editor/
+/Assets/EditorThemes/
+/Assets/dev/
+/Assets/StreamingAssets.meta
+/Assets/Editor.meta
+/Assets/EditorThemes.meta
+/Assets/dev.meta
