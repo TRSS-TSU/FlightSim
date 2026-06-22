@@ -35,23 +35,40 @@ public class RouteTilePreloader : MonoBehaviour
             yield break;
         }
 
-        int padding = scenario.preloadPaddingTiles >= 0
-            ? scenario.preloadPaddingTiles
-            : defaultPaddingTiles;
+        int padding =
+            scenario.preloadPaddingTiles >= 0 ? scenario.preloadPaddingTiles : defaultPaddingTiles;
 
-        var indexes = BuildTileIndexList(routeWaypoints, zoom, padding);
+        List<Vector2Int> tileIndexes;
 
-        if (indexes.Count >= largeTileCountWarning)
-            Debug.LogWarning(
-                $"[RouteTilePreloader] Large fixed preload z={zoom} total={indexes.Count}. Consider reducing padding or zoom."
+        if (scenario.useFixedTileBounds)
+        {
+            zoom = scenario.fixedTileZoom > 0 ? scenario.fixedTileZoom : zoom;
+
+            tileIndexes = BuildFixedBoundsTileIndexList(
+                scenario.fixedTileMinX,
+                scenario.fixedTileMaxX,
+                scenario.fixedTileMinY,
+                scenario.fixedTileMaxY
             );
+        }
+        else
+        {
+            tileIndexes = BuildTileIndexList(routeWaypoints, zoom, padding);
+        }
+
+        if (tileIndexes.Count >= largeTileCountWarning)
+        {
+            Debug.LogWarning(
+                $"[RouteTilePreloader] Large fixed preload z={zoom} total={tileIndexes.Count}. Consider reducing padding, fixed bounds, or zoom."
+            );
+        }
 
         loadingOverlay?.Show("Loading route map tiles...");
-        loadingOverlay?.SetProgress(0, indexes.Count);
+        loadingOverlay?.SetProgress(0, tileIndexes.Count);
 
         yield return tileGrid.BuildFixedTileSet(
             scenario,
-            indexes,
+            tileIndexes,
             zoom,
             (loaded, total) => loadingOverlay?.SetProgress(loaded, total)
         );
@@ -104,5 +121,32 @@ public class RouteTilePreloader : MonoBehaviour
         );
 
         return result;
+    }
+
+    public static List<Vector2Int> BuildFixedBoundsTileIndexList(
+        int xMin,
+        int xMax,
+        int yMin,
+        int yMax
+    )
+    {
+        var tiles = new List<Vector2Int>();
+
+        if (xMax < xMin || yMax < yMin)
+            return tiles;
+
+        for (int x = xMin; x <= xMax; x++)
+        {
+            for (int y = yMin; y <= yMax; y++)
+            {
+                tiles.Add(new Vector2Int(x, y));
+            }
+        }
+
+        Debug.Log(
+            $"[RouteTilePreloader] Fixed bounds x={xMin}..{xMax} y={yMin}..{yMax} total={tiles.Count}"
+        );
+
+        return tiles;
     }
 }

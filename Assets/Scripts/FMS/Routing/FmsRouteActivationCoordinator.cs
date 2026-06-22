@@ -11,6 +11,7 @@ public class FmsRouteActivationCoordinator : MonoBehaviour
     public NavAutopilot navAutopilot;
     public RouteTilePreloader tilePreloader;
     public RouteTileAuditLogger tileAuditLogger;
+    public LocalTileChunkGrid chunkGrid;
 
     public UnityEvent routeActivated;
 
@@ -68,14 +69,23 @@ public class FmsRouteActivationCoordinator : MonoBehaviour
         int zoom =
             scenario.preloadZoomOverride > 0 ? scenario.preloadZoomOverride : scenario.baseZoom;
 
-        tileAuditLogger?.AuditRoute(scenario, routeWaypoints, zoom);
-
-        if (scenario.preloadTilesOnRouteExecute && tilePreloader)
+        if (ShouldUseIndividualTilePreload(scenario) && tilePreloader)
         {
+            tileAuditLogger?.AuditRoute(scenario, routeWaypoints, zoom);
+
             yield return tilePreloader.PreloadForRoute(scenario, routeWaypoints, zoom);
         }
         else
         {
+            if (scenario.mapRasterLoadMode == MapRasterLoadMode.StitchedChunks)
+            {
+                Debug.Log(
+                    "[FmsRouteActivationCoordinator] Skipping individual tile preload because map mode is StitchedChunks."
+                );
+
+                yield return WaitForChunkMapLoad();
+            }
+
             loadingOverlay?.Show("Building flight plan...");
             yield return null;
         }
@@ -102,5 +112,38 @@ public class FmsRouteActivationCoordinator : MonoBehaviour
         IsExecuting = false;
         onComplete?.Invoke(activeIndex);
         routeActivated?.Invoke();
+    }
+
+    private static bool ShouldUseIndividualTilePreload(ScenarioDefinition scenario)
+    {
+        if (!scenario)
+            return false;
+
+        if (!scenario.preloadTilesOnRouteExecute)
+            return false;
+
+        return scenario.mapRasterLoadMode == MapRasterLoadMode.IndividualTiles;
+    }
+
+    private IEnumerator WaitForChunkMapLoad()
+    {
+        if (!chunkGrid)
+            chunkGrid = FindFirstObjectByType<LocalTileChunkGrid>();
+
+        if (!chunkGrid)
+            yield break;
+
+        if (chunkGrid.IsLoading)
+            loadingOverlay?.Show("Loading map chunks...");
+
+        while (chunkGrid.IsLoading)
+            yield return null;
+
+        if (!chunkGrid.IsLoaded)
+        {
+            Debug.LogWarning(
+                "[FmsRouteActivationCoordinator] Chunk map loader did not report a complete load before route activation."
+            );
+        }
     }
 }

@@ -7979,6 +7979,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 137805737}
   m_CullTransparentMesh: 1
+--- !u!134 &137856344
+PhysicsMaterial:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  serializedVersion: 2
+  m_DynamicFriction: 0.6
+  m_StaticFriction: 0.6
+  m_Bounciness: 0
+  m_FrictionCombine: 0
+  m_BounceCombine: 0
 --- !u!1 &140155441
 GameObject:
   m_ObjectHideFlags: 0
@@ -12389,6 +12402,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 244301619}
   m_CullTransparentMesh: 1
+--- !u!1 &246351479
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 246351480}
+  - component: {fileID: 246351481}
+  m_Layer: 0
+  m_Name: MapThemeManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &246351480
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 246351479}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1281267493}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &246351481
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 246351479}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac1a15083e4fdb447a448b25e169d0b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MapTileThemeApplier
+  tileGrid: {fileID: 1796302381}
 --- !u!1 &247374000
 GameObject:
   m_ObjectHideFlags: 0
@@ -18361,6 +18419,37 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 342991128}
   m_CullTransparentMesh: 1
+--- !u!1 &345169020
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 345169021}
+  m_Layer: 0
+  m_Name: GroundRoot_Chunks
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &345169021
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 345169020}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1796302380}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &345771264
 GameObject:
   m_ObjectHideFlags: 0
@@ -29978,7 +30067,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 556070993}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 137856344}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -29999,7 +30088,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 556070993}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 847880820}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -30061,7 +30150,7 @@ MonoBehaviour:
   waypointParent: {fileID: 2104837905}
   aircraftRoot: {fileID: 556070994}
   trainingWorldScale: 0.05
-  autoBuildScenarioOnStart: 1
+  autoBuildScenarioOnStart: 0
   snapAircraftToScenarioStartOnLoad: 1
   logBuild: 1
   gizmoRadiusM: 0.3
@@ -32721,6 +32810,56 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 600021083}
   m_CullTransparentMesh: 1
+--- !u!1 &600318542
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 600318543}
+  - component: {fileID: 600318544}
+  m_Layer: 0
+  m_Name: MapRasterModeManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &600318543
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 600318542}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1796302380}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &600318544
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 600318542}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7e47e9892d4b7a489a3befca77a584c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MapRasterModeCoordinator
+  fallbackScenario: {fileID: 11400000, guid: 57714959751f1fb44811a44741208a8a, type: 2}
+  individualTileGrid: {fileID: 1796302381}
+  individualTileVisualRoot: {fileID: 1885233895}
+  chunkGrid: {fileID: 1130551063}
+  chunkVisualRoot: {fileID: 345169020}
+  verboseLogs: 1
 --- !u!1 &602517005
 GameObject:
   m_ObjectHideFlags: 0
@@ -46245,6 +46384,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 847856553}
   m_CullTransparentMesh: 1
+--- !u!134 &847880820
+PhysicsMaterial:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  serializedVersion: 2
+  m_DynamicFriction: 0.6
+  m_StaticFriction: 0.6
+  m_Bounciness: 0
+  m_FrictionCombine: 0
+  m_BounceCombine: 0
 --- !u!1 &850010327
 GameObject:
   m_ObjectHideFlags: 0
@@ -64754,6 +64906,60 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1130054052}
   m_CullTransparentMesh: 1
+--- !u!1 &1130551061
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1130551062}
+  - component: {fileID: 1130551063}
+  m_Layer: 0
+  m_Name: MapChunckGrid
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1130551062
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1130551061}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1796302380}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1130551063
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1130551061}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e18c6b7fac741de4aaf4d61bfe5146dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalTileChunkGrid
+  chunkParent: {fileID: 345169021}
+  scenario: {fileID: 11400000, guid: 57714959751f1fb44811a44741208a8a, type: 2}
+  chunkPrefab: {fileID: 1544206004520836083, guid: b1290d14f6574b444a400ebee1a19ede, type: 3}
+  chunksFolder: mapchunks_nd_fms_dark_nd_z14_16x16
+  trainingWorldScale: 0.05
+  autoLoadOnStart: 0
+  yieldEveryChunks: 2
+  verboseLogs: 1
+  z: 14
+  tileSizeM: 0
 --- !u!1 &1133571251
 GameObject:
   m_ObjectHideFlags: 0
@@ -73294,6 +73500,7 @@ Transform:
   m_Children:
   - {fileID: 410087041}
   - {fileID: 832575519}
+  - {fileID: 246351480}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1282006091
@@ -101844,6 +102051,9 @@ Transform:
   - {fileID: 1885233896}
   - {fileID: 2102193847}
   - {fileID: 1307188549}
+  - {fileID: 1130551062}
+  - {fileID: 345169021}
+  - {fileID: 600318543}
   m_Father: {fileID: 1603726616}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1796302381
@@ -101864,11 +102074,11 @@ MonoBehaviour:
   ndCamera: {fileID: 1877253058}
   scenario: {fileID: 11400000, guid: 57714959751f1fb44811a44741208a8a, type: 2}
   tilePrefab: {fileID: 1544206004520836083, guid: b1290d14f6574b444a400ebee1a19ede, type: 3}
-  tilesFolder: tiles_nd_fms_v2
+  tilesFolder: tiles_nd_fms_tactical_gray_z14
   bufferTiles: 3
   rebuildDelay: 0.1
   trainingWorldScale: 0.05
-  verboseLogs: 0
+  verboseLogs: 1
   z: 16
   radius: 10
   tileSizeM: 610
@@ -106649,7 +106859,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 1
-  far clip plane: 80000
+  far clip plane: 3500
   field of view: 60
   orthographic: 0
   orthographic size: 1220

@@ -202,6 +202,11 @@ public class LocalTileGrid : MonoBehaviour
         if (!scenario || tileIndexes == null)
             yield break;
 
+        Debug.Log(
+            $"[LocalTileGrid] BuildFixedTileSet ENTER folder={tilesFolder} zoom={zoom} "
+                + $"tileIndexes={(tileIndexes == null ? -1 : tileIndexes.Count)} loadMode={loadMode}"
+        );
+
         if (pending != null)
         {
             StopCoroutine(pending);

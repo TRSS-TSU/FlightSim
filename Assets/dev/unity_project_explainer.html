@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FlightSim Unity Project Explainer</title>
+  <style>
+    :root {
+      --bg: #09111f;
+      --panel: #101b2d;
+      --panel-2: #14243c;
+      --text: #edf5ff;
+      --muted: #a8b8ce;
+      --accent: #59c7ff;
+      --accent-2: #7cf5bd;
+      --warn: #ffd166;
+      --line: rgba(255,255,255,.12);
+      --code: #06101d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font: 16px/1.55 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 15% 10%, rgba(89,199,255,.18), transparent 30rem),
+        radial-gradient(circle at 85% 0%, rgba(124,245,189,.12), transparent 34rem),
+        var(--bg);
+    }
+    header {
+      padding: 56px 7vw 34px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(16,27,45,.9), rgba(16,27,45,.35));
+    }
+    header h1 { margin: 0 0 10px; font-size: clamp(2rem, 4vw, 4rem); letter-spacing: -.04em; }
+    header p { max-width: 960px; margin: 0; color: var(--muted); font-size: 1.1rem; }
+    main { padding: 34px 7vw 70px; max-width: 1320px; margin: 0 auto; }
+    section { margin: 0 0 28px; padding: 24px; border: 1px solid var(--line); border-radius: 18px; background: rgba(16,27,45,.76); box-shadow: 0 18px 60px rgba(0,0,0,.18); }
+    h2 { margin: 0 0 14px; font-size: 1.55rem; }
+    h3 { margin: 18px 0 8px; font-size: 1.05rem; color: var(--accent-2); }
+    a { color: var(--accent); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+    .card { padding: 16px; border-radius: 14px; background: var(--panel-2); border: 1px solid var(--line); }
+    .metric { font-size: 1.8rem; font-weight: 760; color: var(--accent); }
+    .label { color: var(--muted); font-size: .92rem; }
+    ul { margin-top: 8px; }
+    li { margin: 6px 0; }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Consolas, Menlo, monospace; }
+    code { padding: .12rem .35rem; border-radius: 6px; background: var(--code); color: #d9ecff; }
+    pre { overflow:auto; padding: 14px; border-radius: 12px; background: var(--code); border: 1px solid var(--line); color: #d9ecff; }
+    table { width: 100%; border-collapse: collapse; overflow: hidden; border-radius: 12px; }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { color: var(--accent-2); background: rgba(255,255,255,.04); }
+    .pill { display:inline-block; margin: 4px 6px 4px 0; padding: 5px 9px; border:1px solid var(--line); border-radius: 999px; background: rgba(89,199,255,.08); color: #dff5ff; font-size: .88rem; }
+    .note { border-left: 4px solid var(--warn); padding: 12px 14px; background: rgba(255,209,102,.1); border-radius: 10px; color: #fff4d7; }
+    footer { color: var(--muted); margin-top: 28px; font-size: .95rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>FlightSim Unity Project Explainer</h1>
+    <p>A live-inspected orientation guide for <strong>FlightSim</strong>, a Unity-based flight-management and training simulation centered on an iPad-style FMS/CDU, navigation display, scenario-driven routes, and aircraft guidance systems.</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>Executive summary</h2>
+      <p>This project appears to be a flight management simulator/training app. The active scene is a menu scene that lets users select a scenario, while the main simulation scene (<code>Master_FMS.unity</code>) likely hosts the aircraft, FMS/CDU UI, PFD/ND instrument displays, route/map systems, autopilot, and takeoff procedure logic.</p>
+      <div class="grid">
+        <div class="card"><div class="metric">Unity 6000.3.3f1</div><div class="label">Project Unity version reported by UnityMCP</div></div>
+        <div class="card"><div class="metric">iOS</div><div class="label">Project platform from Unity project info</div></div>
+        <div class="card"><div class="metric">2 build scenes</div><div class="label"><code>Menu</code> and <code>Master_FMS</code> enabled in build settings</div></div>
+        <div class="card"><div class="metric">7,738</div><div class="label">PNG map tiles under <code>Assets/StreamingAssets</code></div></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Current live Unity editor/scene state</h2>
+      <table>
+        <tr><th>Observation</th><th>Value</th></tr>
+        <tr><td>Project root</td><td><code>C:/Users/Admin/Documents/Unity/Flight Management Sim/Current/FlightSim</code></td></tr>
+        <tr><td>Active Unity instance</td><td><code>FlightSim@8ecc59ceefeb9fdc</code></td></tr>
+        <tr><td>Editor readiness</td><td>Ready for tools; idle; not playing; not paused; not compiling; no tests running.</td></tr>
+        <tr><td>Active scene</td><td><code>Assets/Scenes/Menu.unity</code>, build index 0, loaded, not dirty, 3 root objects.</td></tr>
+        <tr><td>Current selection</td><td>The <code>dev</code> folder asset is selected.</td></tr>
+        <tr><td>Console</td><td>0 log entries returned by the Unity console query.</td></tr>
+        <tr><td>Camera state</td><td>One Unity camera named <code>Main Camera</code>, FOV 179, no Cinemachine brain/cameras; Cinemachine not installed.</td></tr>
+        <tr><td>Named tags</td><td><code>Untagged</code>, <code>Respawn</code>, <code>Finish</code>, <code>EditorOnly</code>, <code>MainCamera</code>, <code>Player</code>, <code>GameController</code>.</td></tr>
+        <tr><td>Named layers</td><td><code>Default</code>, <code>TransparentFX</code>, <code>Ignore Raycast</code>, <code>ND</code>, <code>Water</code>, <code>UI</code>, <code>Aircraft3D</code>.</td></tr>
+      </table>
+      <h3>Active scene hierarchy snapshot</h3>
+      <ul>
+        <li><code>ScenarioManager</code> with components <code>Transform</code> and <code>ScenarioSelection</code>.</li>
+        <li><code>iPad</code>, a root object with two children, likely the menu/iPad UI shell.</li>
+        <li><code>Sys</code>, a root object with two children, likely system/event/camera infrastructure.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Project structure</h2>
+      <p>Top-level assets discovered on disk:</p>
+      <p>
+        <span class="pill">Animations</span><span class="pill">Editor</span><span class="pill">EditorThemes</span><span class="pill">Fonts</span><span class="pill">Images</span><span class="pill">ImportedPackages</span><span class="pill">InputSystemReferences</span><span class="pill">Materials</span><span class="pill">Prefabs</span><span class="pill">Scenes</span><span class="pill">ScriptableObjects</span><span class="pill">Scripts</span><span class="pill">Settings</span><span class="pill">StreamingAssets</span><span class="pill">TextMesh Pro</span><span class="pill">dev</span>
+      </p>
+      <h3>Build scenes</h3>
+      <ul>
+        <li><code>Assets/Scenes/Menu.unity</code> is enabled and is the currently open active scene.</li>
+        <li><code>Assets/Scenes/Master_FMS.unity</code> is enabled and is likely the main simulator/FMS scene.</li>
+        <li><code>Assets/Scenes/Main.unity</code> is listed in build settings but disabled; the asset was not found in the Unity scene asset search, so it may be stale configuration.</li>
+      </ul>
+      <h3>Script organization</h3>
+      <table>
+        <tr><th>Folder</th><th>Observed .cs count</th><th>Role</th></tr>
+        <tr><td><code>Assets/Scripts</code></td><td>26</td><td>Core sim, drawers, aircraft, ND, autopilot, targets, tile/grid logic.</td></tr>
+        <tr><td><code>Assets/Scripts/FMS</code></td><td>10</td><td>CDU/FMS model, router, scratchpad, LSK/function buttons, route resolution/preload.</td></tr>
+        <tr><td><code>Assets/Scripts/FMS/Pages</code></td><td>11</td><td>Concrete FMS pages such as INDEX, POS INIT, ACT LEGS, ACT FPLN, DEP/ARR, PERF INIT, PROG, STATUS, TUNE.</td></tr>
+        <tr><td><code>Assets/Scripts/Instruments</code></td><td>11</td><td>PFD and instrument display drivers for airspeed, altitude, attitude, heading, selected altitude, vertical speed, etc.</td></tr>
+        <tr><td><code>Assets/Scripts/MainMenuScripts</code></td><td>5</td><td>Scenario selection and menu/how-to panels.</td></tr>
+        <tr><td><code>Assets/Scripts/Nd</code></td><td>3</td><td>Navigation display helpers such as WebMercator and ND aircraft/range state.</td></tr>
+        <tr><td><code>Assets/Scripts/Scenarios</code></td><td>1</td><td>Runtime selected scenario singleton/event bus.</td></tr>
+        <tr><td><code>Assets/Scripts/ScriptableObjectScripts</code></td><td>1</td><td>ScenarioDefinition ScriptableObject schema.</td></tr>
+        <tr><td><code>Assets/Scripts/UI</code></td><td>3</td><td>UI-specific controls such as takeoff button, phase button, loading overlay.</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>Key systems and how they fit together</h2>
+      <h3>Scenario-driven training flow</h3>
+      <p><code>ScenarioDefinition</code> is a ScriptableObject schema with scenario title/route/description, map anchor, tile preload settings, waypoint database, prefilled route idents, approach fixes, and performance data. The observed asset <code>Assets/ScriptableObjects/ScenarioDefinition01.asset</code> is titled <strong>Flight Scenario 01</strong>, uses route <strong>T3002</strong>, centers around latitude 30.3 / longitude -87.3 at zoom 14, and describes a departure from <strong>KNPA</strong> to Visual Route 1020 with landing at <strong>KVPS</strong>.</p>
+      <p><code>ScenarioRuntime</code> is a static holder for the current scenario. Its <code>Set</code> method validates the scenario and raises <code>OnChanged</code>, allowing the flight plan, FMS, and navigation systems to react to scenario changes.</p>
+
+      <h3>Flight plan and map/tile systems</h3>
+      <p><code>FlightPlan</code> listens to <code>ScenarioRuntime.OnChanged</code>, can build a waypoint route from a selected scenario, and supports training-world scaling through <code>trainingWorldScale</code>. It also handles snapping/stabilizing the aircraft at scenario start. The project includes <code>Assets/Prefabs/GroundTile_Z16.prefab</code>, <code>Assets/Prefabs/ND_Tile.prefab</code>, <code>Assets/Prefabs/WP_Marker.prefab</code>, and 7,738 PNG map tiles in <code>Assets/StreamingAssets/tiles_nd_fms_v2</code>.</p>
+
+      <h3>FMS/CDU architecture</h3>
+      <p><code>FmsModel</code> is intentionally pure C# and acts as the central data store for FMS state: active route, origin/destination, POS INIT data, frequencies, status database identifiers, performance values, and live telemetry. <code>FmsPageRouter</code> is the MonoBehaviour scene controller that owns an <code>FmsModel</code>, registers page views, shows pages, and pumps live telemetry from <code>FlightDataBus</code> at 10 Hz. Page scripts such as <code>ActFplnView</code>, <code>ActLegsView</code>, <code>DepArrView</code>, <code>DirView</code>, <code>PerfInitView</code>, <code>PosInitView</code>, <code>ProgView</code>, <code>StatusView</code>, and <code>TuneView</code> render CDU pages and handle student interactions.</p>
+
+      <h3>Aircraft motion, autopilot, and telemetry</h3>
+      <p><code>PlaneController</code> requires a Rigidbody and implements training-scaled movement, speed hold, altitude capture/hold, VNAV-lite parameters, turn dynamics, visual pitch, and parked pose behavior. <code>NavAutopilot</code> follows <code>FlightPlan</code> waypoints, exposes active distance/bearing/cross-track error, supports NAV engagement, waypoint capture, look-ahead LNAV, and turn anticipation. <code>FlightDataBus</code> is the central telemetry hub for instruments, exposing unit-suffixed values such as <code>iasKt</code>, <code>gsKt</code>, <code>altFtMsl</code>, <code>hdgDeg</code>, <code>trkDeg</code>, <code>vsiFpm</code>, <code>bankDeg</code>, <code>pitchDeg</code>, <code>brgDeg</code>, and <code>distM</code>.</p>
+
+      <h3>Navigation display and instruments</h3>
+      <p><code>NdPresenter</code> positions an ND camera above the aircraft and builds the route line from <code>FlightPlan.waypoints</code>. Additional ND helpers include <code>NDAircraftIconDriver</code>, <code>NDRangeState</code>, and <code>WebMercator</code>. PFD/instrument scripts under <code>Assets/Scripts/Instruments</code> drive displayed attitude, heading rose/bug, airspeed tape, altitude tape/readout, lower data, pitch needle, selected altitude, and vertical speed scale.</p>
+
+      <h3>Takeoff procedure</h3>
+      <p><code>TakeoffProcedureController</code> coordinates staged takeoff targets. It references <code>SimTargets</code>, <code>NavAutopilot</code>, an aircraft transform, and <code>FlightPlan</code>; it uses runway/departure headings, speed/altitude targets, timing, and waypoint gates such as <code>KNPA_RW25R_THRESH</code> and <code>KNPA_DEP_1DME</code>.</p>
+    </section>
+
+    <section>
+      <h2>Assets discovered via UnityMCP</h2>
+      <h3>Scene assets</h3>
+      <ul>
+        <li>Project scenes: <code>Assets/Scenes/Menu.unity</code>, <code>Assets/Scenes/Master_FMS.unity</code>.</li>
+        <li>Imported/demo scenes: Alstra Infinite plane showcase and Scalable Grid Prototype Materials demo/template scenes.</li>
+        <li>Package scene templates from Universal Render Pipeline.</li>
+      </ul>
+      <h3>Project prefabs</h3>
+      <ul>
+        <li><code>Assets/Prefabs/GroundTile_Z16.prefab</code></li>
+        <li><code>Assets/Prefabs/ND_Tile.prefab</code></li>
+        <li><code>Assets/Prefabs/WP_Marker.prefab</code></li>
+        <li>Imported low-poly aircraft prefabs such as <code>ComPlaneV1</code>, <code>ComPlaneV2</code>, <code>ComPlaneV3</code>, <code>EaglePlane</code>, <code>LightPlane</code>, and helicopter variants.</li>
+      </ul>
+      <h3>Notable packages</h3>
+      <p>The package manifest includes Unity MCP, Universal Render Pipeline 17.3.0, Input System 1.17.0, UGUI, Timeline, Recorder, Test Framework, Visual Scripting, AI Inference, and 2D packages. The MCP package is configured as <code>com.coplaydev.unity-mcp</code> from GitHub.</p>
+    </section>
+
+    <section>
+      <h2>Developer orientation guide</h2>
+      <ol>
+        <li><strong>Start with scenes.</strong> Open <code>Assets/Scenes/Menu.unity</code> to understand scenario selection. Open <code>Assets/Scenes/Master_FMS.unity</code> to inspect the full simulator scene and wired references.</li>
+        <li><strong>Trace scenario flow.</strong> Follow <code>ScenarioSelection</code> → <code>ScenarioRuntime.Set</code> → <code>FlightPlan.LoadScenario</code> / <code>FmsPageRouter.OnScenarioChanged</code> / <code>NavAutopilot.OnScenarioChanged</code>.</li>
+        <li><strong>Trace flight truth.</strong> Inspect <code>PlaneController</code>, <code>SimTargets</code>, and <code>NavAutopilot</code>. These drive the actual movement targets and route following.</li>
+        <li><strong>Trace display truth.</strong> Inspect <code>FlightDataBus</code>. Instrument and FMS page scripts should read from this hub rather than duplicating unit conversions.</li>
+        <li><strong>Work on the CDU by page.</strong> <code>FmsPageRouter</code> owns navigation and state; concrete page scripts under <code>Assets/Scripts/FMS/Pages</code> should render and mutate the model through the router.</li>
+        <li><strong>Be careful with map scale.</strong> There are explicit training-world and movement scale controls; do not assume real-world meters equal game-world spacing everywhere.</li>
+        <li><strong>Validate scenario assets.</strong> <code>ScenarioDefinitionValidator</code> is invoked by <code>ScenarioRuntime.Set</code>. If adding routes or waypoints, keep identifiers consistent with FMS prefill route idents, takeoff gates, and approach sets.</li>
+      </ol>
+      <p class="note">The current editor scene is the menu, not the full simulator scene. Some runtime wiring for aircraft/FMS/ND systems should be verified by opening <code>Master_FMS.unity</code> before making major scene-reference changes.</p>
+    </section>
+
+    <section>
+      <h2>Concrete observations used</h2>
+      <ul>
+        <li><code>mcp_UnityMCP_list_resources</code> succeeded and exposed UnityMCP resources including project info, editor state, cameras, tags, layers, and instances.</li>
+        <li><code>mcp_UnityMCP_read_resource(mcpforunity://project/info)</code> reported project root, project name <code>FlightSim</code>, Unity version <code>6000.3.3f1</code>, platform <code>iOS</code>, and assets path.</li>
+        <li><code>mcp_UnityMCP_read_resource(mcpforunity://editor/state)</code> reported the editor idle, ready for tools, not playing, not compiling, and active scene <code>Assets/Scenes/Menu.unity</code>.</li>
+        <li><code>mcp_UnityMCP_manage_scene(get_active)</code> reported active scene <code>Menu</code>, build index 0, loaded/not dirty, with 3 roots.</li>
+        <li><code>mcp_UnityMCP_manage_scene(get_hierarchy)</code> reported roots <code>ScenarioManager</code>, <code>iPad</code>, and <code>Sys</code>; <code>ScenarioManager</code> has component <code>ScenarioSelection</code>.</li>
+        <li><code>mcp_UnityMCP_read_console(get)</code> returned 0 console entries.</li>
+        <li><code>mcp_UnityMCP_manage_asset(search, Scene)</code> found 11 scene assets including <code>Menu</code> and <code>Master_FMS</code>.</li>
+        <li><code>mcp_UnityMCP_manage_asset(search, MonoScript)</code> found 8,509 MonoScript assets overall; the first project scripts included the FMS, instruments, flight plan, autopilot, menu, and scenario systems listed here.</li>
+        <li><code>mcp_UnityMCP_manage_asset(search, Prefab)</code> found 48 prefabs, including project prefabs <code>GroundTile_Z16</code>, <code>ND_Tile</code>, and <code>WP_Marker</code>.</li>
+        <li><code>mcp_UnityMCP_find_gameobjects(by_component, ScenarioSelection)</code> found <code>ScenarioManager</code>; <code>find_gameobjects(by_component, Camera)</code> found <code>Main Camera</code>.</li>
+        <li>Local file reads of <code>Packages/manifest.json</code>, <code>ProjectSettings/EditorBuildSettings.asset</code>, key scripts, and <code>ScenarioDefinition01.asset</code> supplied supporting implementation details.</li>
+      </ul>
+    </section>
+
+    <footer>
+      <p>Generated by unity-agent. This document is a static explainer created from live UnityMCP inspection plus local project file reads; it does not modify Unity scenes or assets other than writing this HTML file.</p>
+    </footer>
+  </main>
+</body>
+</html>

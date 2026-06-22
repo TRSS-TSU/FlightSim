@@ -73,17 +73,11 @@ public class FmsModel
         Scenario = sd;
 
         ActiveRoute = new List<ScenarioDefinition.WaypointDef>();
-        foreach (var ident in sd.prefillRouteIdents)
-        {
-            var wpDef = sd.waypoints.Find(w =>
-                string.Equals(w.ident, ident, StringComparison.OrdinalIgnoreCase)
-            );
-            if (wpDef != null)
-                ActiveRoute.Add(wpDef);
-        }
 
-        OriginIdent = ActiveRoute.Count > 0 ? ActiveRoute[0].ident : "";
-        DestIdent = ActiveRoute.Count > 1 ? ActiveRoute[ActiveRoute.Count - 1].ident : "";
+        OriginIdent = sd.prefillRouteIdents.Count > 0 ? sd.prefillRouteIdents[0] : "";
+        DestIdent = sd.prefillRouteIdents.Count > 1
+            ? sd.prefillRouteIdents[sd.prefillRouteIdents.Count - 1]
+            : "";
         AirportIdent = OriginIdent;
 
         if (sd.waypoints.Count > 0)

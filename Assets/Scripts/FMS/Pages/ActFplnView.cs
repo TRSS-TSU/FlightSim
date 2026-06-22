@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -65,13 +67,19 @@ public class ActFplnView : FmsPageView
         // Intentional lazy-init guard — fires only once; acceptable exception to render-only purity.
         if (!_modActive && string.IsNullOrEmpty(_pendingRouteName))
             _pendingRouteName = Model?.Scenario?.route ?? "";
-        origin = Model.ActiveRoute.Count > 0 ? Model.ActiveRoute[0].ident : "----";
+
+        List<ScenarioDefinition.WaypointDef> displayRoute =
+            (_modActive || Model.ActiveRoute.Count == 0)
+                ? BuildScenarioPrefillRoute()
+                : Model.ActiveRoute;
+
+        origin = displayRoute.Count > 0 ? displayRoute[0].ident : "----";
         dest =
-            Model.ActiveRoute.Count > 0
-                ? Model.ActiveRoute[Model.ActiveRoute.Count - 1].ident
+            displayRoute.Count > 0
+                ? displayRoute[displayRoute.Count - 1].ident
                 : "----";
-        toIdent = Model.ActiveRoute.Count > 1 ? Model.ActiveRoute[1].ident : dest;
-        distNm = Mathf.RoundToInt(Model.TotalRouteDistNm);
+        toIdent = displayRoute.Count > 1 ? displayRoute[1].ident : dest;
+        distNm = Mathf.RoundToInt(CalculateTotalRouteDistNm(displayRoute));
 
         if (_modActive && _execArmed)
         {
@@ -198,8 +206,17 @@ public class ActFplnView : FmsPageView
             // L6L: navigate to SecFpln. All other keys inactive.
             if (side == 0 && row == 2)
             {
+                string routeName = Scratchpad.ReadAndClear();
+                if (!IsSelectedRouteNameValid(routeName))
+                {
+                    Scratchpad.ShowMessage("INVALID ROUTE", 1.5f);
+                    _init = false;
+                    _pendingRouteName = null;
+                    return;
+                }
+
                 _modActive = true;
-                _pendingRouteName = Scratchpad.ReadAndClear();
+                _pendingRouteName = routeName;
             }
             if (side == 0 && row == 6)
                 Router.ShowPage("SecFpln");
@@ -258,7 +275,18 @@ public class ActFplnView : FmsPageView
         else
         {
             // Step B: commit scratchpad content → enter MOD
-            _pendingRouteName = Scratchpad.ReadAndClear();
+            string routeName = Scratchpad.ReadAndClear();
+            if (!IsSelectedRouteNameValid(routeName))
+            {
+                Scratchpad.ShowMessage("INVALID ROUTE", 1.5f);
+                _init = false;
+                _pendingRouteName = null;
+                return;
+            }
+
+            _pendingRouteName = routeName;
+            _modActive = true;
+            _init = false;
         }
     }
 
@@ -297,19 +325,18 @@ public class ActFplnView : FmsPageView
             return;
         }
 
+        if (!TryBuildSelectedRoute(out var selectedRoute, out string error))
+        {
+            Scratchpad.ShowMessage(error, 1.5f);
+            return;
+        }
+
         // 1. Capture continuity snapshot BEFORE mutating Model.ActiveRoute
         var snap = Router.CaptureRouteContinuity();
 
-        // 2. Rebuild ActiveRoute from scenario prefill list
+        // 2. Rebuild ActiveRoute from the validated selected route
         Model.ActiveRoute.Clear();
-        foreach (var ident in sd.prefillRouteIdents)
-        {
-            var wp = sd.waypoints.Find(w =>
-                string.Equals(w.ident, ident, System.StringComparison.OrdinalIgnoreCase)
-            );
-            if (wp != null)
-                Model.ActiveRoute.Add(wp);
-        }
+        Model.ActiveRoute.AddRange(selectedRoute);
 
         // 3. Rebuild scene waypoints, resolve active leg, reset capture state
         Router.CommitActiveRoute(snap, clearArrivalLoaded: true, executeNow: true);
@@ -317,5 +344,125 @@ public class ActFplnView : FmsPageView
         // 4. Page-local cleanup
         Scratchpad.ShowMessage("ROUTE LOADED", 1.5f);
         CancelMod();
+    }
+
+    private bool TryBuildSelectedRoute(
+        out List<ScenarioDefinition.WaypointDef> selectedRoute,
+        out string error
+    )
+    {
+        selectedRoute = new List<ScenarioDefinition.WaypointDef>();
+        error = "";
+
+        var sd = Model.Scenario;
+        if (sd == null)
+        {
+            error = "NO SCENARIO";
+            return false;
+        }
+
+        if (!IsSelectedRouteNameValid(_pendingRouteName))
+        {
+            error = "INVALID ROUTE";
+            return false;
+        }
+
+        foreach (var ident in sd.prefillRouteIdents)
+        {
+            var wp = FindActiveRouteWaypoint(sd, ident);
+            if (wp == null)
+            {
+                error = "ROUTE INVALID";
+                selectedRoute.Clear();
+                return false;
+            }
+
+            selectedRoute.Add(wp);
+        }
+
+        if (selectedRoute.Count < 2)
+        {
+            error = "ROUTE INVALID";
+            selectedRoute.Clear();
+            return false;
+        }
+
+        return true;
+    }
+
+    private List<ScenarioDefinition.WaypointDef> BuildScenarioPrefillRoute()
+    {
+        var route = new List<ScenarioDefinition.WaypointDef>();
+        var sd = Model?.Scenario;
+        if (sd == null)
+            return route;
+
+        foreach (var ident in sd.prefillRouteIdents)
+        {
+            var wp = FindActiveRouteWaypoint(sd, ident);
+            if (wp != null)
+                route.Add(wp);
+        }
+
+        return route;
+    }
+
+    private bool IsSelectedRouteNameValid(string routeName)
+    {
+        string scenarioRoute = Model?.Scenario?.route;
+        return !string.IsNullOrWhiteSpace(routeName)
+            && !string.IsNullOrWhiteSpace(scenarioRoute)
+            && string.Equals(
+                routeName.Trim(),
+                scenarioRoute.Trim(),
+                StringComparison.OrdinalIgnoreCase
+            );
+    }
+
+    private static ScenarioDefinition.WaypointDef FindActiveRouteWaypoint(
+        ScenarioDefinition scenario,
+        string ident
+    )
+    {
+        if (scenario == null || string.IsNullOrWhiteSpace(ident))
+            return null;
+
+        return scenario.waypoints.Find(w =>
+            w != null
+            && w.includeInActiveRoute
+            && string.Equals(w.ident, ident, StringComparison.OrdinalIgnoreCase)
+        );
+    }
+
+    private static float CalculateTotalRouteDistNm(List<ScenarioDefinition.WaypointDef> route)
+    {
+        if (route == null || route.Count < 2)
+            return 0f;
+
+        float total = 0f;
+        for (int i = 0; i < route.Count - 1; i++)
+            total += HaversineNm(
+                route[i].latDeg,
+                route[i].lonDeg,
+                route[i + 1].latDeg,
+                route[i + 1].lonDeg
+            );
+
+        return total;
+    }
+
+    private static float HaversineNm(double lat1, double lon1, double lat2, double lon2)
+    {
+        const double R = 3440.065;
+        double dLat = (lat2 - lat1) * Math.PI / 180.0;
+        double dLon = (lon2 - lon1) * Math.PI / 180.0;
+        double a =
+            Math.Sin(dLat / 2) * Math.Sin(dLat / 2)
+            + Math.Cos(lat1 * Math.PI / 180.0)
+                * Math.Cos(lat2 * Math.PI / 180.0)
+                * Math.Sin(dLon / 2)
+                * Math.Sin(dLon / 2);
+        double c = 2.0 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1.0 - a));
+        return (float)(R * c);
     }
 }

@@ -477,15 +477,17 @@ public class FlightPlan : MonoBehaviour
 
     private int GetEffectiveZoom(ScenarioDefinition s)
     {
-        if (tileGrid && tileGrid.z > 0)
-            return tileGrid.z;
+        if (s && s.preloadZoomOverride > 0)
+            return s.preloadZoomOverride;
+
         return s ? s.baseZoom : 14;
     }
 
     private float GetEffectiveTileSizeM(double centerLat, int zoom)
     {
-        if (tileGrid && tileGrid.tileSizeM > 0.1f)
+        if (tileGrid && tileGrid.z == zoom && tileGrid.tileSizeM > 0.1f)
             return tileGrid.tileSizeM;
+
         return WebMercator.MetersPerTile(centerLat, zoom);
     }
 

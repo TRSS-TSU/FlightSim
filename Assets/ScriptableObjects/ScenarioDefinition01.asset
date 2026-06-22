@@ -23,6 +23,13 @@ MonoBehaviour:
   preloadPaddingTiles: 2
   preloadZoomOverride: 14
   preloadTilesOnRouteExecute: 1
+  mapRasterLoadMode: 1
+  useFixedTileBounds: 1
+  fixedTileZoom: 14
+  fixedTileMinX: 4096
+  fixedTileMaxX: 4300
+  fixedTileMinY: 6599
+  fixedTileMaxY: 6785
   waypoints:
   - ident: KNPA
     latDeg: 30.35119059

@@ -208,7 +208,9 @@ public class ActLegsView : FmsPageView, IMultiPage
         }
 
         var wpDef = scenario.waypoints.Find(w =>
-            string.Equals(w.ident, sp, StringComparison.OrdinalIgnoreCase)
+            w != null
+            && w.includeInActiveRoute
+            && string.Equals(w.ident, sp, StringComparison.OrdinalIgnoreCase)
         );
 
         if (wpDef == null)

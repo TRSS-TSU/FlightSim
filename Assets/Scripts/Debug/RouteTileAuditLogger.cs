@@ -23,11 +23,25 @@ public class RouteTileAuditLogger : MonoBehaviour
         string folder = tileGrid ? tileGrid.tilesFolder : "tiles_nd_dark_v1";
 
         int padding = Mathf.Max(0, scenario.preloadPaddingTiles);
-        List<Vector2Int> required = RouteTilePreloader.BuildTileIndexList(
-            routeWaypoints,
-            zoom,
-            padding
-        );
+        List<Vector2Int> required;
+
+        if (scenario.useFixedTileBounds)
+        {
+            required = RouteTilePreloader.BuildFixedBoundsTileIndexList(
+                scenario.fixedTileMinX,
+                scenario.fixedTileMaxX,
+                scenario.fixedTileMinY,
+                scenario.fixedTileMaxY
+            );
+        }
+        else
+        {
+            required = RouteTilePreloader.BuildTileIndexList(
+                routeWaypoints,
+                zoom,
+                scenario.preloadPaddingTiles
+            );
+        }
 
         var found = new List<string>();
         var missing = new List<string>();

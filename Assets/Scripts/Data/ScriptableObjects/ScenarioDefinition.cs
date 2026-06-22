@@ -2,6 +2,12 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum MapRasterLoadMode
+{
+    IndividualTiles,
+    StitchedChunks,
+}
+
 [CreateAssetMenu(menuName = "FMS/Scenario Definition", fileName = "ScenarioDefinition")]
 public class ScenarioDefinition : ScriptableObject
 {
@@ -24,6 +30,17 @@ public class ScenarioDefinition : ScriptableObject
     public int preloadPaddingTiles = 2;
     public int preloadZoomOverride = 0; // 0 = use baseZoom
     public bool preloadTilesOnRouteExecute = true;
+
+    [Header("Map Raster Runtime")]
+    public MapRasterLoadMode mapRasterLoadMode = MapRasterLoadMode.IndividualTiles;
+
+    [Header("Fixed Tile Coverage")]
+    public bool useFixedTileBounds = false;
+    public int fixedTileZoom = 14;
+    public int fixedTileMinX = 4096;
+    public int fixedTileMaxX = 4300;
+    public int fixedTileMinY = 6599;
+    public int fixedTileMaxY = 6785;
 
     public enum WaypointRole
     {
