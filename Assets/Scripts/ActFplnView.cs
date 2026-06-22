@@ -20,15 +20,13 @@ using UnityEngine;
 ///   L6  (state-dependent — see Populate)
 ///
 /// LSK interactions:
-///   L2 (empty SP)       → copy scenario route name to scratchpad
-///   L2 (non-empty SP)   → commit SP → enter MOD state
+///   L2 (empty SP)       → select displayed scenario route and enter MOD state
+///   L2 (non-empty SP)   → commit typed route name and enter MOD state
 ///   L6 ACT              → navigate to SecFpln
 ///   L6 MOD not-armed    → L6L <YES arms EXEC; L6R NO> cancels MOD
 ///   L6 MOD armed        → L6L <CANCEL MOD cancels; L6R OFFSET = inactive
 ///
 /// Formatting: labels cyan (#00FFFF), values white (#FFFFFF) via FmtLabel/FmtValue.
-/// _pendingRouteName is seeded inside Populate() via a one-shot lazy-init guard —
-/// an intentional exception to strict render-only purity; fires only once per ACT session.
 /// </summary>
 public class ActFplnView : FmsPageView
 {
@@ -43,7 +41,6 @@ public class ActFplnView : FmsPageView
 
     // ── MOD state ────────────────────────────────────────────────────────────────
     private string _pendingRouteName = null;
-    private bool _init = false;
     private bool _modActive = false;
     private bool _execArmed = false;
 
@@ -63,10 +60,7 @@ public class ActFplnView : FmsPageView
         ClearAllLines();
         GetPageNumber()?.SetText("1/1");
 
-        // Seed pending route name when in ACT state and not yet set.
-        // Intentional lazy-init guard — fires only once; acceptable exception to render-only purity.
-        if (!_modActive && string.IsNullOrEmpty(_pendingRouteName))
-            _pendingRouteName = Model?.Scenario?.route ?? "";
+        string displayRouteName = GetDisplayRouteName();
 
         List<ScenarioDefinition.WaypointDef> displayRoute =
             (_modActive || Model.ActiveRoute.Count == 0)
@@ -74,10 +68,7 @@ public class ActFplnView : FmsPageView
                 : Model.ActiveRoute;
 
         origin = displayRoute.Count > 0 ? displayRoute[0].ident : "----";
-        dest =
-            displayRoute.Count > 0
-                ? displayRoute[displayRoute.Count - 1].ident
-                : "----";
+        dest = displayRoute.Count > 0 ? displayRoute[displayRoute.Count - 1].ident : "----";
         toIdent = displayRoute.Count > 1 ? displayRoute[1].ident : dest;
         distNm = Mathf.RoundToInt(CalculateTotalRouteDistNm(displayRoute));
 
@@ -90,7 +81,7 @@ public class ActFplnView : FmsPageView
             SetLineLabels(1, FmtLabel("ORIGIN     DIST"), FmtLabel("DEST"));
             SetLineValues(1, FmtValue($"{origin, -14}{distNm, 5}"), FmtValue(dest));
             SetLineLabels(2, FmtLabel("ROUTE"), FmtLabel("ALTN"));
-            SetLineValues(2, FmtValue(_pendingRouteName ?? ""), FmtValue("----"));
+            SetLineValues(2, FmtValue(displayRouteName), FmtValue("----"));
             SetLineLabels(3, FmtLabel(""), FmtLabel("ORIG  RWY"));
             SetLineValues(3, FmtValue(""), FmtValue(""));
             SetLineLabels(4, FmtLabel("VIA"), FmtLabel("TO"));
@@ -110,7 +101,7 @@ public class ActFplnView : FmsPageView
             SetLineLabels(1, FmtLabel("ORIGIN     DIST"), FmtLabel("DEST"));
             SetLineValues(1, FmtValue($"{origin, -14}{distNm, 5}"), FmtValue(dest));
             SetLineLabels(2, FmtLabel("ROUTE"), FmtLabel("ALTN"));
-            SetLineValues(2, FmtValue(_pendingRouteName ?? ""), FmtValue("----"));
+            SetLineValues(2, FmtValue(displayRouteName), FmtValue("----"));
             SetLineLabels(3, FmtLabel("VIA"), FmtLabel("TO"));
             SetLineValues(3, FmtValue("VECT . RNV  32"), FmtValue("RW32"));
             SetLineLabels(4, FmtValue(""), FmtValue(""));
@@ -121,26 +112,6 @@ public class ActFplnView : FmsPageView
             SetLineValues(6, FmtValue("<YES"), FmtValue("NO>"));
             GetMessageLine()?.SetText("FMS DR                   EXEC");
         }
-        else if (_init)
-        {
-            // ── STATE: ACT — SCRATCHPAD SEEDED (pending L2 commit) ───────────────
-            // Route name is in scratchpad; pressing L2 again will enter MOD.
-
-            GetTitle()?.SetText(FmtTitle("ACT FPLN"));
-            SetLineLabels(1, FmtLabel("ORIGIN     DIST"), FmtLabel("DEST"));
-            SetLineValues(1, FmtValue($"{origin, -14}{distNm, 5}"), FmtValue(dest));
-            SetLineLabels(2, FmtLabel("ROUTE"), FmtLabel("ALTN"));
-            SetLineValues(2, FmtValue(_pendingRouteName ?? ""), FmtValue("----"));
-            SetLineLabels(3, FmtLabel("VIA"), FmtLabel("TO"));
-            SetLineValues(3, FmtValue("VECT . RNV  32"), FmtValue("RW32")); //TODO set these initial values to Green color
-            SetLineLabels(4, FmtValue(""), FmtValue(""));
-            SetLineValues(4, FmtValue(""), FmtValue(""));
-            SetLineLabels(5, FmtValue(""), FmtValue(""));
-            SetLineValues(5, FmtValue("<COPY ACTIVE"), FmtValue(""));
-            SetLineLabels(6, FmtValue(""), FmtValue(""));
-            SetLineValues(6, FmtValue("<SEC FPLN"), FmtValue(""));
-            GetMessageLine()?.SetText("GNSS  NOT  AVAILABLE");
-        }
         else if (Model.ActiveRoute.Count > 0)
         {
             // ── STATE: ACT — ROUTE LOADED ────────────────────────────────────────
@@ -150,7 +121,7 @@ public class ActFplnView : FmsPageView
             SetLineLabels(1, FmtLabel("ORIGIN     DIST"), FmtLabel("DEST"));
             SetLineValues(1, FmtValue($"{origin, -14}{distNm, 5}"), FmtValue(dest));
             SetLineLabels(2, FmtLabel("ROUTE"), FmtLabel("ALTN"));
-            SetLineValues(2, FmtValue(_pendingRouteName ?? ""), FmtValue("----"));
+            SetLineValues(2, FmtValue(displayRouteName), FmtValue("----"));
             SetLineLabels(3, FmtLabel("VIA"), FmtLabel("TO"));
             SetLineValues(3, FmtValue("VECT . RNV  32"), FmtValue("RW32")); //TODO set these initial values to Green color
             SetLineLabels(4, FmtValue(""), FmtValue(""));
@@ -167,10 +138,11 @@ public class ActFplnView : FmsPageView
             // Empty flight plan; awaiting route selection via L2.
             GetTitle()?.SetText(FmtTitle("ACT FPLN"));
             SetLineLabels(1, FmtLabel("ORIGIN     DIST"), FmtLabel("DEST"));
-            SetLineValues(1, FmtValue("----"), FmtValue("----"));
+            SetLineValues(1, FmtValue($"{origin, -14}{distNm, 5}"), FmtValue(dest));
             SetLineLabels(2, FmtLabel("ROUTE"), FmtLabel("ALTN"));
-            SetLineValues(2, "", FmtValue("----"));
-            SetLineLabels(3, FmtValue(""), FmtValue(""));
+            SetLineValues(2, FmtValue(displayRouteName), FmtValue("----"));
+            SetLineLabels(3, FmtLabel("VIA"), FmtLabel("TO"));
+            SetLineValues(3, FmtValue("VECT . RNV  32"), FmtValue("RW32"));
             SetLineLabels(4, FmtValue(""), FmtValue(""));
             SetLineValues(4, FmtValue(""), FmtValue(""));
             SetLineLabels(5, "", "");
@@ -198,28 +170,6 @@ public class ActFplnView : FmsPageView
                 _execArmed = true; // <YES — arm EXEC
             if (side == 1 && row == 6)
                 CancelMod(); // NO>  — cancel MOD
-        }
-        else if (_init)
-        {
-            // ── STATE: ACT — SCRATCHPAD SEEDED ───────────────────────────────────
-            // L2: commit scratchpad value to enter MOD.
-            // L6L: navigate to SecFpln. All other keys inactive.
-            if (side == 0 && row == 2)
-            {
-                string routeName = Scratchpad.ReadAndClear();
-                if (!IsSelectedRouteNameValid(routeName))
-                {
-                    Scratchpad.ShowMessage("INVALID ROUTE", 1.5f);
-                    _init = false;
-                    _pendingRouteName = null;
-                    return;
-                }
-
-                _modActive = true;
-                _pendingRouteName = routeName;
-            }
-            if (side == 0 && row == 6)
-                Router.ShowPage("SecFpln");
         }
         else if (Model.ActiveRoute.Count > 0)
         {
@@ -254,40 +204,38 @@ public class ActFplnView : FmsPageView
     // ─────────────────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Two-step L2 interaction:
-    ///   Empty scratchpad → copy route name to scratchpad.
-    ///   Non-empty scratchpad → commit to line 2 and enter MOD state.
+    /// L2 route selection:
+    ///   Empty scratchpad -> select the displayed scenario route.
+    ///   Non-empty scratchpad -> select the typed route name.
     /// </summary>
     private void HandleL2()
     {
         if (Scratchpad.CurrentText.Length == 0)
         {
-            // Step A: seed the scratchpad with the scenario route name
-            string routeName = Model.Scenario?.route ?? "";
-            if (!string.IsNullOrEmpty(routeName))
+            string scenarioRoute = GetScenarioRouteName();
+
+            if (string.IsNullOrWhiteSpace(scenarioRoute))
             {
-                Scratchpad.Append(routeName);
-                _init = true;
-            }
-            else
-                Scratchpad.ShowMessage("NO ROUTE");
-        }
-        else
-        {
-            // Step B: commit scratchpad content → enter MOD
-            string routeName = Scratchpad.ReadAndClear();
-            if (!IsSelectedRouteNameValid(routeName))
-            {
-                Scratchpad.ShowMessage("INVALID ROUTE", 1.5f);
-                _init = false;
-                _pendingRouteName = null;
+                Scratchpad.ShowMessage("NO ROUTE", 1.5f);
                 return;
             }
 
-            _pendingRouteName = routeName;
-            _modActive = true;
-            _init = false;
+            Scratchpad.SetText(scenarioRoute);
+            return;
         }
+
+        string routeName = Scratchpad.ReadAndClear();
+
+        if (!IsSelectedRouteNameValid(routeName))
+        {
+            Scratchpad.ShowMessage("INVALID ROUTE", 1.5f);
+            _pendingRouteName = null;
+            return;
+        }
+
+        _pendingRouteName = routeName.Trim().ToUpperInvariant();
+        _modActive = true;
+        _execArmed = false;
     }
 
     /// <summary>Cancel MOD state and revert to ACT display.</summary>
@@ -296,7 +244,6 @@ public class ActFplnView : FmsPageView
         _modActive = false;
         _pendingRouteName = null;
         _execArmed = false;
-        _init = false;
     }
 
     /// <summary>Called by the EXEC function key.</summary>
@@ -417,6 +364,19 @@ public class ActFplnView : FmsPageView
                 scenarioRoute.Trim(),
                 StringComparison.OrdinalIgnoreCase
             );
+    }
+
+    private string GetDisplayRouteName()
+    {
+        if (_modActive)
+            return _pendingRouteName ?? "";
+
+        return GetScenarioRouteName();
+    }
+
+    private string GetScenarioRouteName()
+    {
+        return Model?.Scenario?.route ?? "";
     }
 
     private static ScenarioDefinition.WaypointDef FindActiveRouteWaypoint(

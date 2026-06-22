@@ -25369,6 +25369,7 @@ MonoBehaviour:
   navAutopilot: {fileID: 556071000}
   tilePreloader: {fileID: 1831565577}
   tileAuditLogger: {fileID: 1831565579}
+  chunkGrid: {fileID: 1130551063}
   routeActivated:
     m_PersistentCalls:
       m_Calls:
@@ -106823,7 +106824,7 @@ GameObject:
   - component: {fileID: 1877253060}
   - component: {fileID: 1877253059}
   - component: {fileID: 1877253062}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: ND_Camera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -106848,7 +106849,7 @@ Camera:
   m_ShutterSpeed: 0.005
   m_Aperture: 16
   m_FocusDistance: 10
-  m_FocalLength: 50
+  m_FocalLength: 20.78461
   m_BladeCount: 5
   m_Curvature: {x: 2, y: 11}
   m_BarrelClipping: 0.25
@@ -106863,13 +106864,13 @@ Camera:
     height: 1
   near clip plane: 1
   far clip plane: 3500
-  field of view: 60
+  field of view: 60.000004
   orthographic: 0
   orthographic size: 1220
-  m_Depth: -1
+  m_Depth: 1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 63
+    m_Bits: 4294967295
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 8400000, guid: 5895b1fe17efc1848baf26504b5e0e64, type: 2}
   m_TargetDisplay: 0
@@ -106893,9 +106894,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalCameraData
-  m_RenderShadows: 1
-  m_RequiresDepthTextureOption: 2
-  m_RequiresOpaqueTextureOption: 2
+  m_RenderShadows: 0
+  m_RequiresDepthTextureOption: 1
+  m_RequiresOpaqueTextureOption: 1
   m_CameraType: 0
   m_Cameras: []
   m_RendererIndex: -1
@@ -106904,11 +106905,11 @@ MonoBehaviour:
     m_Bits: 1
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 0
-  m_Antialiasing: 0
+  m_RenderPostProcessing: 1
+  m_Antialiasing: 1
   m_AntialiasingQuality: 2
   m_StopNaN: 0
-  m_Dithering: 0
+  m_Dithering: 1
   m_ClearDepth: 1
   m_AllowXRRendering: 1
   m_AllowHDROutput: 1
@@ -106966,7 +106967,7 @@ MonoBehaviour:
   rangeState: {fileID: 342991133}
   rebuildDelay: 0.1
   fovDeg: 60
-  farClipMin: 80000
+  farClipMin: 3500
   trainingWorldScale: 0.05
 --- !u!1 &1877411887
 GameObject:

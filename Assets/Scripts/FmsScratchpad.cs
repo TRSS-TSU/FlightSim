@@ -150,4 +150,17 @@ public class FmsScratchpad : MonoBehaviour
         if (scratchpadTMP)
             scratchpadTMP.text = CurrentText;
     }
+
+    public void SetText(string value)
+    {
+        if (_msgRoutine != null)
+            return;
+
+        CurrentText = string.IsNullOrEmpty(value) ? "" : value.ToUpperInvariant();
+
+        if (CurrentText.Length > maxChars)
+            CurrentText = CurrentText.Substring(0, maxChars);
+
+        Refresh();
+    }
 }

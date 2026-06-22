@@ -83,7 +83,7 @@ public class FmsRouteActivationCoordinator : MonoBehaviour
                     "[FmsRouteActivationCoordinator] Skipping individual tile preload because map mode is StitchedChunks."
                 );
 
-                yield return WaitForChunkMapLoad();
+                yield return LoadChunkMapForRoute(scenario);
             }
 
             loadingOverlay?.Show("Building flight plan...");
@@ -125,7 +125,7 @@ public class FmsRouteActivationCoordinator : MonoBehaviour
         return scenario.mapRasterLoadMode == MapRasterLoadMode.IndividualTiles;
     }
 
-    private IEnumerator WaitForChunkMapLoad()
+    private IEnumerator LoadChunkMapForRoute(ScenarioDefinition scenario)
     {
         if (!chunkGrid)
             chunkGrid = FindFirstObjectByType<LocalTileChunkGrid>();
@@ -133,11 +133,21 @@ public class FmsRouteActivationCoordinator : MonoBehaviour
         if (!chunkGrid)
             yield break;
 
-        if (chunkGrid.IsLoading)
-            loadingOverlay?.Show("Loading map chunks...");
+        if (chunkGrid.IsLoaded)
+            yield break;
+
+        loadingOverlay?.Show("Loading map chunks...");
 
         while (chunkGrid.IsLoading)
             yield return null;
+
+        if (!chunkGrid.IsLoaded)
+        {
+            yield return chunkGrid.BuildChunks(
+                scenario,
+                (loaded, total) => loadingOverlay?.SetProgress(loaded, total)
+            );
+        }
 
         if (!chunkGrid.IsLoaded)
         {

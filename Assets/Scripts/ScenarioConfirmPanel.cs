@@ -10,32 +10,51 @@ public class ScenarioConfirmPanel : MonoBehaviour
     [SerializeField]
     private string masterSceneName = "Master_FMS";
 
-    void Awake() => gameObject.SetActive(false);
+    [Header("Back Navigation")]
+    [SerializeField]
+    private GameObject hideOnNo;
+
+    [SerializeField]
+    private GameObject showOnNo;
 
     public void Show(ScenarioDefinition scenario)
     {
         if (scenario == null)
         {
-            descriptionText.text = "No scenario selected.";
+            if (descriptionText)
+                descriptionText.text = "No scenario selected.";
             return;
         }
 
-        descriptionText.text = string.IsNullOrEmpty(scenario.scenarioDescription)
-            ? scenario.name
-            : scenario.scenarioDescription;
+        if (descriptionText)
+        {
+            descriptionText.text = string.IsNullOrEmpty(scenario.scenarioDescription)
+                ? scenario.name
+                : scenario.scenarioDescription;
+        }
 
         gameObject.SetActive(true);
     }
 
     public void OnYes()
     {
-        ScenarioSelection.Instance.ConfirmPending();
+        if (ScenarioSelection.Instance)
+            ScenarioSelection.Instance.ConfirmPending();
+
         SceneManager.LoadScene(masterSceneName);
     }
 
     public void OnNo()
     {
-        ScenarioSelection.Instance.ClearPending();
+        if (ScenarioSelection.Instance)
+            ScenarioSelection.Instance.ClearPending();
+
         gameObject.SetActive(false);
+
+        if (hideOnNo)
+            hideOnNo.SetActive(false);
+
+        if (showOnNo)
+            showOnNo.SetActive(true);
     }
 }

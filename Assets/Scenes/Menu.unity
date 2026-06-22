@@ -2352,6 +2352,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScenarioConfirmPanel
   descriptionText: {fileID: 1361932872}
   masterSceneName: Master_FMS
+  hideOnNo: {fileID: 713458332}
+  showOnNo: {fileID: 995117357}
 --- !u!114 &457693807
 MonoBehaviour:
   m_ObjectHideFlags: 0

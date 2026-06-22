@@ -112,7 +112,6 @@ public class MapRasterModeCoordinator : MonoBehaviour
 
         chunkGrid.enabled = true;
         chunkGrid.chunksFolder = MapThemeRuntime.GetTileChunksFolder();
-        chunkGrid.LoadScenario(scenario);
 
         if (verboseLogs)
         {
