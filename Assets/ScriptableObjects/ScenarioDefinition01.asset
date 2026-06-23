@@ -229,6 +229,42 @@ MonoBehaviour:
     targetAltFtMsl: 0
     targetIasKt: 0
     targetHdgDeg: 0
+  - ident: OBEMY
+    latDeg: 30.29
+    lonDeg: -87.51
+    distance: 0
+    role: 3
+    includeInActiveRoute: 0
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
+  - ident: ODACA
+    latDeg: 30.32
+    lonDeg: -87.41
+    distance: 0
+    role: 3
+    includeInActiveRoute: 0
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
+  - ident: ONOYA
+    latDeg: 30.31
+    lonDeg: -87.44
+    distance: 0
+    role: 3
+    includeInActiveRoute: 0
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
+  - ident: RUECH
+    latDeg: 30.34
+    lonDeg: -87.37
+    distance: 0
+    role: 3
+    includeInActiveRoute: 0
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
   prefillRouteIdents:
   - KNPA
   - TEEZY
@@ -247,5 +283,10 @@ MonoBehaviour:
   - POOVE
   - APUCE
   - ALCOME
+  rnav7LFixes:
+  - OBEMY
+  - ONOYA
+  - ODACA
+  - RUECH
   zfwLbs: 11600
   fuelWeightLbs: 4300

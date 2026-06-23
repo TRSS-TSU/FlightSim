@@ -17,7 +17,6 @@ public static class DrawerGroup
         }
 
         currentOpen = requesterMb;
-        Debug.Log($"RequestOpen: {requesterMb.name}");
     }
 
     public static void NotifyClosed(IDrawerController requester)

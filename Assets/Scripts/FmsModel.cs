@@ -9,6 +9,7 @@ public class FmsModel
 {
     // ── Flight Plan ────────────────────────────────────────────────────────────
     public List<ScenarioDefinition.WaypointDef> ActiveRoute = new();
+    public List<ScenarioDefinition.WaypointDef> ModRoute = new();
     public int ActiveLegIndex; // mirrors NavAutopilot.activeIndex
     public string OriginIdent = "";
     public string DestIdent = "";
@@ -38,6 +39,7 @@ public class FmsModel
 
     // ── DEP/ARR approach loading ───────────────────────────────────────────────
     public bool ArrivalLoaded = false;
+    public string ArrivalName = "";
 
     // ── Performance (PERF INIT) ────────────────────────────────────────────────
     public float ZfwLbs;
@@ -73,6 +75,7 @@ public class FmsModel
         Scenario = sd;
 
         ActiveRoute = new List<ScenarioDefinition.WaypointDef>();
+        ModRoute = new List<ScenarioDefinition.WaypointDef>();
 
         OriginIdent = sd.prefillRouteIdents.Count > 0 ? sd.prefillRouteIdents[0] : "";
         DestIdent = sd.prefillRouteIdents.Count > 1
@@ -92,6 +95,7 @@ public class FmsModel
         FuelWeightLbs = sd.fuelWeightLbs;
 
         ArrivalLoaded = false;
+        ArrivalName = "";
         ActiveCallsign = "CONGO22";
         StandbyFreqAtis = "";
         StandbyFreqGnd = "";

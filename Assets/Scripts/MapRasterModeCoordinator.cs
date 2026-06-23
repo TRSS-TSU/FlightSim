@@ -21,10 +21,6 @@ public class MapRasterModeCoordinator : MonoBehaviour
     [SerializeField]
     private GameObject chunkVisualRoot;
 
-    [Header("Debug")]
-    [SerializeField]
-    private bool verboseLogs = true;
-
     private void Start()
     {
         ScenarioDefinition scenario = ScenarioRuntime.Current
@@ -80,12 +76,6 @@ public class MapRasterModeCoordinator : MonoBehaviour
         if (chunkGrid)
             chunkGrid.enabled = false;
 
-        if (verboseLogs)
-        {
-            Debug.Log(
-                $"[MapRasterModeCoordinator] Mode=IndividualTiles folder={MapThemeRuntime.GetTilesFolder()}"
-            );
-        }
     }
 
     private void ApplyStitchedChunks(ScenarioDefinition scenario)
@@ -113,11 +103,5 @@ public class MapRasterModeCoordinator : MonoBehaviour
         chunkGrid.enabled = true;
         chunkGrid.chunksFolder = MapThemeRuntime.GetTileChunksFolder();
 
-        if (verboseLogs)
-        {
-            Debug.Log(
-                $"[MapRasterModeCoordinator] Mode=StitchedChunks folder={MapThemeRuntime.GetTileChunksFolder()}"
-            );
-        }
     }
 }

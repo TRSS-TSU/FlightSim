@@ -100,14 +100,6 @@ public class TakeoffProcedureController : MonoBehaviour
             out departurePos
         );
 
-        if (logProcedure)
-        {
-            Debug.Log(
-                $"[TakeoffProcedure] Begin takeoff roll. "
-                    + $"thresholdFound={hasThreshold} departureFound={hasDeparture}"
-            );
-        }
-
         // Stage 1: slow roll along runway heading.
         SetTargets(rollIasKt, runwayAltFt, runwayHeadingDeg);
 
@@ -119,9 +111,6 @@ public class TakeoffProcedureController : MonoBehaviour
             );
         else
             yield return WaitStage(rollSeconds);
-
-        if (logProcedure)
-            Debug.Log("[TakeoffProcedure] Threshold gate reached. Liftoff stage.");
 
         // Stage 2: liftoff / gentle initial climb.
         SetTargets(
@@ -161,22 +150,6 @@ public class TakeoffProcedureController : MonoBehaviour
             PrepareNavForDepartureHandoff();
             nav.SetNavEngaged(true);
 
-            if (logProcedure)
-            {
-                string activeName =
-                    nav.plan
-                    && nav.plan.waypoints != null
-                    && nav.activeIndex >= 0
-                    && nav.activeIndex < nav.plan.waypoints.Length
-                    && nav.plan.waypoints[nav.activeIndex]
-                        ? nav.plan.waypoints[nav.activeIndex].name
-                        : "<none>";
-
-                Debug.Log(
-                    $"[TakeoffProcedure] NAV engaged. Route handoff complete. "
-                        + $"activeIndex={nav.activeIndex} activeWaypoint={activeName}"
-                );
-            }
         }
 
         isRunning = false;
@@ -197,13 +170,6 @@ public class TakeoffProcedureController : MonoBehaviour
         targets.targetAltFtMsl = Mathf.Max(0f, altFt);
         targets.targetHdgDeg = NormalizeHeading(hdgDeg);
 
-        if (logProcedure)
-        {
-            Debug.Log(
-                $"[TakeoffProcedure] Targets: IAS={targets.targetIasKt:F0} "
-                    + $"ALT={targets.targetAltFtMsl:F0} HDG={targets.targetHdgDeg:F0}"
-            );
-        }
     }
 
     private static float NormalizeHeading(float hdg)
@@ -289,15 +255,6 @@ public class TakeoffProcedureController : MonoBehaviour
 
             if (gateReady && altitudeReady)
             {
-                if (logProcedure)
-                {
-                    Debug.Log(
-                        $"[TakeoffProcedure] Departure handoff condition met. "
-                            + $"dist={dist:F1}m altitude={altitudeFt:F0}ft "
-                            + $"gateReached={reachedDepartureGate}"
-                    );
-                }
-
                 yield break;
             }
 
@@ -336,12 +293,6 @@ public class TakeoffProcedureController : MonoBehaviour
 
         float startTime = Time.time;
         float radius = Mathf.Max(1f, gateRadiusM);
-        float lastLogTime = Time.time;
-        float lastDist = -1f;
-
-        Rigidbody aircraftRb = aircraft.GetComponent<Rigidbody>();
-        PlaneController plane = aircraft.GetComponent<PlaneController>();
-        SimTargets simTargets = aircraft.GetComponent<SimTargets>();
 
         while (Time.time - startTime < timeoutSeconds)
         {
@@ -349,27 +300,6 @@ public class TakeoffProcedureController : MonoBehaviour
             Vector3 waypointFlat = Vector3.ProjectOnPlane(waypointWorldPos, Vector3.up);
 
             float dist = Vector3.Distance(aircraftFlat, waypointFlat);
-
-            if (logProcedure)
-            {
-                float now = Time.time;
-                float dt = Mathf.Max(0.001f, now - lastLogTime);
-                float closingMps = lastDist >= 0f ? (lastDist - dist) / dt : 0f;
-                Vector3 v = aircraftRb ? aircraftRb.linearVelocity : Vector3.zero;
-                float gsMps = plane ? plane.CurrentGroundSpeedMps : new Vector2(v.x, v.z).magnitude;
-                float targetIasKt = simTargets ? simTargets.targetIasKt : 0f;
-                float worldSpeedScale = plane ? plane.worldSpeedScale : 1f;
-
-                Debug.Log(
-                    $"[TakeoffProcedure] Gate distance: {dist:F1}m / radius={radius:F1}m "
-                        + $"closing={closingMps:F2}m/s gs={gsMps:F2}m/s "
-                        + $"pos=({aircraft.position.x:F1},{aircraft.position.z:F1}) "
-                        + $"yaw={aircraft.eulerAngles.y:F1} IAS={targetIasKt:F0} scale={worldSpeedScale:F2}"
-                );
-
-                lastLogTime = now;
-                lastDist = dist;
-            }
 
             if (dist <= radius)
                 yield break;

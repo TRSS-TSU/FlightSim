@@ -10,7 +10,6 @@ public static class MapThemeRuntime
     public static void Set(MapTileTheme theme)
     {
         Current = theme;
-        Debug.Log($"[MapThemeRuntime] Selected map theme: {theme}");
         OnChanged?.Invoke(Current);
     }
 

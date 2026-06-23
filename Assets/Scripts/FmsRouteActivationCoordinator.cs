@@ -79,10 +79,6 @@ public class FmsRouteActivationCoordinator : MonoBehaviour
         {
             if (scenario.mapRasterLoadMode == MapRasterLoadMode.StitchedChunks)
             {
-                Debug.Log(
-                    "[FmsRouteActivationCoordinator] Skipping individual tile preload because map mode is StitchedChunks."
-                );
-
                 yield return LoadChunkMapForRoute(scenario);
             }
 

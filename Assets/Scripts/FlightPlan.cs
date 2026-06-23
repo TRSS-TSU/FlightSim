@@ -127,9 +127,6 @@ public class FlightPlan : MonoBehaviour
 
         var route = ResolveRouteFromIdents(s, s.prefillRouteIdents);
         RebuildRoute(route, s.centerLatDeg, s.centerLonDeg, z);
-
-        if (logBuild)
-            Debug.Log($"[FlightPlan] Built startup route: {waypoints.Length} @ z={z}");
     }
 
     public void SnapAircraftToScenarioStart(ScenarioDefinition s)
@@ -198,16 +195,6 @@ public class FlightPlan : MonoBehaviour
             PlaneController plane = aircraftRoot.GetComponent<PlaneController>();
             if (plane)
                 plane.ArmParkedPoseHold(worldPos, startHeading);
-
-            if (logBuild)
-            {
-                Debug.Log(
-                    $"[FlightPlan] Snapped aircraft to scenario start {startDef.ident} "
-                        + $"pos={aircraftRoot.position} hdg={startHeading:F0} "
-                        + $"ias={startDef.targetIasKt:F0} alt={startDef.targetAltFtMsl:F0} "
-                        + $"z={z} tileSizeM={tileSizeM:F2} trainingScale={trainingWorldScale:F3}"
-                );
-            }
 
             return;
         }
@@ -393,9 +380,6 @@ public class FlightPlan : MonoBehaviour
 
         waypoints = spawned.ToArray();
 
-        if (logBuild)
-            Debug.Log($"[FlightPlan] RebuildRoute: {waypoints.Length} waypoints @ z={zoom}");
-
         OnRouteBuilt?.Invoke();
     }
 
@@ -420,9 +404,6 @@ public class FlightPlan : MonoBehaviour
             return;
 
         aircraftRoot.position = waypoints[0].position + Vector3.up * 1.5f;
-
-        if (logBuild)
-            Debug.Log($"[FlightPlan] Snapped aircraft to {waypoints[0].name}");
     }
 
     private ScenarioDefinition.WaypointDef FindAircraftStartDef(ScenarioDefinition s)

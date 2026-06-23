@@ -97,9 +97,6 @@ public class FollowAircraftCamera : MonoBehaviour
         // width = 2 * H * tan(FOV/2)  => H = width / (2*tan(FOV/2))
         float H = widthM / (2f * Mathf.Tan(0.5f * Mathf.Deg2Rad * cam.fieldOfView));
 
-        float checkW = 2f * H * Mathf.Tan(0.5f * Mathf.Deg2Rad * cam.fieldOfView);
-        Debug.Log($"[ND] range={nm}NM  H={H:F0}m  width={checkW:F0}m (expected {widthM:F0}m)");
-
         offset = new Vector3(offset.x, H * trainingWorldScale, offset.z);
         cam.farClipPlane = Mathf.Max(farClipMin, (H * trainingWorldScale) + 1000f);
 

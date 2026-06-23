@@ -116,10 +116,6 @@ public class RouteTilePreloader : MonoBehaviour
         for (int y = minY; y <= maxY; y++)
             result.Add(new Vector2Int(x, y));
 
-        Debug.Log(
-            $"[RouteTilePreloader] Route bounds z={zoom} x={minX}..{maxX} y={minY}..{maxY} total={result.Count}"
-        );
-
         return result;
     }
 
@@ -142,10 +138,6 @@ public class RouteTilePreloader : MonoBehaviour
                 tiles.Add(new Vector2Int(x, y));
             }
         }
-
-        Debug.Log(
-            $"[RouteTilePreloader] Fixed bounds x={xMin}..{xMax} y={yMin}..{yMax} total={tiles.Count}"
-        );
 
         return tiles;
     }

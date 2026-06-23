@@ -25,7 +25,6 @@ public class PfdPitchNeedleDriver : MonoBehaviour
 
         float targetZ = invertRotation ? -bus.pitchDeg : bus.pitchDeg;
         _z = Mathf.LerpAngle(_z, targetZ, 1f - Mathf.Exp(-smooth * Time.deltaTime));
-        // Debug.Log($"PfdPitchNeedleDriver: targetZ={targetZ:F1} _z={_z:F1}");
         needle.localEulerAngles = new Vector3(0f, 0f, _z);
     }
 

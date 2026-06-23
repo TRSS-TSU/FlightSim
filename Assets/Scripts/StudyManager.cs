@@ -13,7 +13,6 @@ public class StudyManager : MonoBehaviour
         // iOS prefers an explicit file:// URL
         string url = "file://" + fullPath;
 
-        Debug.Log($"Opening Study PDF: {url}");
         Application.OpenURL(url);
     }
 }

@@ -75,6 +75,7 @@ public class ScenarioDefinition : ScriptableObject
 
     [Header("Approach Sets (optional)")]
     public List<string> rnav25LFixes = new();
+    public List<string> rnav7LFixes = new();
 
     [Header("Performance (PERF INIT)")]
     public float zfwLbs = 0f; // Zero-fuel weight in lbs

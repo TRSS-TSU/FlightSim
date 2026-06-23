@@ -12,9 +12,7 @@ public static class ScenarioRuntime
 
         if (scenario != null)
         {
-            if (ScenarioDefinitionValidator.Validate(scenario, out var rep))
-                Debug.Log(rep);
-            else
+            if (!ScenarioDefinitionValidator.Validate(scenario, out var rep))
                 Debug.LogError(rep);
         }
 

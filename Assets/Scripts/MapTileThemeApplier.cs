@@ -23,7 +23,5 @@ public class MapTileThemeApplier : MonoBehaviour
 
         string folder = MapThemeRuntime.GetTilesFolder();
         tileGrid.tilesFolder = folder;
-
-        Debug.Log($"[MapTileThemeApplier] Applied tile folder: {folder}");
     }
 }

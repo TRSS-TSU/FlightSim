@@ -160,16 +160,6 @@ public class LocalTileChunkGrid : MonoBehaviour
         int missing = 0;
         int total = manifest.chunks.Length;
 
-        if (verboseLogs)
-        {
-            Debug.Log(
-                $"[LocalTileChunkGrid] Chunk preload started: folder={chunksFolder} "
-                    + $"theme={manifest.theme} z={z} chunks={total} "
-                    + $"bounds x={manifest.minX}..{manifest.maxX} y={manifest.minY}..{manifest.maxY} "
-                    + $"tileSizeM={tileSizeM:F2} trainingScale={trainingWorldScale:F3}"
-            );
-        }
-
         for (int i = 0; i < total; i++)
         {
             ChunkEntry chunk = manifest.chunks[i];
@@ -183,13 +173,6 @@ public class LocalTileChunkGrid : MonoBehaviour
 
             if ((i + 1) % yieldEveryChunks == 0)
                 yield return null;
-        }
-
-        if (verboseLogs)
-        {
-            Debug.Log(
-                $"[LocalTileChunkGrid] Chunk preload complete: found={found} missing={missing}"
-            );
         }
 
         IsLoaded = found > 0 && missing == 0;

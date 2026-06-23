@@ -87,7 +87,6 @@ public class PlaneController : MonoBehaviour
 
     [Header("Debug")]
     public bool enableHeadingDebug = false;
-    float _hdgLogT;
 
     [Header("Parked Pose Hold")]
     [Tooltip("When armed, holds the aircraft at the scenario start while IAS target is zero and NAV is off.")]
@@ -302,9 +301,6 @@ public class PlaneController : MonoBehaviour
         float turnRateRad = 9.81f * Mathf.Tan(currentBankDeg * Mathf.Deg2Rad) / groundSpeed;
         float newYaw = currentYaw + turnRateRad * Mathf.Rad2Deg * dt;
 
-        if (enableHeadingDebug)
-            LogHeadingDebug(currentYaw, targetYaw, currentBankDeg, groundSpeed);
-
         float vy = vyCmdSmoothed;
 
         // Positive climb = nose up, descent = nose down.
@@ -379,16 +375,5 @@ public class PlaneController : MonoBehaviour
         // No else — vyDes = vyCap when VNAV not available
 
         vyCmdSmoothed = Mathf.MoveTowards(vyCmdSmoothed, vyDes, maxVyAccel * dt);
-    }
-
-    void LogHeadingDebug(float currentYaw, float targetYaw, float bankDeg, float groundSpeed)
-    {
-        _hdgLogT += Time.fixedDeltaTime;
-        if (_hdgLogT < 0.5f)
-            return;
-        _hdgLogT = 0f;
-
-        float err = Mathf.DeltaAngle(currentYaw, targetYaw);
-        Debug.Log($"[HDG] err={err:F1}° bank={bankDeg:F1}° gs={groundSpeed * 1.944f:F0}kt");
     }
 }

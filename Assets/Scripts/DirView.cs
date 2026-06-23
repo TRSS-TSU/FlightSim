@@ -118,8 +118,9 @@ public class DirView : FmsPageView
         {
             // Seed scratchpad with the current TO waypoint ident (if route is active)
             int active = Model.ActiveLegIndex;
+            var route = Router.GetRouteForDisplay();
             string toIdent =
-                (active < Model.ActiveRoute.Count) ? Model.ActiveRoute[active].ident : "";
+                (active < route.Count) ? route[active].ident : "";
             if (!string.IsNullOrEmpty(toIdent))
                 Scratchpad.Append(toIdent);
             return;
@@ -146,26 +147,30 @@ public class DirView : FmsPageView
         var snap = Router.CaptureRouteContinuity();
 
         // STRICT strategy: truncate all legs before the target waypoint.
-        int idx = Model.ActiveRoute.FindIndex(w =>
+        var editedRoute = new System.Collections.Generic.List<ScenarioDefinition.WaypointDef>(
+            Router.GetRouteForDisplay()
+        );
+
+        int idx = editedRoute.FindIndex(w =>
             string.Equals(w.ident, wpDef.ident, System.StringComparison.OrdinalIgnoreCase)
         );
 
         if (idx < 0)
         {
             // Valid DB ident but not in current route — insert at front
-            Model.ActiveRoute.Insert(0, wpDef);
+            editedRoute.Insert(0, wpDef);
         }
         else if (idx > 0)
         {
             // Truncate all legs before the target (STRICT)
-            Model.ActiveRoute.RemoveRange(0, idx);
+            editedRoute.RemoveRange(0, idx);
         }
 
         // Note: do NOT write Model.ActiveLegIndex here — FmsPageRouter.Update() owns it
         // and will sync it from nav.activeIndex on the next frame.
 
         // Approach fixes are at the end of route; they may have been truncated.
-        Router.CommitActiveRoute(snap, clearArrivalLoaded: true);
+        Router.StageActiveRoute(editedRoute, snap, clearArrivalLoaded: true, arrivalLoadedAfterExec: false);
 
         Scratchpad.ReadAndClear();
         Scratchpad.ShowMessage("DIR MOD - EXEC", 2.0f);

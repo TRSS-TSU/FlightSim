@@ -63,10 +63,6 @@ public class RouteTileAuditLogger : MonoBehaviour
                 missing.Add(rel);
         }
 
-        Debug.Log(
-            $"[RouteTileAudit] z={zoom} required={required.Count} found={found.Count} missing={missing.Count}"
-        );
-
         if (!writeFiles)
             return;
 
@@ -79,8 +75,6 @@ public class RouteTileAuditLogger : MonoBehaviour
         );
         File.WriteAllLines(Path.Combine(outDir, $"found_tiles_z{zoom}.txt"), found);
         File.WriteAllLines(Path.Combine(outDir, $"missing_tiles_z{zoom}.txt"), missing);
-
-        Debug.Log($"[RouteTileAudit] Wrote audit files to: {outDir}");
     }
 
     private static IEnumerable<string> ToLines(string folder, int zoom, List<Vector2Int> tiles)

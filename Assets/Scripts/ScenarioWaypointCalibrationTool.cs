@@ -49,10 +49,5 @@ public class ScenarioWaypointCalibrationTool : MonoBehaviour
             Debug.LogWarning($"[ScenarioWaypointCalibration] Failed to convert {ident}.");
             return;
         }
-
-        Debug.Log(
-            $"[ScenarioWaypointCalibration] {ident} "
-                + $"worldPos={marker.position} -> Lat={lat:F8}, Lon={lon:F8}"
-        );
     }
 }

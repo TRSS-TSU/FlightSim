@@ -38,30 +38,6 @@ public class AircraftScaleAudit : MonoBehaviour
         float suggestedScaleFactor =
             longestAxis > 0.001f ? desiredAircraftLengthM / longestAxis : 1f;
 
-        Debug.Log(
-            $"[AircraftScaleAudit] Visual world bounds size={size} "
-                + $"longestAxis={longestAxis:F2}m desiredLength={desiredAircraftLengthM:F2}m "
-                + $"suggested additional scale multiplier={suggestedScaleFactor:F3}"
-        );
-
-        if (aircraftRoot)
-        {
-            Debug.Log(
-                $"[AircraftScaleAudit] Root pos={aircraftRoot.position} "
-                    + $"root scale={aircraftRoot.localScale} visual scale={aircraftVisual.localScale}"
-            );
-        }
-
-        if (startPoint && thresholdPoint)
-        {
-            Vector3 a = Vector3.ProjectOnPlane(startPoint.position, Vector3.up);
-            Vector3 c = Vector3.ProjectOnPlane(thresholdPoint.position, Vector3.up);
-            float runwaySegmentM = Vector3.Distance(a, c);
-
-            Debug.Log(
-                $"[AircraftScaleAudit] Start-to-threshold distance={runwaySegmentM:F2} Unity meters. "
-                    + $"Aircraft length / segment = {(longestAxis / Mathf.Max(1f, runwaySegmentM)):P1}"
-            );
-        }
+        _ = suggestedScaleFactor;
     }
 }

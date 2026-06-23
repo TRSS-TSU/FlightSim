@@ -70,6 +70,8 @@ public class FmsPageRouter : MonoBehaviour
     private const float RefreshInterval = 0.1f; // 10 Hz
     private bool _hasPendingRouteActivation;
     private bool _pendingClearArrivalLoaded;
+    private bool? _pendingArrivalLoaded;
+    private string _pendingArrivalName;
     private RouteContinuitySnapshot _pendingRouteSnapshot;
 
     public FmsPageView CurrentPage => _current;
@@ -210,6 +212,17 @@ public class FmsPageRouter : MonoBehaviour
 
     public FmsModel GetModel() => _model;
 
+    public List<ScenarioDefinition.WaypointDef> GetRouteForDisplay()
+        => _model.ModRoute.Count > 0 ? _model.ModRoute : _model.ActiveRoute;
+
+    public bool HasPendingArrivalLoaded => _pendingArrivalLoaded == true;
+
+    public bool HasPendingArrivalChange => _pendingArrivalLoaded.HasValue;
+
+    public bool PendingArrivalLoaded => _pendingArrivalLoaded == true;
+
+    public string PendingArrivalName => _pendingArrivalLoaded == true ? _pendingArrivalName : "";
+
     public FlightPlan GetFlightPlan() => flightPlan;
 
     public NavAutopilot GetNavAutopilot() => navAutopilot;
@@ -262,7 +275,10 @@ public class FmsPageRouter : MonoBehaviour
                                    bool executeNow = false)
     {
         if (clearArrivalLoaded)
+        {
             _model.ArrivalLoaded = false;
+            _model.ArrivalName = "";
+        }
 
         if (executeNow)
         {
@@ -272,6 +288,29 @@ public class FmsPageRouter : MonoBehaviour
 
         _pendingRouteSnapshot = snapshot;
         _pendingClearArrivalLoaded |= clearArrivalLoaded;
+        _model.ModRoute = new List<ScenarioDefinition.WaypointDef>(_model.ActiveRoute);
+        _hasPendingRouteActivation = true;
+        scratchpad?.ShowMessage("MOD ROUTE - EXEC", 1.5f);
+    }
+
+    public void StageActiveRoute(List<ScenarioDefinition.WaypointDef> route,
+                                  RouteContinuitySnapshot snapshot,
+                                  bool clearArrivalLoaded = false,
+                                  bool? arrivalLoadedAfterExec = null,
+                                  string arrivalNameAfterExec = "")
+    {
+        if (route == null || route.Count == 0)
+        {
+            scratchpad?.ShowMessage("NO ROUTE", 1.5f);
+            return;
+        }
+
+        _model.ModRoute = new List<ScenarioDefinition.WaypointDef>(route);
+        _pendingRouteSnapshot = snapshot;
+        _pendingClearArrivalLoaded |= clearArrivalLoaded;
+        _pendingArrivalLoaded = arrivalLoadedAfterExec ?? _pendingArrivalLoaded;
+        if (arrivalLoadedAfterExec == true)
+            _pendingArrivalName = arrivalNameAfterExec ?? "";
         _hasPendingRouteActivation = true;
         scratchpad?.ShowMessage("MOD ROUTE - EXEC", 1.5f);
     }
@@ -285,21 +324,29 @@ public class FmsPageRouter : MonoBehaviour
         }
 
         if (_pendingClearArrivalLoaded)
+        {
             _model.ArrivalLoaded = false;
+            _model.ArrivalName = "";
+        }
 
-        ExecuteActiveRoute(_pendingRouteSnapshot);
+        ExecuteActiveRoute(_pendingRouteSnapshot, _model.ModRoute);
     }
 
-    private void ExecuteActiveRoute(RouteContinuitySnapshot snapshot)
+    private void ExecuteActiveRoute(RouteContinuitySnapshot snapshot,
+                                    List<ScenarioDefinition.WaypointDef> routeOverride = null)
     {
         var sd = _model.Scenario;
-        if (sd == null || _model.ActiveRoute.Count == 0)
+        var routeSource = routeOverride != null && routeOverride.Count > 0
+            ? routeOverride
+            : _model.ActiveRoute;
+
+        if (sd == null || routeSource.Count == 0)
         {
             scratchpad?.ShowMessage("NO ROUTE", 1.5f);
             return;
         }
 
-        var routeCopy = new List<ScenarioDefinition.WaypointDef>(_model.ActiveRoute);
+        var routeCopy = new List<ScenarioDefinition.WaypointDef>(routeSource);
         bool forceFirstLeg = flightPlan == null
             || flightPlan.waypoints == null
             || flightPlan.waypoints.Length == 0;
@@ -319,6 +366,7 @@ public class FmsPageRouter : MonoBehaviour
 
             _hasPendingRouteActivation = false;
             _pendingClearArrivalLoaded = false;
+            ApplyPendingModelRoute(routeCopy);
 
             routeActivationCoordinator.ExecuteModifiedRoute(
                 sd,
@@ -338,6 +386,7 @@ public class FmsPageRouter : MonoBehaviour
 
         _hasPendingRouteActivation = false;
         _pendingClearArrivalLoaded = false;
+        ApplyPendingModelRoute(routeCopy);
 
         if (navAutopilot)
             navAutopilot.SetNavEngaged(false);
@@ -362,6 +411,21 @@ public class FmsPageRouter : MonoBehaviour
     {
         _model.ActiveLegIndex = activeIndex;
         scratchpad?.ShowMessage("ROUTE EXEC", 1.5f);
+    }
+
+    private void ApplyPendingModelRoute(List<ScenarioDefinition.WaypointDef> routeCopy)
+    {
+        _model.ActiveRoute = new List<ScenarioDefinition.WaypointDef>(routeCopy);
+        _model.ModRoute.Clear();
+
+        if (_pendingArrivalLoaded.HasValue)
+        {
+            _model.ArrivalLoaded = _pendingArrivalLoaded.Value;
+            _model.ArrivalName = _pendingArrivalLoaded.Value ? _pendingArrivalName : "";
+        }
+
+        _pendingArrivalLoaded = null;
+        _pendingArrivalName = "";
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -408,6 +472,9 @@ public class FmsPageRouter : MonoBehaviour
     {
         _hasPendingRouteActivation = false;
         _pendingClearArrivalLoaded = false;
+        _pendingArrivalLoaded = null;
+        _pendingArrivalName = "";
+        _model.ModRoute.Clear();
         _model.LoadFromScenario(sd);
         ShowPage("Index");
     }

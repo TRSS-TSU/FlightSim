@@ -42,7 +42,10 @@ public class ActLegsView : FmsPageView, IMultiPage
     private int _pageIndex;
 
     private int TotalPages =>
-        Mathf.Max(1, Mathf.CeilToInt(Model.ActiveRoute.Count / (float)LEGS_PER_PAGE));
+        Mathf.Max(1, Mathf.CeilToInt(DisplayRoute.Count / (float)LEGS_PER_PAGE));
+
+    private System.Collections.Generic.List<ScenarioDefinition.WaypointDef> DisplayRoute =>
+        Router.GetRouteForDisplay();
 
     // ─────────────────────────────────────────────────────────────────────────
     // FmsPageView contract
@@ -51,7 +54,7 @@ public class ActLegsView : FmsPageView, IMultiPage
     public override void Populate()
     {
         ClearAllLines();
-        GetTitle()?.SetText(FmtTitle());
+        GetTitle()?.SetText(Router.HasPendingRouteActivation ? "MOD LEGS" : FmtTitle());
         GetPageNumber()?.SetText($"{_pageIndex + 1}/{TotalPages}");
         GetMessageLine()?.SetText("");
 
@@ -63,7 +66,8 @@ public class ActLegsView : FmsPageView, IMultiPage
             int lineA = slot * 2 + 1; // lines 1, 3, 5
             int lineB = lineA + 1; // lines 2, 4, 6
 
-            if (routeIdx >= Model.ActiveRoute.Count)
+            var route = DisplayRoute;
+            if (routeIdx >= route.Count)
             {
                 SetLineLabels(lineA, "\u2014", "");
                 SetLineValues(lineA, "", "");
@@ -72,7 +76,7 @@ public class ActLegsView : FmsPageView, IMultiPage
                 continue;
             }
 
-            var wp = Model.ActiveRoute[routeIdx];
+            var wp = route[routeIdx];
             bool past = routeIdx < Model.ActiveLegIndex;
             bool active = routeIdx == Model.ActiveLegIndex;
 
@@ -178,18 +182,20 @@ public class ActLegsView : FmsPageView, IMultiPage
 
         if (sp.Length == 0)
         {
-            if (routeIdx < Model.ActiveRoute.Count)
-                Scratchpad.Append(Model.ActiveRoute[routeIdx].ident);
+            var route = DisplayRoute;
+            if (routeIdx < route.Count)
+                Scratchpad.Append(route[routeIdx].ident);
             return;
         }
 
         if (string.Equals(sp, "DELETE", StringComparison.OrdinalIgnoreCase))
         {
-            if (routeIdx < Model.ActiveRoute.Count && Model.ActiveRoute.Count > 1)
+            var route = new System.Collections.Generic.List<ScenarioDefinition.WaypointDef>(DisplayRoute);
+            if (routeIdx < route.Count && route.Count > 1)
             {
-                Model.ActiveRoute.RemoveAt(routeIdx);
+                route.RemoveAt(routeIdx);
                 Scratchpad.ReadAndClear();
-                CommitRoute(snap);
+                CommitRoute(route, snap);
                 _pageIndex = Mathf.Clamp(_pageIndex, 0, TotalPages - 1);
             }
             else
@@ -219,10 +225,11 @@ public class ActLegsView : FmsPageView, IMultiPage
             return;
         }
 
-        int insertAt = Mathf.Clamp(routeIdx, 0, Model.ActiveRoute.Count);
-        Model.ActiveRoute.Insert(insertAt, wpDef);
+        var editedRoute = new System.Collections.Generic.List<ScenarioDefinition.WaypointDef>(DisplayRoute);
+        int insertAt = Mathf.Clamp(routeIdx, 0, editedRoute.Count);
+        editedRoute.Insert(insertAt, wpDef);
         Scratchpad.ReadAndClear();
-        CommitRoute(snap);
+        CommitRoute(editedRoute, snap);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -234,8 +241,10 @@ public class ActLegsView : FmsPageView, IMultiPage
     /// shared five-tier continuity resolver in FmsPageRouter.CommitActiveRoute().
     /// <paramref name="snap"/> must be captured BEFORE the route mutation.
     /// </summary>
-    private void CommitRoute(RouteContinuitySnapshot snap)
-        => Router.CommitActiveRoute(snap);
+    private void CommitRoute(
+        System.Collections.Generic.List<ScenarioDefinition.WaypointDef> route,
+        RouteContinuitySnapshot snap)
+        => Router.StageActiveRoute(route, snap);
 
     // ─────────────────────────────────────────────────────────────────────────
     // IMultiPage

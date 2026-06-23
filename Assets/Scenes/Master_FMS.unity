@@ -11459,10 +11459,10 @@ RectTransform:
   - {fileID: 1399050264}
   m_Father: {fileID: 250915359}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 100}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 650, y: -350}
+  m_SizeDelta: {x: 1100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &211334968
 MonoBehaviour:
@@ -24882,10 +24882,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 250915359}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 100}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 650, y: -250}
+  m_SizeDelta: {x: 1100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &467020141
 MonoBehaviour:
@@ -32865,7 +32865,6 @@ MonoBehaviour:
   individualTileVisualRoot: {fileID: 1885233895}
   chunkGrid: {fileID: 1130551063}
   chunkVisualRoot: {fileID: 345169020}
-  verboseLogs: 1
 --- !u!1 &602517005
 GameObject:
   m_ObjectHideFlags: 0
@@ -68581,7 +68580,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1193053682
 RectTransform:
   m_ObjectHideFlags: 0
@@ -71463,6 +71462,7 @@ GameObject:
   - component: {fileID: 1247336094}
   - component: {fileID: 1247336096}
   - component: {fileID: 1247336097}
+  - component: {fileID: 1247336098}
   m_Layer: 5
   m_Name: FMS_Text_Display
   m_TagString: Untagged
@@ -71550,6 +71550,19 @@ MonoBehaviour:
   pageDepArr: {fileID: 1229893180}
   pageDir: {fileID: 1146824905}
   pagePerf: {fileID: 779738462}
+--- !u!114 &1247336098
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1247336093}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf2b68741345cd84fa1efc27955918dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScenarioRuntimeBootstrap
+  fallbackScenario: {fileID: 11400000, guid: 57714959751f1fb44811a44741208a8a, type: 2}
 --- !u!1 &1251273693
 GameObject:
   m_ObjectHideFlags: 0
@@ -88729,7 +88742,7 @@ RectTransform:
   m_Father: {fileID: 1946301451}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -120843,10 +120856,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 250915359}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 100}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 650, y: -150}
+  m_SizeDelta: {x: 1100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2115103873
 MonoBehaviour:
