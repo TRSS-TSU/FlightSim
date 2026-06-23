@@ -41,8 +41,8 @@ public class DrawerToggleButton : MonoBehaviour
 
     public void Press()
     {
-        MonoBehaviour resolvedController = ResolveController();
-        if (!resolvedController)
+        IDrawerController resolvedController = ResolveController();
+        if (resolvedController == null)
         {
             Debug.LogError(
                 $"[DrawerToggleButton] Missing {GetExpectedControllerName()} on button panel.",
@@ -51,11 +51,11 @@ public class DrawerToggleButton : MonoBehaviour
             return;
         }
 
-        resolvedController.SendMessage("RecalculateTargets", SendMessageOptions.DontRequireReceiver);
+        resolvedController.RecalculateTargets();
 
         if (openWhenPressed)
         {
-            resolvedController.SendMessage("SnapOpen", SendMessageOptions.RequireReceiver);
+            resolvedController.SnapOpen();
             SetThisDrawerOpen(true);
 
             // DrawerGroup closes the other drawer, so update its buttons too.
@@ -63,24 +63,19 @@ public class DrawerToggleButton : MonoBehaviour
         }
         else
         {
-            resolvedController.SendMessage("SnapClosed", SendMessageOptions.RequireReceiver);
+            resolvedController.SnapClosed();
             SetThisDrawerOpen(false);
         }
     }
 
-    private MonoBehaviour ResolveController()
+    private IDrawerController ResolveController()
     {
-        if (IsValidController(controller))
-            return controller;
+        if (controller is IDrawerController validController)
+            return validController;
 
         DrawerKind expectedKind = ResolveDrawerKind();
         controller = FindController(expectedKind);
-        return controller;
-    }
-
-    private bool IsValidController(MonoBehaviour candidate)
-    {
-        return candidate is IDrawerController;
+        return controller as IDrawerController;
     }
 
     private DrawerKind ResolveDrawerKind()

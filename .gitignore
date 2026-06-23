@@ -69,6 +69,9 @@ node_modules/
 # Project-specific ignored folders
 /Assets/StreamingAssets
 /Assets/_Recovery/
+/.codex/
+/graphify-out/
+/.graphifyignore
 /notes/
 /Recordings/
 /Temp/
