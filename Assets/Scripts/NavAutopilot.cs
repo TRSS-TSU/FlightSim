@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class NavAutopilot : MonoBehaviour
 {
+    public event System.Action<string> WaypointSequenced;
     [HideInInspector]
     public float activeDistance;
 
@@ -238,6 +239,7 @@ public class NavAutopilot : MonoBehaviour
             && advanceCooldownT <= 0f
         )
         {
+            string sequencedIdent = wp ? wp.name.Replace("WP_", "") : "";
             activeIndex++;
             if (activeIndex >= plan.waypoints.Length)
                 activeIndex = loop ? 0 : plan.waypoints.Length - 1;
@@ -246,6 +248,7 @@ public class NavAutopilot : MonoBehaviour
             nearFrames = 0;
             prevDist = float.PositiveInfinity;
             advanceCooldownT = advanceCooldownSec;
+            WaypointSequenced?.Invoke(sequencedIdent);
         }
         else
         {

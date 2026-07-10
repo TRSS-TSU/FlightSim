@@ -9,6 +9,12 @@ public class TakeoffEngageButton : MonoBehaviour
     {
         bool started = false;
 
+        if (FlightSession.Instance && !FlightSession.Instance.TryBeginTakeoff())
+        {
+            Debug.LogWarning("[TakeoffEngageButton] Route review is required before takeoff.");
+            return;
+        }
+
         if (takeoffProcedure)
             started = takeoffProcedure.BeginTakeoff();
         else

@@ -20,26 +20,30 @@ public class FmsPhaseButtonController : MonoBehaviour
             landButton.SetActive(false);
     }
 
+    private void OnEnable()
+    {
+        if (FlightSession.Instance)
+            FlightSession.Instance.StartAvailabilityChanged += SetTakeoffVisible;
+    }
+
+    private void OnDisable()
+    {
+        if (FlightSession.Instance)
+            FlightSession.Instance.StartAvailabilityChanged -= SetTakeoffVisible;
+    }
+
     public void ShowTakeoff()
     {
-        if (takeoffButton)
-            takeoffButton.SetActive(true);
+        bool verified = FlightSession.Instance && FlightSession.Instance.Record.routeVerified && FlightSession.Instance.Phase == FlightPhase.ReadyForTakeoff;
+        SetTakeoffVisible(verified);
         if (landButton)
             landButton.SetActive(false);
     }
 
-    void Update()
+    private void SetTakeoffVisible(bool visible)
     {
-        if (!nav || !plan || plan.waypoints == null || plan.waypoints.Length == 0)
-            return;
-
-        bool onLastWaypoint = nav.activeIndex >= plan.waypoints.Length - 1;
-        bool nearLast = nav.activeDistance <= landShowDistanceM;
-
-        if (onLastWaypoint && nearLast)
-        {
-            if (landButton)
-                landButton.SetActive(true);
-        }
+        if (takeoffButton)
+            takeoffButton.SetActive(visible);
     }
+
 }

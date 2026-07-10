@@ -30210,8 +30210,8 @@ MonoBehaviour:
   climbIasKt: 130
   departureIasKt: 150
   runwayAltFt: 0
-  liftoffAltFt: 50
-  departureAltFt: 500
+  liftoffAltFt: 250
+  departureAltFt: 3000
   rollSeconds: 8
   liftoffSeconds: 8
   climbSeconds: 12
@@ -30224,7 +30224,7 @@ MonoBehaviour:
   maxGateWaitSeconds: 180
   runwayThresholdIdent: KNPA_RW25R_THRESH
   departureIdent: KNPA_DEP_1DME
-  navHandoffMinAltitudeFt: 2500
+  navHandoffMinAltitudeFt: 250
   navHandoffRouteIndex: 1
   allowHandoffAfterDepartureGate: 1
 --- !u!114 &556071004

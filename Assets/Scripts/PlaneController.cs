@@ -13,6 +13,35 @@ public class PlaneController : MonoBehaviour
     public float CurrentGroundSpeedMps => Mathf.Abs(forwardSpeedMps);
     public float CurrentVerticalSpeedMps => vyCmdSmoothed;
 
+    /// <summary>Execution-layer final stop that preserves the world-unit and ground-plane invariants.</summary>
+    public void StopAtGround()
+    {
+        forwardSpeedMps = 0f;
+        vyCmdSmoothed = 0f;
+
+        if (targets)
+        {
+            targets.targetIasKt = 0f;
+            targets.targetAltFtMsl = 0f;
+        }
+
+        Vector3 position = rb ? rb.position : transform.position;
+        position.y = 0f;
+        if (rb)
+        {
+            rb.position = position;
+            if (!rb.isKinematic)
+            {
+                rb.linearVelocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
+            }
+        }
+        else
+        {
+            transform.position = position;
+        }
+    }
+
     [Header("Speed Hold")]
     [Tooltip("Proportional gain that turns speed error into commanded acceleration.")]
     public float speedResponse = 1.5f; // 1/s
