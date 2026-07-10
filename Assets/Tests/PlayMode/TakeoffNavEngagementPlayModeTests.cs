@@ -82,6 +82,93 @@ public class TakeoffNavEngagementPlayModeTests
         }
     }
 
+    [UnityTest]
+    public IEnumerator Scenario01PensiHoldLandingResultsLoopCompletes()
+    {
+        yield return SceneManager.LoadSceneAsync("Master_FMS", LoadSceneMode.Single);
+        yield return null;
+
+        Type scenarioType = RequireType("ScenarioDefinition");
+        Type scenarioRuntimeType = RequireType("ScenarioRuntime");
+        Type routerType = RequireType("FmsPageRouter");
+        Type navType = RequireType("NavAutopilot");
+        Type sessionType = RequireType("FlightSession");
+
+        UnityEngine.Object scenario = BuildScenario01(scenarioType);
+        scenarioRuntimeType.GetMethod("Set", BindingFlags.Static | BindingFlags.Public)
+            .Invoke(null, new object[] { scenario });
+        yield return null;
+
+        object router = UnityEngine.Object.FindFirstObjectByType(routerType);
+        object nav = UnityEngine.Object.FindFirstObjectByType(navType);
+        object session = sessionType.GetProperty("Instance", BindingFlags.Static | BindingFlags.Public)
+            .GetValue(null);
+
+        Assert.NotNull(router);
+        Assert.NotNull(nav);
+        Assert.NotNull(session);
+
+        IList route = ResolveRoute(scenario, scenarioType);
+        Assert.IsTrue(
+            (bool)routerType.GetMethod("ReplaceRuntimeRoute", InstanceFlags).Invoke(router, new object[] { route, 0 }),
+            "Initial route did not build."
+        );
+
+        sessionType.GetMethod("NotifyRouteExecuted", InstanceFlags).Invoke(session, new object[] { false });
+        sessionType.GetMethod("ConfirmRouteReview", InstanceFlags).Invoke(session, null);
+        Assert.IsTrue(
+            (bool)sessionType.GetMethod("TryBeginTakeoff", InstanceFlags).Invoke(session, null),
+            "Route-reviewed session could not start takeoff."
+        );
+        sessionType.GetMethod("NotifyNavHandoff", InstanceFlags).Invoke(session, null);
+
+        sessionType.GetMethod("NotifyWaypointSequenced", InstanceFlags).Invoke(session, new object[] { "PENSI" });
+        AssertPhase(session, sessionType, "EnteringHold");
+        Assert.IsTrue((bool)navType.GetField("loop", InstanceFlags).GetValue(nav));
+        Assert.AreEqual(0, (int)navType.GetField("activeIndex", InstanceFlags).GetValue(nav));
+        AssertRoute((IList)routerType.GetMethod("GetRouteForDisplay", InstanceFlags).Invoke(router, null), "CUPER", "POOVE", "APUCE", "ALCOME");
+
+        sessionType.GetMethod("NotifyWaypointSequenced", InstanceFlags).Invoke(session, new object[] { "CUPER" });
+        AssertPhase(session, sessionType, "Holding");
+
+        sessionType.GetMethod("NotifyWaypointSequenced", InstanceFlags).Invoke(session, new object[] { "ALCOME" });
+        AssertRecordField(session, sessionType, "holdCircuitsCompleted", 1);
+        AssertPhase(session, sessionType, "Holding");
+
+        sessionType.GetMethod("BeginLanding", InstanceFlags).Invoke(session, null);
+        AssertPhase(session, sessionType, "HoldExitArmed");
+        Assert.IsFalse((bool)navType.GetField("loop", InstanceFlags).GetValue(nav));
+        AssertRoute(
+            (IList)routerType.GetMethod("GetRouteForDisplay", InstanceFlags).Invoke(router, null),
+            "CUPER",
+            "POOVE",
+            "APUCE",
+            "ALCOME",
+            "KNPA_RW25L_FINAL",
+            "KNPA_RW25L_TOUCHDOWN",
+            "KNPA_FINAL_STOP"
+        );
+
+        sessionType.GetMethod("NotifyWaypointSequenced", InstanceFlags).Invoke(session, new object[] { "ALCOME" });
+        AssertPhase(session, sessionType, "Approach");
+
+        sessionType.GetMethod("NotifyWaypointSequenced", InstanceFlags).Invoke(session, new object[] { "KNPA_RW25L_TOUCHDOWN" });
+        AssertPhase(session, sessionType, "Landing");
+        AssertRecordField(session, sessionType, "touchdownReached", true);
+
+        sessionType.GetMethod("NotifyWaypointSequenced", InstanceFlags).Invoke(session, new object[] { "KNPA_FINAL_STOP" });
+        AssertPhase(session, sessionType, "Stopped");
+        AssertRecordField(session, sessionType, "finalStopReached", true);
+        AssertRecordField(session, sessionType, "status", "Completed");
+
+        sessionType
+            .GetMethod("EndFlight", BindingFlags.Instance | BindingFlags.NonPublic)
+            .Invoke(session, null);
+        yield return null;
+
+        Assert.AreEqual("ScenarioResults", SceneManager.GetActiveScene().name);
+    }
+
     private static Type RequireType(string typeName)
     {
         Type type = Type.GetType(typeName + ", Assembly-CSharp");
@@ -117,6 +204,13 @@ public class TakeoffNavEngagementPlayModeTests
         AddWaypoint(waypoints, waypointType, "VR1020_E", 31.1d, -86.57d, "Route", true, 3000f, 0f, 0f);
         AddWaypoint(waypoints, waypointType, "CEW", 30.83d, -86.68d, "Route", true, 3000f, 0f, 0f);
         AddWaypoint(waypoints, waypointType, "PENSI", 30.79d, -87.27d, "Route", true, 3000f, 0f, 0f);
+        AddWaypoint(waypoints, waypointType, "CUPER", 30.17d, -87.15d, "Approach", false, 3000f, 0f, 0f);
+        AddWaypoint(waypoints, waypointType, "POOVE", 30.11d, -87.33d, "Approach", false, 3000f, 0f, 0f);
+        AddWaypoint(waypoints, waypointType, "APUCE", 30.01d, -87.47d, "Approach", false, 3000f, 0f, 0f);
+        AddWaypoint(waypoints, waypointType, "ALCOME", 30.22d, -87.58d, "Approach", false, 3000f, 0f, 0f);
+        AddWaypoint(waypoints, waypointType, "KNPA_RW25L_FINAL", 30.39d, -87.43d, "Approach", false, 1200f, 0f, 250f);
+        AddWaypoint(waypoints, waypointType, "KNPA_RW25L_TOUCHDOWN", 30.35d, -87.31d, "Approach", false, 0f, 0f, 250f);
+        AddWaypoint(waypoints, waypointType, "KNPA_FINAL_STOP", 30.35119059d, -87.29687867d, "Approach", false, 0f, 0f, 250f);
         AddWaypoint(waypoints, waypointType, "KNPA", 30.35119059d, -87.29687867d, "Route", true, 3000f, 0f, 0f);
         SetField(scenario, scenarioType, "waypoints", waypoints);
 
@@ -197,6 +291,31 @@ public class TakeoffNavEngagementPlayModeTests
         }
 
         return route;
+    }
+
+    private static void AssertRoute(IList route, params string[] expected)
+    {
+        Assert.AreEqual(expected.Length, route.Count, "Route length mismatch.");
+        for (int i = 0; i < expected.Length; i++)
+        {
+            object waypoint = route[i];
+            Assert.AreEqual(expected[i], waypoint.GetType().GetField("ident", InstanceFlags).GetValue(waypoint), $"Route waypoint {i} mismatch.");
+        }
+    }
+
+    private static void AssertPhase(object session, Type sessionType, string expected)
+    {
+        Assert.AreEqual(expected, sessionType.GetProperty("Phase", InstanceFlags).GetValue(session).ToString());
+    }
+
+    private static void AssertRecordField(object session, Type sessionType, string fieldName, object expected)
+    {
+        object record = sessionType.GetProperty("Record", InstanceFlags).GetValue(session);
+        object actual = record.GetType().GetField(fieldName, InstanceFlags).GetValue(record);
+        if (expected is string)
+            Assert.AreEqual(expected, actual.ToString());
+        else
+            Assert.AreEqual(expected, actual);
     }
 
     private static float GetAltFt(object targets, Type targetsType)

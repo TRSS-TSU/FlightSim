@@ -250,7 +250,13 @@ public sealed class FlightSession : MonoBehaviour
     /// <summary>Receives one valid leg-completion signal from NavAutopilot.</summary>
     public void NotifyWaypointSequenced(string ident)
     {
-        if (string.IsNullOrEmpty(ident) || Phase < FlightPhase.Enroute || Phase >= FlightPhase.Stopped)
+        if (string.IsNullOrEmpty(ident))
+            return;
+
+        if (Phase == FlightPhase.Takeoff)
+            SetPhase(FlightPhase.Enroute);
+
+        if (Phase < FlightPhase.Enroute || Phase >= FlightPhase.Stopped)
             return;
 
         Record.waypointsCompleted++;

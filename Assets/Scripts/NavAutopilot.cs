@@ -240,9 +240,18 @@ public class NavAutopilot : MonoBehaviour
         )
         {
             string sequencedIdent = wp ? wp.name.Replace("WP_", "") : "";
-            activeIndex++;
-            if (activeIndex >= plan.waypoints.Length)
-                activeIndex = loop ? 0 : plan.waypoints.Length - 1;
+            int previousIndex = activeIndex;
+            int nextIndex = activeIndex + 1;
+            if (nextIndex >= plan.waypoints.Length)
+                nextIndex = loop ? 0 : plan.waypoints.Length - 1;
+
+            if (nextIndex == previousIndex)
+            {
+                prevDist = dist;
+                return;
+            }
+
+            activeIndex = nextIndex;
 
             wasNear = false;
             nearFrames = 0;

@@ -1,7 +1,7 @@
 # NAS FMS MVP edge map
 
 Generated: 2026-07-10
-Graph source: `graphify-out/graph.json` (1,134 nodes, 2,086 edges, 87 communities)
+Graph source: `graphify-out/graph.json` (1,138 nodes, 2,101 edges, 92 communities)
 
 ```mermaid
 flowchart LR
@@ -32,9 +32,9 @@ flowchart LR
 | CDU page view tracking | `FmsPageRouter.ShowPage` to `FlightSession.MarkPageViewed` |
 | Successful EXEC / route review | `FmsPageRouter.OnRouteActivationComplete` to `FlightSession.NotifyRouteExecuted` |
 | Runtime route changes | `FmsPageRouter.ReplaceRuntimeRoute` / `AppendRuntimeRoute`; list clones only |
-| Valid waypoint completion | `NavAutopilot.WaypointSequenced` to `FlightSession.NotifyWaypointSequenced` |
+| Valid waypoint completion | `NavAutopilot.WaypointSequenced` to `FlightSession.NotifyWaypointSequenced`; non-loop final waypoint repeats are suppressed |
 | Start gate | `FmsPhaseButtonController` subscribes to `FlightSession.StartAvailabilityChanged`; existing Start button retains its `TakeoffEngageButton` reference |
-| Takeoff handoff | `TakeoffProcedureController` at 250 ft then `FlightSession.NotifyNavHandoff` |
+| Takeoff handoff | `TakeoffProcedureController` at 250 ft then `FlightSession.NotifyNavHandoff`; route waypoint events during Takeoff also promote the session to Enroute |
 | Aircraft stop | `FlightSession` requests `PlaneController.StopAtGround`; the controller owns target/velocity reset |
 | Results display | `ScenarioResults` scene and `ScenarioResultsPresenter`; data is read-only |
 
@@ -47,7 +47,7 @@ flowchart LR
 
 ## Validation and open risks
 
-- Unity 6000.3.3f1 compiles with no console errors or warnings after reimport.
-- Play Mode smoke check passed route review, PENSI replacement, hold exit, touchdown, and final stop.
-- `Assets/Tests/PlayMode/TakeoffNavEngagementPlayModeTests.cs` covers the 250 ft handoff target but has not been run through the standalone Unity Test Runner in this session.
+- Unity 6000.3.3f1 C# project builds pass for `Assembly-CSharp.csproj` and `FlightSim.PlayModeTests.csproj`.
+- Direct Play Mode smoke through Unity MCP passed route review, PENSI replacement, hold route targeting, hold exit, touchdown, final stop, and asynchronous load to `ScenarioResults`.
+- `Assets/Tests/PlayMode/TakeoffNavEngagementPlayModeTests.cs` now covers both the 250 ft handoff target and the PENSI -> hold -> landing -> results state loop; the Unity Test Runner API was blocked by the MCP wrapper as user-interactive, so the test was build-validated and mirrored with the direct Play Mode smoke.
 - Full real-time route/geometry, map alignment, and Restart Flight visual UX remain manual acceptance checks; existing map scale and source landing geometry were not changed.
