@@ -152,6 +152,9 @@ public sealed class FlightSession : MonoBehaviour
 
     public void MarkPageViewed(string pageId)
     {
+        if (Phase >= FlightPhase.Takeoff)
+            return;
+
         if (pageId == "PosInit")
         {
             Record.posInitViewed = true;
@@ -203,6 +206,9 @@ public sealed class FlightSession : MonoBehaviour
 
     public void ConfirmRouteReview()
     {
+        if (Phase >= FlightPhase.Takeoff)
+            return;
+
         Record.routeVerified = true;
         Record.routeVerifiedAt = FirstTimestamp(Record.routeVerifiedAt);
         SetPhase(FlightPhase.ReadyForTakeoff);

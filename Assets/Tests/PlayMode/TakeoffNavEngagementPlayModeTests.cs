@@ -145,6 +145,15 @@ public class TakeoffNavEngagementPlayModeTests
             (bool)sessionType.GetMethod("TryBeginTakeoff", InstanceFlags).Invoke(session, null),
             "Route-reviewed session could not start takeoff."
         );
+
+        sessionType.GetMethod("MarkPageViewed", InstanceFlags).Invoke(session, new object[] { "PosInit" });
+        sessionType.GetMethod("MarkPageViewed", InstanceFlags).Invoke(session, new object[] { "PerfInit" });
+        sessionType.GetMethod("ConfirmRouteReview", InstanceFlags).Invoke(session, null);
+        AssertRecordField(session, sessionType, "posInitViewed", false);
+        AssertRecordField(session, sessionType, "fuelViewed", false);
+        AssertRecordField(session, sessionType, "weightViewed", false);
+        AssertPhase(session, sessionType, "Takeoff");
+
         sessionType.GetMethod("NotifyNavHandoff", InstanceFlags).Invoke(session, null);
 
         sessionType.GetMethod("NotifyWaypointSequenced", InstanceFlags).Invoke(session, new object[] { "PENSI" });
