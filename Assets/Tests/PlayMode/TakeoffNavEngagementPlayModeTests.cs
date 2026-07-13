@@ -150,11 +150,15 @@ public class TakeoffNavEngagementPlayModeTests
         sessionType.GetMethod("NotifyWaypointSequenced", InstanceFlags).Invoke(session, new object[] { "PENSI" });
         AssertPhase(session, sessionType, "EnteringHold");
         Assert.IsTrue((bool)navType.GetField("loop", InstanceFlags).GetValue(nav));
-        Assert.AreEqual(0, (int)navType.GetField("activeIndex", InstanceFlags).GetValue(nav));
-        AssertRoute((IList)routerType.GetMethod("GetRouteForDisplay", InstanceFlags).Invoke(router, null), "CUPER", "POOVE", "APUCE", "ALCOME");
+        Assert.AreEqual(1, (int)navType.GetField("activeIndex", InstanceFlags).GetValue(nav));
+        AssertRoute((IList)routerType.GetMethod("GetRouteForDisplay", InstanceFlags).Invoke(router, null), "PENSI", "CUPER", "POOVE", "APUCE", "ALCOME");
 
         sessionType.GetMethod("NotifyWaypointSequenced", InstanceFlags).Invoke(session, new object[] { "CUPER" });
         AssertPhase(session, sessionType, "Holding");
+
+        sessionType.GetMethod("ContinueHolding", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(session, null);
+        Assert.AreEqual(1, (int)navType.GetField("activeIndex", InstanceFlags).GetValue(nav));
+        AssertRoute((IList)routerType.GetMethod("GetRouteForDisplay", InstanceFlags).Invoke(router, null), "CUPER", "POOVE", "APUCE", "ALCOME");
 
         sessionType.GetMethod("NotifyWaypointSequenced", InstanceFlags).Invoke(session, new object[] { "ALCOME" });
         AssertRecordField(session, sessionType, "holdCircuitsCompleted", 1);

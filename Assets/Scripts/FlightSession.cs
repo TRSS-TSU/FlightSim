@@ -286,11 +286,11 @@ public sealed class FlightSession : MonoBehaviour
 
     private void EnterHold()
     {
-        var hold = ResolveWaypoints("CUPER", "POOVE", "APUCE", "ALCOME");
-        if (hold.Count != 4 || !ResolveRouter())
+        var hold = ResolveWaypoints("PENSI", "CUPER", "POOVE", "APUCE", "ALCOME");
+        if (hold.Count != 5 || !ResolveRouter())
             return;
 
-        router.ReplaceRuntimeRoute(hold, 0);
+        router.ReplaceRuntimeRoute(hold, 1);
         nav.loop = true;
         SetPhase(FlightPhase.EnteringHold);
     }
@@ -307,10 +307,21 @@ public sealed class FlightSession : MonoBehaviour
             "HOLD DECISION",
             "Continue holding or begin the landing sequence after this circuit?",
             "Continue Holding",
-            () => { },
+            ContinueHolding,
             "Begin Landing",
             BeginLanding
         );
+    }
+
+    private void ContinueHolding()
+    {
+        RemovePensiFromHold();
+    }
+
+    private bool RemovePensiFromHold()
+    {
+        var hold = ResolveWaypoints("CUPER", "POOVE", "APUCE", "ALCOME");
+        return hold.Count == 4 && ResolveRouter() && router.ReplaceRuntimeRoute(hold, 1);
     }
 
     private void CompleteHoldCircuit()
@@ -322,7 +333,7 @@ public sealed class FlightSession : MonoBehaviour
 
     public void BeginLanding()
     {
-        if (landingAppended || !ResolveRouter())
+        if (landingAppended || !RemovePensiFromHold())
             return;
 
         var landing = ResolveWaypoints("KNPA_RW25L_FINAL", "KNPA_RW25L_TOUCHDOWN", "KNPA_FINAL_STOP");

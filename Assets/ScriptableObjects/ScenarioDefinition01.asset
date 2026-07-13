@@ -162,7 +162,7 @@ MonoBehaviour:
     lonDeg: -87.15
     distance: 0
     role: 3
-    includeInActiveRoute: 0
+    includeInActiveRoute: 1
     targetAltFtMsl: 0
     targetIasKt: 0
     targetHdgDeg: 0
@@ -277,7 +277,7 @@ MonoBehaviour:
   - VR1020_E
   - CEW
   - PENSI
-  - KNPA
+  - CUPER
   rnav25LFixes:
   - CUPER
   - POOVE
