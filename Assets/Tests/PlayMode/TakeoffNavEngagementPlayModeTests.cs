@@ -11,6 +11,22 @@ public class TakeoffNavEngagementPlayModeTests
     private const BindingFlags InstanceFlags = BindingFlags.Instance | BindingFlags.Public;
 
     [UnityTest]
+    public IEnumerator DeveloperTimeScalePanelClampsAndRestoresTimeScale()
+    {
+        Type panelType = RequireType("DeveloperTimeScalePanel");
+        var panelObject = new GameObject("DeveloperTimeScalePanelTest");
+        Component panel = panelObject.AddComponent(panelType);
+
+        panelType.GetMethod("SetTimeScale", InstanceFlags).Invoke(panel, new object[] { 99f });
+        Assert.AreEqual(8f, Time.timeScale);
+
+        UnityEngine.Object.Destroy(panelObject);
+        yield return null;
+
+        Assert.AreEqual(1f, Time.timeScale);
+    }
+
+    [UnityTest]
     public IEnumerator Scenario01TakeoffEngagesNavAfterThreshold()
     {
         yield return SceneManager.LoadSceneAsync("Master_FMS", LoadSceneMode.Single);
@@ -93,6 +109,8 @@ public class TakeoffNavEngagementPlayModeTests
         Type routerType = RequireType("FmsPageRouter");
         Type navType = RequireType("NavAutopilot");
         Type sessionType = RequireType("FlightSession");
+        Type targetsType = RequireType("SimTargets");
+        Type planeType = RequireType("PlaneController");
 
         UnityEngine.Object scenario = BuildScenario01(scenarioType);
         scenarioRuntimeType.GetMethod("Set", BindingFlags.Static | BindingFlags.Public)
@@ -103,10 +121,17 @@ public class TakeoffNavEngagementPlayModeTests
         object nav = UnityEngine.Object.FindFirstObjectByType(navType);
         object session = sessionType.GetProperty("Instance", BindingFlags.Static | BindingFlags.Public)
             .GetValue(null);
+        object targets = UnityEngine.Object.FindFirstObjectByType(targetsType);
+        Component plane = (Component)UnityEngine.Object.FindFirstObjectByType(planeType);
 
         Assert.NotNull(router);
         Assert.NotNull(nav);
         Assert.NotNull(session);
+        Assert.NotNull(targets);
+        Assert.NotNull(plane);
+
+        targetsType.GetField("targetAltFtMsl", InstanceFlags).SetValue(targets, 3000f);
+        targetsType.GetField("targetIasKt", InstanceFlags).SetValue(targets, 200f);
 
         IList route = ResolveRoute(scenario, scenarioType);
         Assert.IsTrue(
@@ -134,6 +159,7 @@ public class TakeoffNavEngagementPlayModeTests
         sessionType.GetMethod("NotifyWaypointSequenced", InstanceFlags).Invoke(session, new object[] { "ALCOME" });
         AssertRecordField(session, sessionType, "holdCircuitsCompleted", 1);
         AssertPhase(session, sessionType, "Holding");
+        AssertAltFt(targets, targetsType, 3000f, "Holding target altitude");
 
         sessionType.GetMethod("BeginLanding", InstanceFlags).Invoke(session, null);
         AssertPhase(session, sessionType, "HoldExitArmed");
@@ -149,17 +175,25 @@ public class TakeoffNavEngagementPlayModeTests
             "KNPA_FINAL_STOP"
         );
 
+        sessionType.GetMethod("NotifyWaypointSequenced", InstanceFlags).Invoke(session, new object[] { "APUCE" });
+        AssertAltFt(targets, targetsType, 2000f, "ALCOME descent target altitude");
+
         sessionType.GetMethod("NotifyWaypointSequenced", InstanceFlags).Invoke(session, new object[] { "ALCOME" });
         AssertPhase(session, sessionType, "Approach");
+        AssertAltFt(targets, targetsType, 1200f, "Final approach target altitude");
+
+        sessionType.GetMethod("NotifyWaypointSequenced", InstanceFlags).Invoke(session, new object[] { "KNPA_RW25L_FINAL" });
+        AssertAltFt(targets, targetsType, 0f, "Touchdown target altitude");
+        AssertIasKt(targets, targetsType, 100f, "Touchdown approach target IAS");
 
         sessionType.GetMethod("NotifyWaypointSequenced", InstanceFlags).Invoke(session, new object[] { "KNPA_RW25L_TOUCHDOWN" });
-        AssertPhase(session, sessionType, "Landing");
-        AssertRecordField(session, sessionType, "touchdownReached", true);
-
-        sessionType.GetMethod("NotifyWaypointSequenced", InstanceFlags).Invoke(session, new object[] { "KNPA_FINAL_STOP" });
         AssertPhase(session, sessionType, "Stopped");
+        AssertRecordField(session, sessionType, "touchdownReached", true);
         AssertRecordField(session, sessionType, "finalStopReached", true);
         AssertRecordField(session, sessionType, "status", "Completed");
+        AssertAltFt(targets, targetsType, 0f, "Stopped target altitude");
+        AssertIasKt(targets, targetsType, 0f, "Stopped target IAS");
+        Assert.AreEqual(0f, plane.transform.position.y, 0.001f, "Aircraft did not stop on the ground plane.");
 
         sessionType
             .GetMethod("EndFlight", BindingFlags.Instance | BindingFlags.NonPublic)
@@ -207,9 +241,9 @@ public class TakeoffNavEngagementPlayModeTests
         AddWaypoint(waypoints, waypointType, "CUPER", 30.17d, -87.15d, "Approach", false, 3000f, 0f, 0f);
         AddWaypoint(waypoints, waypointType, "POOVE", 30.11d, -87.33d, "Approach", false, 3000f, 0f, 0f);
         AddWaypoint(waypoints, waypointType, "APUCE", 30.01d, -87.47d, "Approach", false, 3000f, 0f, 0f);
-        AddWaypoint(waypoints, waypointType, "ALCOME", 30.22d, -87.58d, "Approach", false, 3000f, 0f, 0f);
-        AddWaypoint(waypoints, waypointType, "KNPA_RW25L_FINAL", 30.39d, -87.43d, "Approach", false, 1200f, 0f, 250f);
-        AddWaypoint(waypoints, waypointType, "KNPA_RW25L_TOUCHDOWN", 30.35d, -87.31d, "Approach", false, 0f, 0f, 250f);
+        AddWaypoint(waypoints, waypointType, "ALCOME", 30.22d, -87.58d, "Approach", false, 2000f, 0f, 0f);
+        AddWaypoint(waypoints, waypointType, "KNPA_RW25L_FINAL", 30.39d, -87.43d, "Approach", false, 1200f, 200f, 250f);
+        AddWaypoint(waypoints, waypointType, "KNPA_RW25L_TOUCHDOWN", 30.35d, -87.31d, "Approach", false, 0f, 100f, 250f);
         AddWaypoint(waypoints, waypointType, "KNPA_FINAL_STOP", 30.35119059d, -87.29687867d, "Approach", false, 0f, 0f, 250f);
         AddWaypoint(waypoints, waypointType, "KNPA", 30.35119059d, -87.29687867d, "Route", true, 3000f, 0f, 0f);
         SetField(scenario, scenarioType, "waypoints", waypoints);
@@ -326,5 +360,11 @@ public class TakeoffNavEngagementPlayModeTests
     private static void AssertAltFt(object targets, Type targetsType, float expected, string label)
     {
         Assert.AreEqual(expected, GetAltFt(targets, targetsType), 0.1f, label);
+    }
+
+    private static void AssertIasKt(object targets, Type targetsType, float expected, string label)
+    {
+        float actual = (float)targetsType.GetField("targetIasKt", InstanceFlags).GetValue(targets);
+        Assert.AreEqual(expected, actual, 0.1f, label);
     }
 }

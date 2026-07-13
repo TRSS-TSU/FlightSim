@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Student procedures for Flight Scenario 01 in the NAS Flight Management System trainer.">
+  <title>NAS FMS Trainer | Scenario 01 Procedures</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to procedures</a>
+
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="NAS FMS procedures home">
+      <span class="brand-mark" aria-hidden="true">FMS</span>
+      <span>
+        <strong>NAS Trainer</strong>
+        <small>Scenario 01 procedures</small>
+      </span>
+    </a>
+    <nav aria-label="Primary navigation">
+      <a href="#preflight">Preflight</a>
+      <a href="#route">Route</a>
+      <a href="#flight">Flight</a>
+      <a href="#results">Results</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow">T-1A-style FMS training · Flight Scenario 01</p>
+        <h1 id="hero-title">Program it. Verify it. Fly it.</h1>
+        <p class="lede">A cockpit-side guide for the complete KNPA training loop—from scenario load and position initialization to the PENSI hold, RNAV 25L landing, and tracked results.</p>
+        <div class="hero-actions">
+          <a class="button primary" href="#quick-start">Start the procedure</a>
+          <a class="button secondary" href="#route-strip">View the route</a>
+        </div>
+      </div>
+
+      <aside class="mission-card" aria-labelledby="mission-title">
+        <p class="card-kicker">Mission profile</p>
+        <h2 id="mission-title">KNPA round trip</h2>
+        <dl>
+          <div><dt>Departure</dt><dd>Runway 25R</dd></div>
+          <div><dt>Enroute</dt><dd>VR1020 A–E</dd></div>
+          <div><dt>Hold trigger</dt><dd>PENSI</dd></div>
+          <div><dt>Landing</dt><dd>RNAV 25L</dd></div>
+        </dl>
+        <p class="status"><span aria-hidden="true"></span> Aircraft begins parked and stationary</p>
+      </aside>
+    </section>
+
+    <section class="route-overview" id="route-strip" aria-labelledby="route-title">
+      <div class="section-heading compact">
+        <p class="eyebrow">Programmed enroute path</p>
+        <h2 id="route-title">Scenario route</h2>
+      </div>
+      <ol class="route-strip" aria-label="Scenario 01 waypoint sequence">
+        <li><strong>KNPA</strong><span>Start</span></li>
+        <li><strong>TEEZY</strong></li>
+        <li><strong>TRADR</strong></li>
+        <li><strong>BFM</strong></li>
+        <li class="route-group"><strong>VR1020</strong><span>A · B · C · D · E</span></li>
+        <li><strong>CEW</strong></li>
+        <li><strong>PENSI</strong><span>Hold trigger</span></li>
+        <li><strong>KNPA</strong><span>Return</span></li>
+      </ol>
+    </section>
+
+    <section class="content-section" id="quick-start" aria-labelledby="quick-title">
+      <div class="section-heading">
+        <p class="eyebrow">At a glance</p>
+        <h2 id="quick-title">Complete training flow</h2>
+        <p>Follow the flow in order. The simulator tracks preparation, gates takeoff on route review, and then flies the active guidance.</p>
+      </div>
+      <ol class="flow-grid">
+        <li><span>01</span><strong>Load</strong><small>Select Scenario 01</small></li>
+        <li><span>02</span><strong>Initialize</strong><small>POS INIT + PERF INIT</small></li>
+        <li><span>03</span><strong>Program</strong><small>Load route + EXEC</small></li>
+        <li><span>04</span><strong>Verify</strong><small>Confirm five checks</small></li>
+        <li><span>05</span><strong>Fly</strong><small>Takeoff to PENSI</small></li>
+        <li><span>06</span><strong>Decide</strong><small>Hold or begin landing</small></li>
+        <li><span>07</span><strong>Finish</strong><small>RNAV 25L + results</small></li>
+      </ol>
+    </section>
+
+    <section class="content-section" id="preflight" aria-labelledby="preflight-title">
+      <div class="section-heading">
+        <p class="eyebrow">Phase 1</p>
+        <h2 id="preflight-title">Scenario setup and initialization</h2>
+        <p>Load the scenario, establish the FMS position, and review the scenario-provided performance data.</p>
+      </div>
+
+      <div class="procedure-grid">
+        <article class="procedure-card">
+          <span class="step-number">1</span>
+          <div>
+            <h3>Load Flight Scenario 01</h3>
+            <ol>
+              <li>From the Menu, select <kbd>Flight Scenario 01</kbd>.</li>
+              <li>Review the scenario confirmation panel.</li>
+              <li>Select <kbd>Yes</kbd> to enter <strong>Master_FMS</strong>.</li>
+            </ol>
+            <p class="note">The aircraft should load parked at KNPA. Selecting No returns to the prior menu panel without loading the scenario.</p>
+          </div>
+        </article>
+
+        <article class="procedure-card">
+          <span class="step-number">2</span>
+          <div>
+            <h3>Complete POS INIT</h3>
+            <ol>
+              <li>Open <kbd>POS INIT</kbd>.</li>
+              <li>On page 1/2, select right LSK 4 beside <strong>SET POS TO GNSS</strong>.</li>
+              <li>Wait for the position load to complete; the line changes to <strong>COMPLETED</strong>.</li>
+              <li>Select right LSK 6 beside <strong>FPLN&gt;</strong> when ready to continue.</li>
+            </ol>
+            <p class="note">Opening POS INIT records the POS INIT check. NEXT and PREV switch between its two pages.</p>
+          </div>
+        </article>
+
+        <article class="procedure-card">
+          <span class="step-number">3</span>
+          <div>
+            <h3>Review PERF INIT</h3>
+            <ol>
+              <li>Open <kbd>PERF INIT</kbd> and stay on page 1/2.</li>
+              <li>Review <strong>ZFW 11,600 lb</strong>, <strong>fuel 4,300 lb</strong>, and the computed gross weight.</li>
+              <li>To change ZFW or fuel, enter a non-negative value in the scratchpad and select left LSK 1 or 2.</li>
+              <li>If a value was changed, press <kbd>EXEC</kbd> and confirm the <strong>PERF ACCEPTED</strong> message.</li>
+            </ol>
+            <p class="note">Opening PERF INIT records both the fuel and weight/ZFW checks. V-speeds on page 2 are marked NOT IMPL.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="content-section dark-panel" id="route" aria-labelledby="program-title">
+      <div class="section-heading">
+        <p class="eyebrow">Phase 2</p>
+        <h2 id="program-title">Program, execute, and verify the route</h2>
+        <p>The FMS preserves a deliberate ACT/MOD workflow. EXEC activates the route; it does not launch the aircraft.</p>
+      </div>
+
+      <div class="split-layout">
+        <ol class="numbered-procedure">
+          <li>
+            <span>1</span>
+            <div><h3>Open ACT FPLN</h3><p>Press <kbd>FPLN</kbd>. The displayed scenario route name is <strong>T3002</strong>.</p></div>
+          </li>
+          <li>
+            <span>2</span>
+            <div><h3>Select the route</h3><p>With an empty scratchpad, select left LSK 2 once to copy the scenario route name. Select left LSK 2 again to enter <strong>MOD FPLN</strong>.</p></div>
+          </li>
+          <li>
+            <span>3</span>
+            <div><h3>Arm EXEC</h3><p>Select left LSK 6 beside <strong>&lt;YES</strong>. The MOD route is now armed.</p></div>
+          </li>
+          <li>
+            <span>4</span>
+            <div><h3>Activate</h3><p>Press the physical <kbd>EXEC</kbd> key. Wait for <strong>ROUTE LOADED</strong> and the route-review popup.</p></div>
+          </li>
+          <li>
+            <span>5</span>
+            <div><h3>Review ACT LEGS</h3><p>Verify the waypoint order, then choose <kbd>Checks Complete</kbd>. Choosing Cancel leaves takeoff locked and returns you to ACT LEGS.</p></div>
+          </li>
+        </ol>
+
+        <aside class="checklist" aria-labelledby="checks-title">
+          <p class="card-kicker">Required before takeoff review</p>
+          <h3 id="checks-title">The five checks</h3>
+          <ol>
+            <li><span aria-hidden="true">01</span>POS INIT page viewed</li>
+            <li><span aria-hidden="true">02</span>PERF INIT fuel viewed</li>
+            <li><span aria-hidden="true">03</span>PERF INIT weight/ZFW viewed</li>
+            <li><span aria-hidden="true">04</span>Route successfully executed</li>
+            <li><span aria-hidden="true">05</span>Active route review confirmed</li>
+          </ol>
+          <p><strong>Important:</strong> POS/PERF checks are measured, but route review is the hard takeoff gate. Missing checks are counted when takeoff starts.</p>
+        </aside>
+      </div>
+
+      <div class="callout" role="note">
+        <strong>Optional RNAV 25L setup:</strong> Open <kbd>DEP ARR</kbd>, select right LSK 4 beside <strong>LOAD 25L&gt;</strong>, then press <kbd>EXEC</kbd> to commit the staged MOD. Any pre-takeoff route change requires another active-route review.
+      </div>
+    </section>
+
+    <section class="content-section" id="flight" aria-labelledby="flight-title">
+      <div class="section-heading">
+        <p class="eyebrow">Phases 3–5</p>
+        <h2 id="flight-title">Takeoff, enroute, hold, and land</h2>
+        <p>Once the route review is confirmed, the Start control appears and the simulator can fly the active guidance.</p>
+      </div>
+
+      <div class="phase-stack">
+        <article class="phase-card">
+          <div class="phase-label"><span>Takeoff</span><strong>Automated departure</strong></div>
+          <div>
+            <ol>
+              <li>Select <kbd>Start</kbd>. The active route and completed route review are required.</li>
+              <li>The aircraft rolls on runway heading, lifts off, and begins the initial climb.</li>
+              <li>At <strong>250 ft</strong>, NAV engages and hands the aircraft to the active FMS route.</li>
+              <li>Monitor the PFD and ND as guidance continues toward <strong>TEEZY</strong>.</li>
+            </ol>
+          </div>
+        </article>
+
+        <article class="phase-card">
+          <div class="phase-label"><span>Enroute</span><strong>Follow the active legs</strong></div>
+          <div>
+            <p class="route-text">TEEZY → TRADR → BFM → VR1020_A → B → C → D → E → CEW → PENSI</p>
+            <p>Watch ACT LEGS and the ND for sequencing. Each valid waypoint completion is recorded. PENSI is the transition trigger; it is not part of the holding loop.</p>
+          </div>
+        </article>
+
+        <article class="phase-card accent-card">
+          <div class="phase-label"><span>PENSI</span><strong>Enter the hold</strong></div>
+          <div>
+            <p>At PENSI, the runtime route changes to the four-fix loop:</p>
+            <p class="route-text hold-route">CUPER → POOVE → APUCE → ALCOME ↻</p>
+            <p>The <strong>HOLD DECISION</strong> appears at CUPER. A completed CUPER-to-ALCOME circuit increments the hold-circuit result.</p>
+            <div class="decision-grid">
+              <div><h3>Continue Holding</h3><p>Closes the decision and leaves the loop unchanged. The decision returns at the next CUPER.</p></div>
+              <div><h3>Begin Landing</h3><p>Arms the exit, appends the landing points once, and finishes the current hold circuit.</p></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="phase-card">
+          <div class="phase-label"><span>RNAV 25L</span><strong>Landing sequence</strong></div>
+          <div>
+            <ol>
+              <li>After <kbd>Begin Landing</kbd>, continue through the current loop to ALCOME.</li>
+              <li>At ALCOME, guidance advances to <strong>KNPA_RW25L_FINAL</strong> instead of returning to CUPER.</li>
+              <li>The final target is <strong>1,200 ft / 200 kt</strong>.</li>
+              <li>Guidance then advances to <strong>KNPA_RW25L_TOUCHDOWN</strong> at <strong>100 kt</strong>.</li>
+              <li>At touchdown, the aircraft enters Landing and proceeds to <strong>KNPA_FINAL_STOP</strong>.</li>
+            </ol>
+            <p class="note">The simulator marks touchdown and final stop, disengages NAV, stops the aircraft on the ground, and displays the completion choices.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="content-section results-section" id="results" aria-labelledby="results-title">
+      <div class="section-heading">
+        <p class="eyebrow">Phase 6</p>
+        <h2 id="results-title">Completion and Scenario Results</h2>
+        <p>At the final stop, choose whether to repeat the scenario or preserve the completed record and review it.</p>
+      </div>
+
+      <div class="completion-grid">
+        <article>
+          <span aria-hidden="true">↻</span>
+          <h3>Takeoff Again</h3>
+          <p>Reloads the same scenario, clears the flight record, returns to parked preflight, and requires route review again.</p>
+        </article>
+        <article>
+          <span aria-hidden="true">→</span>
+          <h3>End</h3>
+          <p>Preserves the finalized record and opens the <strong>ScenarioResults</strong> scene.</p>
+        </article>
+      </div>
+
+      <div class="results-board" aria-labelledby="tracked-title">
+        <div>
+          <p class="card-kicker">Finalized by the flight session</p>
+          <h3 id="tracked-title">What the simulator tracks</h3>
+          <p>The results screen displays the record; it does not recalculate it.</p>
+        </div>
+        <ul>
+          <li>Scenario name and status</li>
+          <li>Elapsed time</li>
+          <li>Waypoints completed</li>
+          <li>Route modifications</li>
+          <li>Skipped required checks</li>
+          <li>Hold circuits completed</li>
+          <li>Touchdown reached</li>
+          <li>Final stop reached</li>
+        </ul>
+      </div>
+
+      <p class="results-actions"><strong>From Scenario Results:</strong> choose <kbd>Back to Menu</kbd> to clear the record and return to the Menu, or <kbd>End</kbd> to quit the application.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p><strong>NAS Flight Management System Trainer</strong></p>
+    <p>Scenario 01 student procedures · Local project documentation</p>
+    <a href="#top">Back to top ↑</a>
+  </footer>
+</body>
+</html>

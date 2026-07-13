@@ -190,7 +190,7 @@ MonoBehaviour:
     distance: 0
     role: 3
     includeInActiveRoute: 0
-    targetAltFtMsl: 0
+    targetAltFtMsl: 2000
     targetIasKt: 0
     targetHdgDeg: 0
   - ident: KNPA_RW25L_FINAL
@@ -199,7 +199,7 @@ MonoBehaviour:
     distance: 0
     role: 3
     includeInActiveRoute: 0
-    targetAltFtMsl: 3000
+    targetAltFtMsl: 1200
     targetIasKt: 200
     targetHdgDeg: 0
   - ident: KNPA_RW25L_TOUCHDOWN
@@ -208,7 +208,7 @@ MonoBehaviour:
     distance: 0
     role: 4
     includeInActiveRoute: 0
-    targetAltFtMsl: 200
+    targetAltFtMsl: 0
     targetIasKt: 100
     targetHdgDeg: 250
   - ident: KNPA_FINAL_STOP
