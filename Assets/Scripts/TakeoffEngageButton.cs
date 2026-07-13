@@ -8,6 +8,13 @@ public class TakeoffEngageButton : MonoBehaviour
     public void Press()
     {
         bool started = false;
+        var session = FlightSession.Instance;
+
+        if (session && (!session.Record.routeVerified || session.Phase != FlightPhase.ReadyForTakeoff))
+        {
+            Debug.LogWarning("[TakeoffEngageButton] Route review is required before takeoff.");
+            return;
+        }
 
         if (takeoffProcedure)
             started = takeoffProcedure.BeginTakeoff();
@@ -16,5 +23,8 @@ public class TakeoffEngageButton : MonoBehaviour
 
         if (started && takeoffButtonToHide)
             takeoffButtonToHide.SetActive(false);
+
+        if (started)
+            session?.TryBeginTakeoff();
     }
 }

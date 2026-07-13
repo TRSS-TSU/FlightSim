@@ -47,7 +47,7 @@ public class TakeoffProcedureController : MonoBehaviour
     public string departureIdent = "KNPA_DEP_1DME";
 
     [Header("Departure Handoff")]
-    public float navHandoffMinAltitudeFt = 2500f;
+    public float navHandoffMinAltitudeFt = 250f;
     public int navHandoffRouteIndex = 1;
     public bool allowHandoffAfterDepartureGate = true;
 
@@ -65,6 +65,12 @@ public class TakeoffProcedureController : MonoBehaviour
         if (!targets)
         {
             Debug.LogWarning("[TakeoffProcedure] Cannot begin: SimTargets is not assigned.");
+            return false;
+        }
+
+        if (engageNavAfterProcedure && !HasActiveNavRoute())
+        {
+            Debug.LogWarning("[TakeoffProcedure] Cannot begin: active FMS route is not built.");
             return false;
         }
 
@@ -104,20 +110,27 @@ public class TakeoffProcedureController : MonoBehaviour
         SetTargets(rollIasKt, runwayAltFt, runwayHeadingDeg);
 
         if (hasThreshold)
-            yield return WaitUntilNearWaypoint(
+            yield return WaitUntilNearOrPastWaypoint(
                 thresholdPos,
                 thresholdGateRadiusM,
+                runwayHeadingDeg,
                 maxGateWaitSeconds
             );
         else
             yield return WaitStage(rollSeconds);
 
         // Stage 2: liftoff / gentle initial climb.
-        SetTargets(
-            ResolveScenarioIas(thresholdDef, liftoffIasKt),
-            ResolveScenarioAltitude(thresholdDef, liftoffAltFt),
-            ResolveScenarioHeading(thresholdDef, runwayHeadingDeg)
-        );
+        SetTargets(liftoffIasKt, liftoffAltFt, runwayHeadingDeg);
+        yield return WaitUntilAltitudeAtLeast(navHandoffMinAltitudeFt, maxGateWaitSeconds);
+
+        if (engageNavAfterProcedure && nav)
+        {
+            PrepareNavForDepartureHandoff();
+            nav.SetNavEngaged(true);
+            FlightSession.Instance?.NotifyNavHandoff();
+            if (logProcedure)
+                Debug.Log($"[TakeoffProcedure] NAV engaged at {navHandoffMinAltitudeFt:0} ft, route index {nav.activeIndex}.");
+        }
 
         yield return WaitStage(liftoffSeconds);
 
@@ -144,13 +157,6 @@ public class TakeoffProcedureController : MonoBehaviour
             ResolveScenarioAltitude(departureDef, departureAltFt),
             departureHeadingDeg
         );
-
-        if (engageNavAfterProcedure && nav)
-        {
-            PrepareNavForDepartureHandoff();
-            nav.SetNavEngaged(true);
-
-        }
 
         isRunning = false;
         routine = null;
@@ -273,6 +279,31 @@ public class TakeoffProcedureController : MonoBehaviour
         return Vector3.Distance(aircraftFlat, waypointFlat);
     }
 
+    private IEnumerator WaitUntilAltitudeAtLeast(float altitudeFt, float timeoutSeconds)
+    {
+        if (!aircraft)
+            yield break;
+
+        float deadline = Time.time + Mathf.Max(1f, timeoutSeconds);
+        while (Time.time < deadline)
+        {
+            if (aircraft.position.y * 3.2808399f >= altitudeFt)
+                yield break;
+
+            yield return null;
+        }
+
+        Debug.LogWarning("[TakeoffProcedure] NAV handoff altitude wait timed out. Continuing procedure.");
+    }
+
+    private bool HasActiveNavRoute()
+    {
+        return nav
+            && nav.plan
+            && nav.plan.waypoints != null
+            && nav.plan.waypoints.Length > 1;
+    }
+
     private void PrepareNavForDepartureHandoff()
     {
         if (!nav || !nav.plan || nav.plan.waypoints == null || nav.plan.waypoints.Length == 0)
@@ -282,9 +313,10 @@ public class TakeoffProcedureController : MonoBehaviour
         nav.ResetCaptureState();
     }
 
-    private IEnumerator WaitUntilNearWaypoint(
+    private IEnumerator WaitUntilNearOrPastWaypoint(
         Vector3 waypointWorldPos,
         float gateRadiusM,
+        float courseDeg,
         float timeoutSeconds
     )
     {
@@ -293,6 +325,7 @@ public class TakeoffProcedureController : MonoBehaviour
 
         float startTime = Time.time;
         float radius = Mathf.Max(1f, gateRadiusM);
+        Vector3 courseForward = HeadingToFlatDirection(courseDeg);
 
         while (Time.time - startTime < timeoutSeconds)
         {
@@ -301,12 +334,18 @@ public class TakeoffProcedureController : MonoBehaviour
 
             float dist = Vector3.Distance(aircraftFlat, waypointFlat);
 
-            if (dist <= radius)
+            if (dist <= radius || Vector3.Dot(aircraftFlat - waypointFlat, courseForward) >= 0f)
                 yield break;
 
             yield return new WaitForSeconds(0.25f);
         }
 
         Debug.LogWarning("[TakeoffProcedure] Gate wait timed out. Continuing procedure.");
+    }
+
+    private static Vector3 HeadingToFlatDirection(float headingDeg)
+    {
+        float rad = NormalizeHeading(headingDeg) * Mathf.Deg2Rad;
+        return new Vector3(Mathf.Sin(rad), 0f, Mathf.Cos(rad));
     }
 }

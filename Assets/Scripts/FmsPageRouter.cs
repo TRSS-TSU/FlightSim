@@ -73,6 +73,7 @@ public class FmsPageRouter : MonoBehaviour
     private bool? _pendingArrivalLoaded;
     private string _pendingArrivalName;
     private RouteContinuitySnapshot _pendingRouteSnapshot;
+    private bool _routeWasActive;
 
     public FmsPageView CurrentPage => _current;
     public bool HasPendingRouteActivation => _hasPendingRouteActivation;
@@ -149,6 +150,7 @@ public class FmsPageRouter : MonoBehaviour
 
         _current = next;
         _current.gameObject.SetActive(true);
+        FlightSession.Instance?.MarkPageViewed(pageId);
     }
 
     public void HandleFunctionKey(FmsKey key)
@@ -274,6 +276,9 @@ public class FmsPageRouter : MonoBehaviour
                                    bool clearArrivalLoaded = false,
                                    bool executeNow = false)
     {
+        _routeWasActive = snapshot.oldRouteIdents != null && snapshot.oldRouteIdents.Count > 0;
+        if (!executeNow)
+            FlightSession.Instance?.InvalidateRouteReview();
         if (clearArrivalLoaded)
         {
             _model.ArrivalLoaded = false;
@@ -305,6 +310,8 @@ public class FmsPageRouter : MonoBehaviour
             return;
         }
 
+        _routeWasActive = snapshot.oldRouteIdents != null && snapshot.oldRouteIdents.Count > 0;
+        FlightSession.Instance?.InvalidateRouteReview();
         _model.ModRoute = new List<ScenarioDefinition.WaypointDef>(route);
         _pendingRouteSnapshot = snapshot;
         _pendingClearArrivalLoaded |= clearArrivalLoaded;
@@ -411,6 +418,48 @@ public class FmsPageRouter : MonoBehaviour
     {
         _model.ActiveLegIndex = activeIndex;
         scratchpad?.ShowMessage("ROUTE EXEC", 1.5f);
+        FlightSession.Instance?.NotifyRouteExecuted(_routeWasActive);
+    }
+
+    /// <summary>Intent-layer runtime route replacement for scripted training transitions.</summary>
+    public bool ReplaceRuntimeRoute(List<ScenarioDefinition.WaypointDef> route, int activeIndex)
+    {
+        var scenario = _model.Scenario ? _model.Scenario : ScenarioRuntime.Current;
+        if (!scenario || route == null || route.Count == 0 || !flightPlan)
+            return false;
+
+        _hasPendingRouteActivation = false;
+        _pendingClearArrivalLoaded = false;
+        _model.ActiveRoute = new List<ScenarioDefinition.WaypointDef>(route);
+        _model.ModRoute.Clear();
+        int zoom = scenario.preloadZoomOverride > 0 ? scenario.preloadZoomOverride : scenario.baseZoom;
+        flightPlan.ActivateRouteFromFms(scenario, _model.ActiveRoute, zoom);
+
+        if (navAutopilot)
+        {
+            navAutopilot.activeIndex = Mathf.Clamp(activeIndex, 0, flightPlan.waypoints.Length - 1);
+            navAutopilot.ResetCaptureState();
+        }
+
+        _model.ActiveLegIndex = activeIndex;
+        return true;
+    }
+
+    /// <summary>Appends unique runtime legs without mutating the source ScenarioDefinition.</summary>
+    public bool AppendRuntimeRoute(List<ScenarioDefinition.WaypointDef> append)
+    {
+        if (append == null || append.Count == 0)
+            return false;
+
+        var merged = new List<ScenarioDefinition.WaypointDef>(_model.ActiveRoute);
+        foreach (var waypoint in append)
+        {
+            if (waypoint == null || merged.Exists(w => w != null && string.Equals(w.ident, waypoint.ident, System.StringComparison.OrdinalIgnoreCase)))
+                continue;
+            merged.Add(waypoint);
+        }
+
+        return merged.Count > _model.ActiveRoute.Count && ReplaceRuntimeRoute(merged, navAutopilot ? navAutopilot.activeIndex : 0);
     }
 
     private void ApplyPendingModelRoute(List<ScenarioDefinition.WaypointDef> routeCopy)
