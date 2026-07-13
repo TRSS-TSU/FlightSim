@@ -7,7 +7,7 @@ public sealed class DeveloperTimeScalePanel : MonoBehaviour
 
     [SerializeField] private bool showPanel = true;
     [SerializeField] private float baselineRouteMinutes = 29.6f;
-    [SerializeField, Range(MinTimeScale, MaxTimeScale)] private float timeScale = 1f;
+    [SerializeField, Range(MinTimeScale, MaxTimeScale)] private float timeScale = 3f;
     [SerializeField, Range(1f, 2f)] private float uiScale = 1.5f;
 
     private Rect windowRect = new(16f, 16f, 280f, 125f);

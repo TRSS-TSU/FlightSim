@@ -73540,7 +73540,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DeveloperTimeScalePanel
   showPanel: 1
   baselineRouteMinutes: 29.6
-  timeScale: 1
+  timeScale: 3
   uiScale: 1.5
 --- !u!1 &1282006091
 GameObject:
