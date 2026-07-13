@@ -182,8 +182,8 @@ public sealed class FlightSession : MonoBehaviour
         RouteReviewRequired?.Invoke();
         ShowModal().Show(
             "ROUTE REVIEW",
-            "Have you reviewed the active route and waypoint sequence?",
-            "Confirm",
+            "Before takeoff, confirm all five required checks:\nPOS INIT | FUEL | WEIGHT | EXEC | ACTIVE ROUTE REVIEW",
+            "Checks Complete",
             ConfirmRouteReview,
             "Cancel",
             () => router?.ShowPage("ActLegs")
@@ -264,12 +264,21 @@ public sealed class FlightSession : MonoBehaviour
             EnterHold();
         else if (string.Equals(ident, "CUPER", StringComparison.OrdinalIgnoreCase) && Phase >= FlightPhase.EnteringHold && Phase <= FlightPhase.Holding)
             OfferHoldDecision();
+        else if (string.Equals(ident, "APUCE", StringComparison.OrdinalIgnoreCase) && Phase == FlightPhase.HoldExitArmed)
+            ApplyLandingTargets("ALCOME");
         else if (string.Equals(ident, "ALCOME", StringComparison.OrdinalIgnoreCase) && Phase >= FlightPhase.Holding && Phase <= FlightPhase.HoldExitArmed)
+        {
             CompleteHoldCircuit();
+            if (Phase == FlightPhase.Approach)
+                ApplyLandingTargets("KNPA_RW25L_FINAL");
+        }
+        else if (string.Equals(ident, "KNPA_RW25L_FINAL", StringComparison.OrdinalIgnoreCase) && Phase == FlightPhase.Approach)
+            ApplyLandingTargets("KNPA_RW25L_TOUCHDOWN");
         else if (string.Equals(ident, "KNPA_RW25L_TOUCHDOWN", StringComparison.OrdinalIgnoreCase))
         {
             Record.touchdownReached = true;
             SetPhase(FlightPhase.Landing);
+            StopAtFinalWaypoint();
         }
         else if (string.Equals(ident, "KNPA_FINAL_STOP", StringComparison.OrdinalIgnoreCase))
             StopAtFinalWaypoint();
@@ -326,6 +335,17 @@ public sealed class FlightSession : MonoBehaviour
         SetPhase(FlightPhase.HoldExitArmed);
     }
 
+    private void ApplyLandingTargets(string ident)
+    {
+        var waypoint = ResolveWaypoints(ident);
+        if (waypoint.Count != 1 || !nav || !nav.targets)
+            return;
+
+        nav.targets.targetAltFtMsl = Mathf.Max(0f, waypoint[0].targetAltFtMsl);
+        if (waypoint[0].targetIasKt > 0f)
+            nav.targets.targetIasKt = waypoint[0].targetIasKt;
+    }
+
     private void StopAtFinalWaypoint()
     {
         if (Record.finalStopReached)
@@ -341,7 +361,7 @@ public sealed class FlightSession : MonoBehaviour
 
         SetPhase(FlightPhase.Stopped);
         FlightCompleted?.Invoke();
-        ShowModal().Show("FLIGHT COMPLETE", "Flight complete. Restart or view results?", "Restart Flight", RestartFlight, "End", EndFlight);
+        ShowModal().Show("FLIGHT COMPLETE", "Flight complete. Take off again or view results?", "Takeoff Again", RestartFlight, "End", EndFlight);
     }
 
     private void RestartFlight()
