@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Clone, configure, and run the NAS FMS Unity project with its offline light and dark map assets.">
+  <title>NAS FMS Trainer | Repository Setup</title>
+  <link rel="stylesheet" href="../FlightSimProcedures/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to setup</a>
+
+  <header class="site-header">
+    <a class="brand" href="../index.html" aria-label="Back to NAS FMS trainer home">
+      <span class="brand-mark" aria-hidden="true">FMS</span>
+      <span>
+        <strong>NAS Trainer</strong>
+        <small>Repository setup</small>
+      </span>
+    </a>
+    <nav aria-label="Primary navigation">
+      <a href="../index.html">Home</a>
+      <a href="#clone">Clone</a>
+      <a href="#maps">Map assets</a>
+      <a href="#run">Run in Unity</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero setup-hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow">Developer onboarding</p>
+        <h1 id="hero-title">From GitHub to Play Mode.</h1>
+        <p class="lede">Pull down the Unity project, add the separately hosted offline maps, and launch the simulator with the expected project structure.</p>
+        <div class="hero-actions">
+          <a class="button primary" href="https://github.com/TRSS-TSU/FlightSim">Open GitHub repository</a>
+          <a class="button secondary" href="#clone">Start setup</a>
+        </div>
+      </div>
+
+      <aside class="mission-card" aria-labelledby="requirements-title">
+        <p class="card-kicker">Project requirements</p>
+        <h2 id="requirements-title">Before you begin</h2>
+        <dl>
+          <div><dt>Repository</dt><dd>TRSS-TSU/FlightSim</dd></div>
+          <div><dt>Branch</dt><dd>main</dd></div>
+          <div><dt>Unity Editor</dt><dd>6000.3.3f1</dd></div>
+          <div><dt>Map packages</dt><dd>2 release ZIPs</dd></div>
+        </dl>
+      </aside>
+    </section>
+
+    <section class="content-section" id="clone" aria-labelledby="clone-title">
+      <div class="section-heading">
+        <p class="eyebrow">Step 1</p>
+        <h2 id="clone-title">Establish the local Git repository</h2>
+        <p>The GitHub repository contains the Unity project files. The large map images are intentionally downloaded separately.</p>
+      </div>
+
+      <div class="procedure-grid">
+        <article class="procedure-card">
+          <span class="step-number">1</span>
+          <div>
+            <h3>Install the tools</h3>
+            <p>Install Git, Unity Hub, and Unity Editor <strong>6000.3.3f1</strong>. The editor version is recorded by the project in <code>ProjectSettings/ProjectVersion.txt</code>.</p>
+          </div>
+        </article>
+
+        <article class="procedure-card">
+          <span class="step-number">2</span>
+          <div>
+            <h3>Clone the project</h3>
+            <p>Open PowerShell in the parent directory where you want the project, then run:</p>
+            <pre class="command"><code>git clone https://github.com/TRSS-TSU/FlightSim.git
+cd FlightSim</code></pre>
+            <p class="note">The cloned <code>FlightSim</code> folder is the Unity project root. It contains <code>Assets</code>, <code>Packages</code>, and <code>ProjectSettings</code>.</p>
+          </div>
+        </article>
+
+        <article class="procedure-card">
+          <span class="step-number">3</span>
+          <div>
+            <h3>Pull future updates</h3>
+            <p>From the project root, update a clean local checkout with:</p>
+            <pre class="command"><code>git switch main
+git pull --ff-only</code></pre>
+            <p>Commit or stash your own work before pulling if Git reports local changes.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="content-section dark-panel" id="maps" aria-labelledby="maps-title">
+      <div class="section-heading">
+        <p class="eyebrow">Step 2</p>
+        <h2 id="maps-title">Download the offline map assets</h2>
+        <p><code>Assets/StreamingAssets</code> is ignored by Git, so every new checkout needs both release packages extracted locally.</p>
+      </div>
+
+      <div class="release-grid">
+        <article class="release-card">
+          <span class="portal-index" aria-hidden="true">LIGHT</span>
+          <h3>Light tactical map</h3>
+          <p>Release: <strong>light-tile-map-images</strong></p>
+          <p>Archive: <code>mapchunks_nd_fms_tactical_gray_z14_16x16.zip</code></p>
+          <div class="release-actions">
+            <a class="button primary" href="https://github.com/TRSS-TSU/FlightSim/releases/tag/maptile-images-nd-light">View light release</a>
+            <a class="button secondary" href="https://github.com/TRSS-TSU/FlightSim/releases/download/maptile-images-nd-light/mapchunks_nd_fms_tactical_gray_z14_16x16.zip">Download ZIP</a>
+          </div>
+        </article>
+
+        <article class="release-card">
+          <span class="portal-index" aria-hidden="true">DARK</span>
+          <h3>Dark ND map</h3>
+          <p>Release: <strong>maptiles-dark</strong></p>
+          <p>Archive: <code>mapchunks_nd_fms_dark_nd_z14_16x16.zip</code></p>
+          <div class="release-actions">
+            <a class="button primary" href="https://github.com/TRSS-TSU/FlightSim/releases/tag/maptile-images-nd-dark">View dark release</a>
+            <a class="button secondary" href="https://github.com/TRSS-TSU/FlightSim/releases/download/maptile-images-nd-dark/mapchunks_nd_fms_dark_nd_z14_16x16.zip">Download ZIP</a>
+          </div>
+        </article>
+      </div>
+
+      <article class="file-layout" aria-labelledby="extract-title">
+        <h3 id="extract-title">Extract both ZIPs into StreamingAssets</h3>
+        <p>Create <code>Assets/StreamingAssets</code> if it does not exist. Extract each archive so the project ends with this exact layout:</p>
+        <pre class="file-tree"><code>FlightSim/
+└── Assets/
+    └── StreamingAssets/
+        ├── mapchunks_nd_fms_tactical_gray_z14_16x16/
+        │   ├── manifest.json
+        │   └── 14/
+        └── mapchunks_nd_fms_dark_nd_z14_16x16/
+            ├── manifest.json
+            └── 14/</code></pre>
+        <p class="note"><strong>Avoid a doubled folder:</strong> <code>.../mapchunks.../mapchunks.../manifest.json</code> is incorrect. The manifest must sit directly inside the named map folder.</p>
+      </article>
+    </section>
+
+    <section class="content-section" id="run" aria-labelledby="run-title">
+      <div class="section-heading">
+        <p class="eyebrow">Step 3</p>
+        <h2 id="run-title">Open and run the Unity project</h2>
+      </div>
+
+      <ol class="numbered-procedure run-list">
+        <li><span>1</span><div><h3>Add the project in Unity Hub</h3><p>Choose <strong>Add → Add project from disk</strong>, then select the cloned <code>FlightSim</code> folder—not its <code>Assets</code> subfolder.</p></div></li>
+        <li><span>2</span><div><h3>Open with 6000.3.3f1</h3><p>Allow Unity to import packages and the newly extracted map files. The first import can take longer than later launches.</p></div></li>
+        <li><span>3</span><div><h3>Open the Menu scene</h3><p>In the Project window, open <code>Assets/Scenes/Menu.unity</code>.</p></div></li>
+        <li><span>4</span><div><h3>Enter Play Mode</h3><p>Press Play, load Flight Scenario 01, and confirm the selected light or dark map renders without missing-chunk gaps.</p></div></li>
+      </ol>
+
+      <div class="results-board setup-finish">
+        <div>
+          <p class="card-kicker">Setup complete</p>
+          <h3>Continue with the student procedure</h3>
+          <p>The simulator should start in the Menu scene with both map themes available locally.</p>
+        </div>
+        <a class="button setup-next" href="../FlightSimProcedures/index.html">Open Flight Scenario 01 procedures →</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p><strong>NAS Flight Management System Trainer</strong></p>
+    <p>Repository and offline map setup</p>
+    <a href="../index.html">Back to start ↑</a>
+  </footer>
+</body>
+</html>
