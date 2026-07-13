@@ -20,6 +20,12 @@ public class TakeoffNavEngagementPlayModeTests
         panelType.GetMethod("SetTimeScale", InstanceFlags).Invoke(panel, new object[] { 99f });
         Assert.AreEqual(8f, Time.timeScale);
 
+        foreach (float expected in new[] { 0f, 1f, 2f, 4f, 8f })
+        {
+            panelType.GetMethod("SetTimeScale", InstanceFlags).Invoke(panel, new object[] { expected });
+            Assert.AreEqual(expected, Time.timeScale);
+        }
+
         UnityEngine.Object.Destroy(panelObject);
         yield return null;
 
@@ -177,6 +183,7 @@ public class TakeoffNavEngagementPlayModeTests
         sessionType.GetMethod("BeginLanding", InstanceFlags).Invoke(session, null);
         AssertPhase(session, sessionType, "HoldExitArmed");
         Assert.IsFalse((bool)navType.GetField("loop", InstanceFlags).GetValue(nav));
+        AssertAltFt(targets, targetsType, 2000f, "Landing selection descent target altitude");
         AssertRoute(
             (IList)routerType.GetMethod("GetRouteForDisplay", InstanceFlags).Invoke(router, null),
             "CUPER",

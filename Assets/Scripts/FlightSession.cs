@@ -350,6 +350,7 @@ public sealed class FlightSession : MonoBehaviour
         exitHoldArmed = true;
         nav.loop = false;
         SetPhase(FlightPhase.HoldExitArmed);
+        ApplyLandingTargets("ALCOME");
     }
 
     private void ApplyLandingTargets(string ident)

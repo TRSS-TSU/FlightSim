@@ -5,9 +5,9 @@ public sealed class DeveloperTimeScalePanel : MonoBehaviour
     private const float MinTimeScale = 0.25f;
     private const float MaxTimeScale = 8f;
 
-    [SerializeField] private bool showPanel = true;
+    [SerializeField] private bool showPanel;
     [SerializeField] private float baselineRouteMinutes = 29.6f;
-    [SerializeField, Range(MinTimeScale, MaxTimeScale)] private float timeScale = 3f;
+    [SerializeField, Range(MinTimeScale, MaxTimeScale)] private float timeScale = 1f;
     [SerializeField, Range(1f, 2f)] private float uiScale = 1.5f;
 
     private Rect windowRect = new(16f, 16f, 280f, 125f);
@@ -38,7 +38,9 @@ public sealed class DeveloperTimeScalePanel : MonoBehaviour
     {
         GUILayout.Label($"Simulation: {timeScale:0.00}x");
         SetTimeScale(GUILayout.HorizontalSlider(timeScale, MinTimeScale, MaxTimeScale));
-        GUILayout.Label($"Estimated route: {baselineRouteMinutes / timeScale:0.0} min");
+        GUILayout.Label(timeScale > 0f
+            ? $"Estimated route: {baselineRouteMinutes / timeScale:0.0} min"
+            : "Estimated route: paused");
 
         GUILayout.BeginHorizontal();
         if (GUILayout.Button("Normal 1x"))
@@ -51,7 +53,7 @@ public sealed class DeveloperTimeScalePanel : MonoBehaviour
 
     public void SetTimeScale(float value)
     {
-        timeScale = Mathf.Clamp(value, MinTimeScale, MaxTimeScale);
+        timeScale = value <= 0f ? 0f : Mathf.Clamp(value, MinTimeScale, MaxTimeScale);
         Time.timeScale = timeScale;
     }
 
