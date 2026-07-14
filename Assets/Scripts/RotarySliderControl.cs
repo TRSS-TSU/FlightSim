@@ -22,6 +22,8 @@ public sealed class RotarySliderControl
 
     [Header("UI")]
     [SerializeField] private GameObject adjustmentPopup;
+    [SerializeField] private RotarySliderControl otherControl;
+    [SerializeField] private GameObject navReengage;
     [SerializeField] private Slider slider;
     [SerializeField] private RectTransform knobImage;
     [SerializeField] private TMP_Text pendingValueText;
@@ -93,6 +95,8 @@ public sealed class RotarySliderControl
             return;
 
         nav?.SetNavEngaged(false);
+        otherControl?.CloseAdjustment();
+        navReengage?.SetActive(false);
         ConfigureSlider();
         pendingValue = AppliedValue;
         slider.SetValueWithoutNotify(pendingValue);
@@ -106,6 +110,8 @@ public sealed class RotarySliderControl
         pendingValue = Quantize(rawValue);
         if (slider && !Mathf.Approximately(slider.value, pendingValue))
             slider.SetValueWithoutNotify(pendingValue);
+        if (targetKind == TargetKind.Altitude && targets)
+            targets.targetAltFtMsl = Mathf.Clamp(pendingValue, targets.minAltFt, targets.maxAltFt);
         RefreshPendingDisplay();
     }
 
@@ -117,11 +123,16 @@ public sealed class RotarySliderControl
         if (targetKind == TargetKind.Heading)
             targets.targetHdgDeg = Mathf.Repeat(pendingValue, 360f);
         else
+        {
             targets.targetAltFtMsl = Mathf.Clamp(pendingValue, targets.minAltFt, targets.maxAltFt);
+            nav?.SetNavEngaged(true);
+        }
 
         commitFired = true;
         holding = false;
         CloseAdjustment();
+        if (targetKind == TargetKind.Heading)
+            navReengage?.SetActive(true);
     }
 
     public void CloseAdjustment()

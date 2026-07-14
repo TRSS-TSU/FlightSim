@@ -33,7 +33,12 @@ public class RotarySliderControlPlayModeTests
             controls,
             control => rotaryType.GetField("targetKind", InstanceFlags).GetValue(control).ToString() == "Heading"
         );
+        UnityEngine.Object altitude = Array.Find(
+            controls,
+            control => rotaryType.GetField("targetKind", InstanceFlags).GetValue(control).ToString() == "Altitude"
+        );
         Assert.NotNull(heading);
+        Assert.NotNull(altitude);
 
         UnityEngine.Object targets = UnityEngine.Object.FindFirstObjectByType(targetsType);
         UnityEngine.Object nav = UnityEngine.Object.FindFirstObjectByType(navType);
@@ -41,8 +46,31 @@ public class RotarySliderControlPlayModeTests
         Assert.NotNull(nav);
 
         navType.GetMethod("SetNavEngaged", InstanceFlags).Invoke(nav, new object[] { true });
+        GameObject headingPopup = (GameObject)rotaryType
+            .GetField("adjustmentPopup", InstanceFlags)
+            .GetValue(heading);
+        GameObject altitudePopup = (GameObject)rotaryType
+            .GetField("adjustmentPopup", InstanceFlags)
+            .GetValue(altitude);
+        GameObject navButtonObject = (GameObject)rotaryType
+            .GetField("navReengage", InstanceFlags)
+            .GetValue(heading);
+
         rotaryType.GetMethod("OpenAdjustment", InstanceFlags).Invoke(heading, null);
         Assert.IsFalse((bool)navType.GetField("navEngaged", InstanceFlags).GetValue(nav));
+        Assert.IsTrue(headingPopup.activeSelf);
+        Assert.IsFalse(altitudePopup.activeSelf);
+        Assert.IsFalse(navButtonObject.activeSelf);
+
+        rotaryType.GetMethod("OpenAdjustment", InstanceFlags).Invoke(altitude, null);
+        Assert.IsFalse(headingPopup.activeSelf);
+        Assert.IsTrue(altitudePopup.activeSelf);
+        Assert.IsFalse(navButtonObject.activeSelf);
+
+        rotaryType.GetMethod("OpenAdjustment", InstanceFlags).Invoke(heading, null);
+        Assert.IsTrue(headingPopup.activeSelf);
+        Assert.IsFalse(altitudePopup.activeSelf);
+        Assert.IsFalse(navButtonObject.activeSelf);
 
         float appliedBeforeCommit = (float)targetsType
             .GetField("targetHdgDeg", InstanceFlags)
@@ -63,13 +91,76 @@ public class RotarySliderControlPlayModeTests
             (float)targetsType.GetField("targetHdgDeg", InstanceFlags).GetValue(targets),
             0.01f
         );
-
-        GameObject navButtonObject = GameObject.Find(
-            "iPad/MainCanvas/RotaryControls/Rotary_Control_Panel/Rotary_Control_Panel_Image/Rotary_NAV_Reengage"
-        );
+        Assert.IsFalse(headingPopup.activeSelf);
+        Assert.IsFalse(altitudePopup.activeSelf);
+        Assert.IsTrue(navButtonObject.activeSelf);
         Assert.NotNull(navButtonObject);
         navButtonObject.GetComponent<Button>().onClick.Invoke();
         Assert.IsTrue((bool)navType.GetField("navEngaged", InstanceFlags).GetValue(nav));
+        Assert.IsFalse(navButtonObject.activeSelf);
+    }
+
+    [UnityTest]
+    public IEnumerator AltitudeSliderAppliesLiveAndHoldReengagesNav()
+    {
+        yield return SceneManager.LoadSceneAsync("Master_FMS", LoadSceneMode.Single);
+        yield return null;
+
+        Type rotaryType = RequireType("RotarySliderControl");
+        Type targetsType = RequireType("SimTargets");
+        Type navType = RequireType("NavAutopilot");
+        UnityEngine.Object[] controls = UnityEngine.Object.FindObjectsByType(
+            rotaryType,
+            FindObjectsInactive.Include,
+            FindObjectsSortMode.None
+        );
+        UnityEngine.Object altitude = Array.Find(
+            controls,
+            control => rotaryType.GetField("targetKind", InstanceFlags).GetValue(control).ToString() == "Altitude"
+        );
+        UnityEngine.Object targets = UnityEngine.Object.FindFirstObjectByType(targetsType);
+        UnityEngine.Object nav = UnityEngine.Object.FindFirstObjectByType(navType);
+
+        Assert.NotNull(altitude);
+        Assert.NotNull(targets);
+        Assert.NotNull(nav);
+
+        navType.GetMethod("SetNavEngaged", InstanceFlags).Invoke(nav, new object[] { true });
+        GameObject headingPopup = (GameObject)rotaryType
+            .GetField("adjustmentPopup", InstanceFlags)
+            .GetValue(Array.Find(
+                controls,
+                control => rotaryType.GetField("targetKind", InstanceFlags).GetValue(control).ToString() == "Heading"
+            ));
+        GameObject altitudePopup = (GameObject)rotaryType
+            .GetField("adjustmentPopup", InstanceFlags)
+            .GetValue(altitude);
+        GameObject navButtonObject = (GameObject)rotaryType
+            .GetField("navReengage", InstanceFlags)
+            .GetValue(altitude);
+        rotaryType.GetMethod("OpenAdjustment", InstanceFlags).Invoke(altitude, null);
+        Assert.IsFalse((bool)navType.GetField("navEngaged", InstanceFlags).GetValue(nav));
+        Assert.IsFalse(headingPopup.activeSelf);
+        Assert.IsTrue(altitudePopup.activeSelf);
+        Assert.IsFalse(navButtonObject.activeSelf);
+
+        Slider slider = (Slider)rotaryType.GetField("slider", InstanceFlags).GetValue(altitude);
+        slider.value = 1200f;
+        yield return null;
+        Assert.AreEqual(
+            1200f,
+            (float)targetsType.GetField("targetAltFtMsl", InstanceFlags).GetValue(targets),
+            0.01f
+        );
+
+        rotaryType.GetField("holdSeconds", InstanceFlags).SetValue(altitude, 0.001f);
+        rotaryType.GetMethod("OnPointerDown", InstanceFlags).Invoke(altitude, new object[] { null });
+        yield return null;
+
+        Assert.IsTrue((bool)navType.GetField("navEngaged", InstanceFlags).GetValue(nav));
+        Assert.IsFalse(headingPopup.activeSelf);
+        Assert.IsFalse(altitudePopup.activeSelf);
+        Assert.IsFalse(navButtonObject.activeSelf);
     }
 
     [UnityTest]

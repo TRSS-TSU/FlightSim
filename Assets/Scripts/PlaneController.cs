@@ -376,15 +376,19 @@ public class PlaneController : MonoBehaviour
         // Altitude captured: smoothly drive Vy to zero (no position teleport)
         if (Mathf.Abs(e_h) <= altHoldToleranceM)
         {
-            altMode = AltMode.Hold;
             vyCmdSmoothed = Mathf.MoveTowards(vyCmdSmoothed, 0f, maxVyAccel * dt);
+            altMode = Mathf.Abs(vyCmdSmoothed) <= captureVyEpsilon
+                ? AltMode.Hold
+                : AltMode.Capture;
             return;
         }
+
+        altMode = AltMode.Capture;
 
         float vyDes = 0f;
 
         float vyCap = 0f;
-        if (Mathf.Abs(e_h) > altitudeCaptureBandM)
+        if (Mathf.Abs(e_h) > Mathf.Min(altitudeCaptureBandM, altHoldToleranceM))
             vyCap = Mathf.Clamp(e_h * altitudeResponse, -maxClimbRate, +maxClimbRate);
 
         vyDes = vyCap;
@@ -402,6 +406,11 @@ public class PlaneController : MonoBehaviour
             vyDes = Mathf.Lerp(vyCap, vyVnav, blend);
         }
         // No else — vyDes = vyCap when VNAV not available
+
+        // Limit vertical speed to what can stop inside the hold tolerance at maxVyAccel.
+        float remainingCaptureM = Mathf.Max(0f, Mathf.Abs(e_h) - altHoldToleranceM);
+        float stoppingVy = Mathf.Sqrt(2f * Mathf.Max(0f, maxVyAccel) * remainingCaptureM);
+        vyDes = Mathf.Sign(e_h) * Mathf.Min(Mathf.Abs(vyDes), stoppingVy);
 
         vyCmdSmoothed = Mathf.MoveTowards(vyCmdSmoothed, vyDes, maxVyAccel * dt);
     }

@@ -284,10 +284,15 @@ public class TakeoffProcedureController : MonoBehaviour
         if (!aircraft)
             yield break;
 
+        PlaneController plane = aircraft.GetComponent<PlaneController>();
         float deadline = Time.time + Mathf.Max(1f, timeoutSeconds);
         while (Time.time < deadline)
         {
-            if (aircraft.position.y * 3.2808399f >= altitudeFt)
+            bool capturedAtOrAboveGate = plane
+                && plane.IsAltCaptured
+                && targets
+                && targets.targetAltFtMsl >= altitudeFt;
+            if (aircraft.position.y * 3.2808399f >= altitudeFt || capturedAtOrAboveGate)
                 yield break;
 
             yield return null;

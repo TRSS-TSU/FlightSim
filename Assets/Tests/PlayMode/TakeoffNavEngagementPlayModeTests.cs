@@ -33,6 +33,76 @@ public class TakeoffNavEngagementPlayModeTests
     }
 
     [UnityTest]
+    public IEnumerator AltitudeCaptureBrakesBeforeSelectedAltitude()
+    {
+        const float feetToMeters = 0.3048f;
+        Type targetsType = RequireType("SimTargets");
+        Type planeType = RequireType("PlaneController");
+        var aircraft = new GameObject("AltitudeCaptureTest");
+        float originalTimeScale = Time.timeScale;
+
+        try
+        {
+            aircraft.transform.position = new Vector3(0f, 3000f * feetToMeters, 0f);
+            Component targets = aircraft.AddComponent(targetsType);
+            targetsType.GetField("targetAltFtMsl", InstanceFlags).SetValue(targets, 3000f);
+
+            Component plane = aircraft.AddComponent(planeType);
+            planeType.GetField("vnavLiteEnabled", InstanceFlags).SetValue(plane, false);
+            planeType.GetField("maxClimbRate", InstanceFlags).SetValue(plane, 15f);
+            planeType.GetField("maxVyAccel", InstanceFlags).SetValue(plane, 1f);
+            planeType.GetField("altitudeCaptureBandM", InstanceFlags).SetValue(plane, 1f);
+            planeType.GetField("altHoldToleranceM", InstanceFlags).SetValue(plane, 0.1f);
+            planeType.GetField("captureVyEpsilon", InstanceFlags).SetValue(plane, 0.3f);
+
+            Time.timeScale = 8f;
+            targetsType.GetField("targetAltFtMsl", InstanceFlags).SetValue(targets, 200f);
+
+            float minimumAltitudeFt = 3000f;
+            float deadline = Time.time + 80f;
+            while (
+                Time.time < deadline
+                && !(bool)planeType.GetProperty("IsAltCaptured", InstanceFlags).GetValue(plane)
+            )
+            {
+                minimumAltitudeFt = Mathf.Min(
+                    minimumAltitudeFt,
+                    aircraft.transform.position.y / feetToMeters
+                );
+                yield return new WaitForFixedUpdate();
+            }
+
+            float stableUntil = Time.time + 3f;
+            while (Time.time < stableUntil)
+            {
+                minimumAltitudeFt = Mathf.Min(
+                    minimumAltitudeFt,
+                    aircraft.transform.position.y / feetToMeters
+                );
+                yield return new WaitForFixedUpdate();
+            }
+
+            float finalAltitudeFt = aircraft.transform.position.y / feetToMeters;
+            float finalVy = (float)planeType
+                .GetProperty("CurrentVerticalSpeedMps", InstanceFlags)
+                .GetValue(plane);
+
+            Assert.IsTrue(
+                (bool)planeType.GetProperty("IsAltCaptured", InstanceFlags).GetValue(plane),
+                "Altitude capture did not complete."
+            );
+            Assert.That(finalAltitudeFt, Is.EqualTo(200f).Within(1f));
+            Assert.GreaterOrEqual(minimumAltitudeFt, 199f, "Aircraft materially overshot selected altitude.");
+            Assert.LessOrEqual(Mathf.Abs(finalVy), 0.3f, "Altitude captured with excess vertical speed.");
+        }
+        finally
+        {
+            Time.timeScale = originalTimeScale;
+            UnityEngine.Object.Destroy(aircraft);
+        }
+    }
+
+    [UnityTest]
     public IEnumerator Scenario01TakeoffEngagesNavAfterThreshold()
     {
         yield return SceneManager.LoadSceneAsync("Master_FMS", LoadSceneMode.Single);
