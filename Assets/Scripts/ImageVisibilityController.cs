@@ -3,10 +3,12 @@ using UnityEngine;
 public class ImageVisibilityController : MonoBehaviour
 {
     [Header("Target")]
-    [SerializeField] private GameObject imageObject;
+    [SerializeField]
+    private GameObject imageObject;
 
     [Header("Initial State")]
-    [SerializeField] private bool visibleOnStart = true;
+    [SerializeField]
+    private bool visibleOnStart = true;
 
     private void Start()
     {
@@ -19,7 +21,8 @@ public class ImageVisibilityController : MonoBehaviour
         {
             Debug.LogWarning(
                 $"{nameof(ImageVisibilityController)}: No image object assigned.",
-                this);
+                this
+            );
 
             return;
         }
@@ -40,6 +43,8 @@ public class ImageVisibilityController : MonoBehaviour
     private void SetImageVisible(bool visible)
     {
         if (imageObject != null)
+        {
             imageObject.SetActive(visible);
+        }
     }
 }
