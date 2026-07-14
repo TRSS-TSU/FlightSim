@@ -63,6 +63,7 @@ public class FmsRouteActivationCoordinator : MonoBehaviour
             yield break;
         }
 
+        bool restoreNav = navAutopilot && navAutopilot.navEngaged;
         if (navAutopilot)
             navAutopilot.SetNavEngaged(false);
 
@@ -102,6 +103,7 @@ public class FmsRouteActivationCoordinator : MonoBehaviour
 
             navAutopilot.activeIndex = activeIndex;
             navAutopilot.ResetCaptureState();
+            navAutopilot.SetNavEngaged(restoreNav);
         }
 
         loadingOverlay?.Hide();

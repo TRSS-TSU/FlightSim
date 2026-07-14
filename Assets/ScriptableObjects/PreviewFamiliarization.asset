@@ -1,0 +1,283 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 88bb0e5f537600b469e137e77844f3b9, type: 3}
+  m_Name: PreviewFamiliarization
+  m_EditorClassIdentifier: Assembly-CSharp::ScenarioDefinition
+  scenarioTitle: Preview Familiarization Flight
+  route: 3-WAYPOINT LOOP
+  scenarioDescription: A three-waypoint familiarization route that loads automatically,
+    begins takeoff after the light map is ready, and repeats continuously. Use HDG,
+    ALT, NAV, and normal FMS route editing while in flight.
+  centerLatDeg: 30.3
+  centerLonDeg: -87.3
+  baseZoom: 14
+  preloadPaddingTiles: 2
+  preloadZoomOverride: 14
+  preloadTilesOnRouteExecute: 0
+  mapRasterLoadMode: 1
+  useFixedTileBounds: 1
+  fixedTileZoom: 14
+  fixedTileMinX: 4096
+  fixedTileMaxX: 4300
+  fixedTileMinY: 6599
+  fixedTileMaxY: 6785
+  waypoints:
+  - ident: KNPA
+    latDeg: 30.35119059
+    lonDeg: -87.29687867
+    distance: 0
+    role: 0
+    includeInActiveRoute: 1
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
+  - ident: KNPA_EOR25R_START
+    latDeg: 30.35119059
+    lonDeg: -87.29687867
+    distance: 0
+    role: 1
+    includeInActiveRoute: 0
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 250
+  - ident: KNPA_RW25R_THRESH
+    latDeg: 30.34346882
+    lonDeg: -87.32018463
+    distance: 0
+    role: 2
+    includeInActiveRoute: 0
+    targetAltFtMsl: 200
+    targetIasKt: 110
+    targetHdgDeg: 250
+  - ident: KNPA_DEP_1DME
+    latDeg: 30.33
+    lonDeg: -87.36
+    distance: 0
+    role: 2
+    includeInActiveRoute: 0
+    targetAltFtMsl: 3000
+    targetIasKt: 400
+    targetHdgDeg: 0
+  - ident: TEEZY
+    latDeg: 30.18
+    lonDeg: -87.69
+    distance: 0
+    role: 0
+    includeInActiveRoute: 1
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
+  - ident: TRADR
+    latDeg: 30.3
+    lonDeg: -88.06
+    distance: 0
+    role: 0
+    includeInActiveRoute: 1
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
+  - ident: BFM
+    latDeg: 30.61
+    lonDeg: -88.06
+    distance: 0
+    role: 0
+    includeInActiveRoute: 1
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
+  - ident: VR1020_A
+    latDeg: 31
+    lonDeg: -88
+    distance: 0
+    role: 0
+    includeInActiveRoute: 1
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
+  - ident: VR1020_B
+    latDeg: 31.55
+    lonDeg: -87.52
+    distance: 0
+    role: 0
+    includeInActiveRoute: 1
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
+  - ident: VR1020_C
+    latDeg: 32.08
+    lonDeg: -87.4
+    distance: 0
+    role: 0
+    includeInActiveRoute: 1
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
+  - ident: VR1020_D
+    latDeg: 31.4
+    lonDeg: -86.73
+    distance: 0
+    role: 0
+    includeInActiveRoute: 1
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
+  - ident: VR1020_E
+    latDeg: 31.1
+    lonDeg: -86.57
+    distance: 0
+    role: 0
+    includeInActiveRoute: 1
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
+  - ident: CEW
+    latDeg: 30.83
+    lonDeg: -86.68
+    distance: 0
+    role: 0
+    includeInActiveRoute: 1
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
+  - ident: PENSI
+    latDeg: 30.79
+    lonDeg: -87.27
+    distance: 0
+    role: 0
+    includeInActiveRoute: 1
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
+  - ident: CUPER
+    latDeg: 30.17
+    lonDeg: -87.15
+    distance: 0
+    role: 3
+    includeInActiveRoute: 1
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
+  - ident: POOVE
+    latDeg: 30.32
+    lonDeg: -87.07
+    distance: 0
+    role: 3
+    includeInActiveRoute: 0
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
+  - ident: APUCE
+    latDeg: 30.42
+    lonDeg: -87.13
+    distance: 0
+    role: 3
+    includeInActiveRoute: 0
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
+  - ident: ALCOME
+    latDeg: 30.38
+    lonDeg: -87.22
+    distance: 0
+    role: 3
+    includeInActiveRoute: 0
+    targetAltFtMsl: 2000
+    targetIasKt: 0
+    targetHdgDeg: 0
+  - ident: KNPA_RW25L_FINAL
+    latDeg: 30.37
+    lonDeg: -87.28
+    distance: 0
+    role: 3
+    includeInActiveRoute: 0
+    targetAltFtMsl: 1200
+    targetIasKt: 200
+    targetHdgDeg: 0
+  - ident: KNPA_RW25L_TOUCHDOWN
+    latDeg: 30.36
+    lonDeg: -87.29
+    distance: 0
+    role: 4
+    includeInActiveRoute: 0
+    targetAltFtMsl: 0
+    targetIasKt: 100
+    targetHdgDeg: 250
+  - ident: KNPA_FINAL_STOP
+    latDeg: 30.35119059
+    lonDeg: -87.29687867
+    distance: 0
+    role: 6
+    includeInActiveRoute: 0
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 250
+  - ident: KNPA
+    latDeg: 30.35119059
+    lonDeg: -87.29687867
+    distance: 0
+    role: 0
+    includeInActiveRoute: 1
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
+  - ident: OBEMY
+    latDeg: 30.29
+    lonDeg: -87.51
+    distance: 0
+    role: 3
+    includeInActiveRoute: 0
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
+  - ident: ODACA
+    latDeg: 30.32
+    lonDeg: -87.41
+    distance: 0
+    role: 3
+    includeInActiveRoute: 0
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
+  - ident: ONOYA
+    latDeg: 30.31
+    lonDeg: -87.44
+    distance: 0
+    role: 3
+    includeInActiveRoute: 0
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
+  - ident: RUECH
+    latDeg: 30.34
+    lonDeg: -87.37
+    distance: 0
+    role: 3
+    includeInActiveRoute: 0
+    targetAltFtMsl: 0
+    targetIasKt: 0
+    targetHdgDeg: 0
+  prefillRouteIdents:
+  - KNPA
+  - TEEZY
+  - TRADR
+  rnav25LFixes:
+  - CUPER
+  - POOVE
+  - APUCE
+  - ALCOME
+  rnav7LFixes:
+  - OBEMY
+  - ONOYA
+  - ODACA
+  - RUECH
+  zfwLbs: 11600
+  fuelWeightLbs: 4300

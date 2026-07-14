@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class HowToPanel_Toggle : MonoBehaviour
@@ -17,6 +18,12 @@ public class HowToPanel_Toggle : MonoBehaviour
     [SerializeField]
     private float closeAnimDelay = 0.3f; // match your close anim
 
+    [SerializeField]
+    private string masterSceneName = "Master_FMS";
+
+    [SerializeField]
+    private ScenarioDefinition previewScenario;
+
     private void Awake()
     {
         if (animator == null)
@@ -32,6 +39,18 @@ public class HowToPanel_Toggle : MonoBehaviour
     {
         animator.SetBool(isOpenParam, false);
         StartCoroutine(ResetScrollAfterClose());
+    }
+
+    public void EnterPreview()
+    {
+        if (!previewScenario)
+        {
+            Debug.LogWarning("[HowToPanel] Preview scenario is not assigned.");
+            return;
+        }
+
+        ScenarioRuntime.BeginPreview(previewScenario);
+        SceneManager.LoadScene(masterSceneName);
     }
 
     private IEnumerator ResetScrollAfterClose()

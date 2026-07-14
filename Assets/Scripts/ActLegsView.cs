@@ -42,7 +42,7 @@ public class ActLegsView : FmsPageView, IMultiPage
     private int _pageIndex;
 
     private int TotalPages =>
-        Mathf.Max(1, Mathf.CeilToInt(DisplayRoute.Count / (float)LEGS_PER_PAGE));
+        Mathf.Max(1, Mathf.CeilToInt((DisplayRoute.Count + 1) / (float)LEGS_PER_PAGE));
 
     private System.Collections.Generic.List<ScenarioDefinition.WaypointDef> DisplayRoute =>
         Router.GetRouteForDisplay();

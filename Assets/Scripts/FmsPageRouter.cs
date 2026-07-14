@@ -310,6 +310,9 @@ public class FmsPageRouter : MonoBehaviour
             return;
         }
 
+        if (!ValidatePreviewRouteCount(route.Count))
+            return;
+
         _routeWasActive = snapshot.oldRouteIdents != null && snapshot.oldRouteIdents.Count > 0;
         FlightSession.Instance?.InvalidateRouteReview();
         _model.ModRoute = new List<ScenarioDefinition.WaypointDef>(route);
@@ -352,6 +355,9 @@ public class FmsPageRouter : MonoBehaviour
             scratchpad?.ShowMessage("NO ROUTE", 1.5f);
             return;
         }
+
+        if (!ValidatePreviewRouteCount(routeSource.Count))
+            return;
 
         var routeCopy = new List<ScenarioDefinition.WaypointDef>(routeSource);
         bool forceFirstLeg = flightPlan == null
@@ -475,6 +481,26 @@ public class FmsPageRouter : MonoBehaviour
 
         _pendingArrivalLoaded = null;
         _pendingArrivalName = "";
+    }
+
+    private bool ValidatePreviewRouteCount(int count)
+    {
+        if (!ScenarioRuntime.IsPreview)
+            return true;
+
+        if (count < 3)
+        {
+            scratchpad?.ShowMessage("MIN 3 WAYPOINTS", 1.5f);
+            return false;
+        }
+
+        if (count > 10)
+        {
+            scratchpad?.ShowMessage("MAX 10 WAYPOINTS", 1.5f);
+            return false;
+        }
+
+        return true;
     }
 
     // ─────────────────────────────────────────────────────────────────────────

@@ -1,8 +1,11 @@
+using System.Collections;
 using UnityEngine;
 
 [DefaultExecutionOrder(-90)]
 public class MapRasterModeCoordinator : MonoBehaviour
 {
+    public bool PreviewLoadFinished { get; private set; }
+
     [Header("Scenario")]
     [SerializeField]
     private ScenarioDefinition fallbackScenario;
@@ -21,6 +24,9 @@ public class MapRasterModeCoordinator : MonoBehaviour
     [SerializeField]
     private GameObject chunkVisualRoot;
 
+    [SerializeField]
+    private MapLoadingOverlay loadingOverlay;
+
     private void Start()
     {
         ScenarioDefinition scenario = ScenarioRuntime.Current
@@ -35,7 +41,42 @@ public class MapRasterModeCoordinator : MonoBehaviour
             return;
         }
 
+        if (ScenarioRuntime.IsPreview)
+            MapThemeRuntime.Set(MapTileTheme.TacticalGray);
+
+        if (scenario.mapRasterLoadMode == MapRasterLoadMode.StitchedChunks)
+        {
+            StartCoroutine(LoadChunkMap(
+                scenario,
+                ScenarioRuntime.IsPreview ? "Loading preview map..." : "Loading map..."
+            ));
+            return;
+        }
+
         ApplyMode(scenario);
+    }
+
+    private IEnumerator LoadChunkMap(ScenarioDefinition scenario, string loadingMessage)
+    {
+        if (!scenario || !chunkGrid)
+        {
+            Debug.LogWarning("[MapRasterModeCoordinator] Chunk map unavailable: missing scenario or chunk grid.");
+            PreviewLoadFinished = true;
+            yield break;
+        }
+
+        ApplyStitchedChunks(scenario);
+
+        loadingOverlay?.Show(loadingMessage);
+        yield return chunkGrid.BuildChunks(
+            scenario,
+            (loaded, total) => loadingOverlay?.SetProgress(loaded, total)
+        );
+        loadingOverlay?.Hide();
+        PreviewLoadFinished = true;
+
+        if (!chunkGrid.IsLoaded)
+            Debug.LogWarning("[MapRasterModeCoordinator] Chunk map did not complete loading.");
     }
 
     public void ApplyMode(ScenarioDefinition scenario)
@@ -88,7 +129,7 @@ public class MapRasterModeCoordinator : MonoBehaviour
 
         if (individualTileGrid)
         {
-            individualTileGrid.enabled = true;
+            individualTileGrid.enabled = false;
             individualTileGrid.tilesFolder = MapThemeRuntime.GetTilesFolder();
         }
 

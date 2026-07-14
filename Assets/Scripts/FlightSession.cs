@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -70,6 +71,7 @@ public sealed class FlightSession : MonoBehaviour
     private bool exitHoldArmed;
     private bool landingAppended;
     private bool trainingTimerRunning;
+    private Coroutine previewStartRoutine;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void EnsureInstance()
@@ -117,12 +119,21 @@ public sealed class FlightSession : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        if (previewStartRoutine != null)
+        {
+            StopCoroutine(previewStartRoutine);
+            previewStartRoutine = null;
+        }
+
         DetachNav();
-        trainingTimerRunning = scene.name == "Master_FMS";
+        trainingTimerRunning = scene.name == "Master_FMS" && !ScenarioRuntime.IsPreview;
         router = FindFirstObjectByType<FmsPageRouter>();
         nav = FindFirstObjectByType<NavAutopilot>();
         if (nav)
             nav.WaypointSequenced += OnWaypointSequenced;
+
+        if (scene.name == "Master_FMS" && ScenarioRuntime.IsPreview)
+            previewStartRoutine = StartCoroutine(StartPreviewFlightWhenReady());
     }
 
     private void DetachNav()
@@ -171,6 +182,15 @@ public sealed class FlightSession : MonoBehaviour
 
     public void NotifyRouteExecuted(bool modification)
     {
+        if (ScenarioRuntime.IsPreview)
+        {
+            Record.routeExecuted = true;
+            Record.routeExecutedAt = FirstTimestamp(Record.routeExecutedAt);
+            if (modification)
+                Record.routeModifications++;
+            return;
+        }
+
         if (Phase >= FlightPhase.Takeoff)
             return;
 
@@ -230,6 +250,84 @@ public sealed class FlightSession : MonoBehaviour
     {
         if (Phase == FlightPhase.Takeoff)
             SetPhase(FlightPhase.Enroute);
+    }
+
+    private IEnumerator StartPreviewFlightWhenReady()
+    {
+        yield return null;
+
+        var scenario = ScenarioRuntime.Current;
+        var mapCoordinator = FindFirstObjectByType<MapRasterModeCoordinator>();
+        var chunkGrid = FindFirstObjectByType<LocalTileChunkGrid>();
+
+        while (mapCoordinator && !mapCoordinator.PreviewLoadFinished)
+            yield return null;
+
+        if (!scenario || !router || !nav || !chunkGrid || !chunkGrid.IsLoaded)
+        {
+            Debug.LogWarning("[FlightSession] Preview startup stopped: scenario, route, nav, or map is not ready.");
+            previewStartRoutine = null;
+            yield break;
+        }
+
+        var route = BuildPreviewRoute(scenario);
+        if (route.Count != 3)
+        {
+            Debug.LogWarning($"[FlightSession] Preview startup requires exactly 3 route waypoints; found {route.Count}.");
+            previewStartRoutine = null;
+            yield break;
+        }
+
+        router.StageActiveRoute(route, router.CaptureRouteContinuity());
+        router.ExecutePendingActiveRoute();
+
+        var activation = FindFirstObjectByType<FmsRouteActivationCoordinator>();
+        yield return null;
+        while (activation && activation.IsExecuting)
+            yield return null;
+
+        var plan = router.GetFlightPlan();
+        if (!plan || plan.waypoints == null || plan.waypoints.Length != route.Count)
+        {
+            Debug.LogWarning("[FlightSession] Preview route did not finish building; auto takeoff cancelled.");
+            previewStartRoutine = null;
+            yield break;
+        }
+
+        nav.loop = true;
+        var takeoff = FindFirstObjectByType<TakeoffProcedureController>();
+        if (!takeoff || !takeoff.BeginTakeoff())
+        {
+            Debug.LogWarning("[FlightSession] Preview route is ready, but auto takeoff could not start.");
+            previewStartRoutine = null;
+            yield break;
+        }
+
+        SetPhase(FlightPhase.Takeoff);
+        StartAvailabilityChanged?.Invoke(false);
+        Debug.Log("[FlightSession] Preview map and 3-waypoint loop ready; auto takeoff started.");
+        previewStartRoutine = null;
+    }
+
+    private static List<ScenarioDefinition.WaypointDef> BuildPreviewRoute(ScenarioDefinition scenario)
+    {
+        var route = new List<ScenarioDefinition.WaypointDef>();
+        if (!scenario || scenario.prefillRouteIdents == null || scenario.waypoints == null)
+            return route;
+
+        foreach (string ident in scenario.prefillRouteIdents)
+        {
+            var waypoint = scenario.waypoints.Find(w =>
+                w != null
+                && w.includeInActiveRoute
+                && string.Equals(w.ident, ident, StringComparison.OrdinalIgnoreCase)
+            );
+
+            if (waypoint != null)
+                route.Add(waypoint);
+        }
+
+        return route;
     }
 
     private int MissingRequiredChecks()
@@ -403,6 +501,7 @@ public sealed class FlightSession : MonoBehaviour
         trainingTimerRunning = false;
         Record = new FlightPerformanceRecord();
         SetPhase(FlightPhase.Preflight);
+        ScenarioRuntime.EndPreview();
         SceneManager.LoadScene("Menu");
     }
 

@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 /// <summary>
 /// CDU CLR/DEL button.
 /// Tap  → backspace one character (CLR).
-/// Hold → clear entire scratchpad (DEL).
+/// Hold → place DELETE in the scratchpad for waypoint removal.
 /// Routes through FmsScratchpad instead of writing to TMP directly.
 /// Wire the <see cref="scratchpad"/> reference in the Inspector.
 /// </summary>
@@ -48,7 +48,7 @@ public class FMS_CLR_DEL_Button
         if (!isPressing)
             yield break;
 
-        scratchpad?.ClearAll(); // DEL on hold
+        scratchpad?.SetText("DELETE"); // DEL on hold
         delFired = true;
     }
 
