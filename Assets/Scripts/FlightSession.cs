@@ -263,6 +263,12 @@ public sealed class FlightSession : MonoBehaviour
         while (mapCoordinator && !mapCoordinator.PreviewLoadFinished)
             yield return null;
 
+        while (chunkGrid && !chunkGrid.IsLoaded)
+            yield return null;
+
+        router ??= FindFirstObjectByType<FmsPageRouter>();
+        nav ??= FindFirstObjectByType<NavAutopilot>();
+
         if (!scenario || !router || !nav || !chunkGrid || !chunkGrid.IsLoaded)
         {
             Debug.LogWarning("[FlightSession] Preview startup stopped: scenario, route, nav, or map is not ready.");

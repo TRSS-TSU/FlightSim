@@ -42,7 +42,12 @@ public class MapRasterModeCoordinator : MonoBehaviour
         }
 
         if (ScenarioRuntime.IsPreview)
+        {
+            // Prevent the theme callback from starting a second chunk load before preview setup owns it.
+            if (chunkGrid)
+                chunkGrid.enabled = false;
             MapThemeRuntime.Set(MapTileTheme.TacticalGray);
+        }
 
         if (scenario.mapRasterLoadMode == MapRasterLoadMode.StitchedChunks)
         {
