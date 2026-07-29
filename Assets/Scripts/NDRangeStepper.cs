@@ -16,8 +16,8 @@ public class NDRangeStepper : MonoBehaviour
         minusDisabled;
 
     [Header("Ranges (NM)")]
-    public int[] rangesNm = new[] { 5, 10, 20 };
-    public int startIndex = 2; // 20NM
+    public int[] rangesNm = new[] { 10, 5, 2, 1 };
+    public int startIndex = 0; // 10NM
 
     int idx;
 

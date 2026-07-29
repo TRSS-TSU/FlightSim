@@ -18960,7 +18960,7 @@ MonoBehaviour:
   plusDisabled: {fileID: 21300000, guid: ba9129ac38698ab4992aa31b447c0130, type: 3}
   minusEnabled: {fileID: 21300000, guid: 76dd2b992e6daeb4b81e06b168a9d948, type: 3}
   minusDisabled: {fileID: 21300000, guid: 8d21383315eb24f4ba0fe40f24f79e72, type: 3}
-  rangesNm: 140000000a00000005000000
+  rangesNm: 0a000000050000000200000001000000
   startIndex: 0
   rangeState: {fileID: 342991133}
 --- !u!114 &342991133

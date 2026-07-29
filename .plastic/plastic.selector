@@ -1,0 +1,4 @@
+repository "FlightSim/FlightSim@2475988887529@cloud"
+  path "/"
+    br "/main"
+    co "/main"
